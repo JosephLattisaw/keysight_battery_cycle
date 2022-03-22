@@ -1,9 +1,12 @@
 #include <iostream>
 
+#include "controller.hpp"
 #include "visa.h"
 
 int main(int, char**) {
-    ViRsrc VISA_ADDRESS_BT2203A = "USB0::0x008D::0x3502::MY58000516::0::INSTR";  // usb address of battery cycler
+    Controller controller;
+
+    /*ViRsrc VISA_ADDRESS_BT2203A = "USB0::0x008D::0x3502::MY58000516::0::INSTR";  // usb address of battery cycler
 
     // create a connection (session) to the instrument
     ViSession resource_manager = 0;
@@ -48,7 +51,7 @@ int main(int, char**) {
 
     // close the connection to the instrument
     viClose(session);
-    viClose(resource_manager);
+    viClose(resource_manager);*/
 
     return 0;
 }
