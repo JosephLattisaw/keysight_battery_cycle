@@ -1,9 +1,12 @@
 #ifndef CONTROLLER_HPP
 #define CONTROLLER_HPP
 
+#include <visa.h>
+
+#include <memory>
 #include <string>
 
-#include "visa.h"
+#include "ieee488_common_commands.hpp"
 
 class Controller {
 public:
@@ -15,7 +18,10 @@ private:
     void open_instrument();
     void open_resource_manager();
 
-    void verify_vi_status(const ViStatus &status, const std::string &message_success, const std::string &message_failure);
+    void enable_read_termination_character();
+
+    // commands
+    std::shared_ptr<IEEE488CommonCommands> ieee488_common_commands;
 
     // session to instrument
     ViSession resource_manager = 0;

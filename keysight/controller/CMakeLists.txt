@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.0.0)
 project(keysight_controller VERSION 0.1.0)
 
+add_definitions(-std=c++17)
+
 include(CTest)
 enable_testing()
 
@@ -17,7 +19,7 @@ set(command_handler_src calibration_commands.cpp cell_commands.cpp digital_comma
 lxi_commands.cpp measure_commands.cpp output_commands.cpp root_commands.cpp sequence_commands.cpp status_commands.cpp
 system_commands.cpp)
 
-add_executable(keysight_controller main.cpp controller.cpp logger.cpp ${command_handler_src})
+add_executable(keysight_controller main.cpp controller.cpp logger.cpp common.cpp ${command_handler_src})
 target_link_libraries(keysight_controller ${VISA_LIBRARY})
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
