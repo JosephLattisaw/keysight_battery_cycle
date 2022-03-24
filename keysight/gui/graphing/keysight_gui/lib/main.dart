@@ -14,8 +14,8 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
+          primarySwatch: Colors.blue,
+          scaffoldBackgroundColor: Color(Colors.black.value).withOpacity(0.90)),
       home:
           const JoesHomePage(title: 'Keysight Battery Charge/Discharge System'),
     );
@@ -42,6 +42,7 @@ class JoesHomePage extends HookWidget {
           children: <Widget>[
             const Text(
               'You have pushed the button this many times:',
+              style: TextStyle(color: Colors.white),
             ),
             Text(
               '${counter.value}',
