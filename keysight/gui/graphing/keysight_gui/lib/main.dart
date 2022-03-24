@@ -16,7 +16,8 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(title: 'Keysight Battery Charge/Discharge System'),
+      home:
+          const JoesHomePage(title: 'Keysight Battery Charge/Discharge System'),
     );
   }
 }
@@ -42,7 +43,7 @@ class JoesHomePage extends HookWidget {
               'You have pushed the button this many times:',
             ),
             Text(
-              '$counter',
+              '${counter.value}',
               style: Theme.of(context).textTheme.headline4,
             ),
           ],
