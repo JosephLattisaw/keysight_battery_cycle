@@ -1,6 +1,8 @@
 #ifndef SEQUENCE_COMMANDS_HPP
 #define SEQUENCE_COMMANDS_HPP
 
+#include <visa.h>
+
 #include <string>
 
 // Sequence commands define the forming process, which is comprised of a sequence of charge,
@@ -16,7 +18,7 @@ public:
     // Clears the specified sequence. Omitting the <seq_id> clears all sequences. Note that even after the
     // definition of the sequence has been cleared, the cells remain assigned to that sequence, until they are
     // re-assigned to a different sequence.
-    void clear(std::string sequence_id);
+    void clear(const ViSession &session, std::string sequence_id) const;
 
     // Returns how many valid steps are defined in the sequence specified by <seq_id>. A valid sequence
     // must have at least one step defined at <step_id> 1.
@@ -41,7 +43,8 @@ public:
     //(#ofParalleledChannels * 6.25A). For a Precharge step, the MaxCC is ≤ (#ofParalleledChannels * 1A).
     //<CV> is the voltage limit for the step. The channel will limit the voltage to this value. Values range
     // from 2.0 V to 4.5 V. For a Precharge step, the cell voltage range is fro 1.0 V to 2.0 V.
-    void step_define(std::string sequence_id, std::string step_id, std::string mode, std::string duration, std::string cc, std::string cv);
+    void step_define(const ViSession &session, std::string sequence_id, std::string step_id, std::string mode, std::string duration,
+                     std::string cc = "", std::string cv = "") const;
     void step_define(std::string sequence_id, std::string step_id);
 
     // Returns a count of how many sequence tests are defined for the step given by <seq_id>,<step_id>.

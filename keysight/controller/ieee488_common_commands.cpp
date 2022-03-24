@@ -1,5 +1,8 @@
 #include "ieee488_common_commands.hpp"
 
+#include <chrono>
+#include <thread>
+
 #include "logger.hpp"
 
 #define LOG_OUT LogOut("iee488_command_handler")
@@ -53,8 +56,13 @@ void IEEE488CommonCommands::operation_complete_query() {
     // TODO do we need to implement?
 }
 
-void IEEE488CommonCommands::reset_command() {
-    // TODO do we need to implement?
+void IEEE488CommonCommands::reset_command(const ViSession &session) const {
+    LOG_OUT << "sending the reset command";
+
+    viPrintf(session, "*RST\n");
+
+    // allow at least 4 seconds for the reset to complete
+    std::this_thread::sleep_for(std::chrono::seconds(4));
 }
 
 void IEEE488CommonCommands::status_byte_query() {

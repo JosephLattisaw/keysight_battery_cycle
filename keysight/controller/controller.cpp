@@ -1,5 +1,7 @@
 #include "controller.hpp"
 
+#include <thread>
+
 #include "common.hpp"
 #include "logger.hpp"
 
@@ -7,7 +9,9 @@
 #define LOG_ERR LogOut("controller")
 
 Controller::Controller() {
+    cell_commands = std::make_shared<CellCommands>();
     ieee488_common_commands = std::make_shared<IEEE488CommonCommands>();
+    sequence_commands = std::make_shared<SequenceCommands>();
 
     // opening the Keysight BT2203A
     open_resource_manager();
@@ -16,6 +20,80 @@ Controller::Controller() {
 
     // getting the id of the machine we're connected with
     ieee488_common_commands->identification_query(session);
+
+    // ieee488_common_commands->reset_command(session);
+    ieee488_common_commands->identification_query(session);
+    /*
+        // sequence example
+
+        // clear any initial setups
+        cell_commands->abort(session, "0");
+
+        // define four parallel channels
+        cell_commands->define(session, "1025", "125");
+        cell_commands->define(session, "1026", "126");
+        cell_commands->define(session, "1027", "127");
+        cell_commands->define(session, "1028", "128");
+        cell_commands->define(session, "1029", "129");
+
+        // define a small sequence
+        sequence_commands->step_define(session, "1", "1", "REST", "30");
+
+        // assign the cells to run sequence 1
+        cell_commands->enable(session, "(@1025,1026)", "1");
+
+        cell_commands->initiate(session, "(@1025,1026)");
+
+        std::this_thread::sleep_for(std::chrono::seconds(2));
+        viPrintf(session, "CELL:STEP:TIME? (@1025,1026)\n");
+        ViChar step_time_response[65535];
+        viScanf(session, "%t", step_time_response);
+        std::cout << "step time: " << step_time_response << std::endl;*/
+
+    viPrintf(session, "CELL:ABORT 0\n");
+    viPrintf(session, "CELL:CLEAR 0\n");
+    viPrintf(session, "SEQ:CLEAR 0\n");
+
+    viPrintf(session, "CELL:DEFINE 1025,(@125)\n");
+    viPrintf(session, "CELL:DEFINE 1026,(@126)\n");
+    viPrintf(session, "CELL:DEFINE 1027,(@127)\n");
+    viPrintf(session, "CELL:DEFINE 1028,(@128)\n");
+
+    viPrintf(session, "SEQ:STEP:DEF 1, 1, REST, 300\n");
+    viPrintf(session, "SEQ:STEP:DEF 2, 1, REST, 30\n");
+
+    viPrintf(session, "CELL:ENABLE (@1025,1026),1\n");
+    viPrintf(session, "CELL:ENABLE (@1027,1028),2\n");
+
+    ViChar enab_response[65535];
+    viScanf(session, "%t", enab_response);
+    std::cout << "response: " << enab_response << std::endl;
+
+    viPrintf(session, "CELL:INITiate (@1025,1026)\n");
+
+    std::this_thread::sleep_for(std::chrono::seconds(10));
+    viPrintf(session, "CELL:INITiate (@1027,1028)\n");
+    ViChar step_time_response[65535];
+    viScanf(session, "%t", step_time_response);
+    std::cout << "response: " << step_time_response << std::endl;
+
+    viPrintf(session, "STAT:CELL:VERBose? 1025\n");
+    viScanf(session, "%t", step_time_response);
+
+    std::cout << "response: " << step_time_response << std::endl;
+    std::this_thread::sleep_for(std::chrono::seconds(10));
+    viPrintf(session, "CELL:STEP:TIME? (@1025,1026)\n");
+    viScanf(session, "%t", step_time_response);
+    std::cout << "response: " << step_time_response << std::endl;
+
+    viPrintf(session, "STAT:CELL:VERBose? 1027\n");
+    viScanf(session, "%t", step_time_response);
+
+    std::cout << "response: " << step_time_response << std::endl;
+
+    viPrintf(session, "CELL:STEP:TIME? (@1027,1028)\n");
+    viScanf(session, "%t", step_time_response);
+    std::cout << "response: " << step_time_response << std::endl;
 }
 
 Controller::~Controller() {

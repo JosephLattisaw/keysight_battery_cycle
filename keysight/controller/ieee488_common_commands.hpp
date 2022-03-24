@@ -46,7 +46,7 @@ public:
 
     // Resets the instrument to pre-defined values that are either typical or safe. These
     // settings are described under Reset Settings.
-    void reset_command();
+    void reset_command(const ViSession &session) const;
 
     // Reads the Status Byte Register, which contains the status summary bits and the
     // Output Queue MAV bit. The Status Byte is a read-only register and the bits are not cleared when it is

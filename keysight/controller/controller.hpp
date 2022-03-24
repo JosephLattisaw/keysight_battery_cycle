@@ -6,7 +6,9 @@
 #include <memory>
 #include <string>
 
+#include "cell_commands.hpp"
 #include "ieee488_common_commands.hpp"
+#include "sequence_commands.hpp"
 
 class Controller {
 public:
@@ -21,7 +23,9 @@ private:
     void enable_read_termination_character();
 
     // commands
+    std::shared_ptr<CellCommands> cell_commands;
     std::shared_ptr<IEEE488CommonCommands> ieee488_common_commands;
+    std::shared_ptr<SequenceCommands> sequence_commands;
 
     // session to instrument
     ViSession resource_manager = 0;
