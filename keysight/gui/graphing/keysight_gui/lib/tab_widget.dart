@@ -57,7 +57,27 @@ class TabWidget extends HookWidget {
             ),
             child: TabBarView(
               children: [
-                InstrumentListView(),
+                //InstrumentListView(),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(
+                        top: 8.0,
+                        left: 8.0,
+                        bottom: 8.0,
+                      ),
+                      child: Text(
+                        "Select Instrument(s) to Control:",
+                        style: TextStyle(
+                            color: Colors.white70,
+                            //fontWeight: FontWeight.bold,
+                            fontStyle: FontStyle.italic),
+                      ),
+                    ),
+                    Expanded(child: InstrumentListView()),
+                  ],
+                ),
                 Text("tab 2"),
                 Text("tab 3"),
                 Text("tab 4"),
