@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:keysight_gui/instrument_list_view.dart';
+import 'package:keysight_gui/instrument_widget.dart';
 
 class TabWidget extends HookWidget {
   const TabWidget({Key? key}) : super(key: key);
@@ -57,27 +57,7 @@ class TabWidget extends HookWidget {
             ),
             child: TabBarView(
               children: [
-                //InstrumentListView(),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(
-                        top: 8.0,
-                        left: 8.0,
-                        bottom: 8.0,
-                      ),
-                      child: Text(
-                        "Select Instrument(s) to Control:",
-                        style: TextStyle(
-                            color: Colors.white70,
-                            //fontWeight: FontWeight.bold,
-                            fontStyle: FontStyle.italic),
-                      ),
-                    ),
-                    Expanded(child: InstrumentListView()),
-                  ],
-                ),
+                InstrumentWidget(),
                 Text("tab 2"),
                 Text("tab 3"),
                 Text("tab 4"),
