@@ -29,7 +29,23 @@ class HomePage extends HookWidget {
           width: MediaQuery.of(context).size.width,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: const [
+            children: [
+              Align(
+                alignment: Alignment.centerRight,
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 8.0, right: 8.0),
+                  child: ElevatedButton(
+                    onPressed: () {},
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text("Emergency Shutoff"),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      primary: Colors.red,
+                    ),
+                  ),
+                ),
+              ),
               Expanded(
                 child: Padding(
                   padding: EdgeInsets.all(8.0),
