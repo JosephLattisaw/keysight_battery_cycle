@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 class ApplicationBar extends StatelessWidget {
+  const ApplicationBar({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     final appBarHeight = AppBar().preferredSize.height;
