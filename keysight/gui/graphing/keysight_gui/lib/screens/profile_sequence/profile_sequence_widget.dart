@@ -16,6 +16,18 @@ class ProfileSequenceWidget extends HookWidget {
       selectedSequence.value = sequenceList.value.length - 1;
     }
 
+    void deleteSequence(int index) {
+      int length = sequenceList.value.length;
+      sequenceList.value = List.from(sequenceList.value)..removeAt(index);
+
+      //option 1: just goto last index if we're deleting an index
+      if (index == (length - 1)) {
+        selectedSequence.value = sequenceList.value.length - 1;
+      } else if (index < selectedSequence.value) {
+        selectedSequence.value--;
+      }
+    }
+
     return Container(
       child: Row(
         children: [
@@ -43,13 +55,12 @@ class ProfileSequenceWidget extends HookWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         ElevatedButton(
-                          onPressed: () {
-                            addNewSequence();
-                          },
+                          onPressed: () => addNewSequence(),
                           child: Text("New"),
                         ),
                         ElevatedButton(
-                          onPressed: () {},
+                          onPressed: () =>
+                              deleteSequence(selectedSequence.value),
                           child: Text("Delete"),
                         ),
                         ElevatedButton(
