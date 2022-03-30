@@ -4,8 +4,6 @@ import 'package:flutter_spinbox/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
 class ProfileSequenceWidget extends HookWidget {
-  final List<String> categories = ["joe"];
-
   @override
   Widget build(BuildContext context) {
     final sequenceList = useState(<String>["New Sequence"]);
@@ -20,12 +18,13 @@ class ProfileSequenceWidget extends HookWidget {
       int length = sequenceList.value.length;
       sequenceList.value = List.from(sequenceList.value)..removeAt(index);
 
-      //option 1: just goto last index if we're deleting an index
+      //just goto last index if we're deleting last index
       if (index == (length - 1)) {
         selectedSequence.value = sequenceList.value.length - 1;
-      } else if (index < selectedSequence.value) {
-        selectedSequence.value--;
       }
+
+      //never want the list to be completey empty
+      if (sequenceList.value.length == 0) addNewSequence();
     }
 
     return Container(
