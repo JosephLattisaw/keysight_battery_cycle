@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:keysight_gui/sequence_list_view.dart';
+import 'package:keysight_gui/screens/profile_sequence/sequence_list_view.dart';
 import 'package:flutter_spinbox/material.dart';
 import 'package:flutter_spinbox/cupertino.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 
-class ProfileSequenceWidget extends StatelessWidget {
+class ProfileSequenceWidget extends HookWidget {
   @override
   Widget build(BuildContext context) {
+    final selectedSequence = useState<int>(0);
+
     return Container(
       child: Row(
         children: [
@@ -14,7 +17,12 @@ class ProfileSequenceWidget extends StatelessWidget {
             child: Padding(
               padding:
                   const EdgeInsets.only(left: 12.0, top: 12.0, bottom: 12.0),
-              child: SequenceListView(),
+              child: SequenceListView(
+                selectedSequence: (value) {
+                  selectedSequence.value = value;
+                },
+                selectedIndex: selectedSequence.value,
+              ),
             ),
           ),
           Expanded(

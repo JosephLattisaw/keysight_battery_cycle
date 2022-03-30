@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:keysight_gui/instrument_list_view.dart';
+import 'package:keysight_gui/screens/instrument_connection/instrument_list_view.dart';
 
 class InstrumentWidget extends StatelessWidget {
   @override

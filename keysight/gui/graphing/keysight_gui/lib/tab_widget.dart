@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:keysight_gui/instrument_widget.dart';
-import 'package:keysight_gui/profile_sequence_widget.dart';
+import 'package:keysight_gui/screens/instrument_connection/instrument_widget.dart';
+import 'package:keysight_gui/screens/profile_sequence/profile_sequence_widget.dart';
 
 class TabWidget extends HookWidget {
   const TabWidget({Key? key}) : super(key: key);
