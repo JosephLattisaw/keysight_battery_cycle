@@ -17,11 +17,35 @@ class ProfileSequenceWidget extends HookWidget {
             child: Padding(
               padding:
                   const EdgeInsets.only(left: 12.0, top: 12.0, bottom: 12.0),
-              child: SequenceListView(
-                selectedSequence: (value) {
-                  selectedSequence.value = value;
-                },
-                selectedIndex: selectedSequence.value,
+              child: Column(
+                children: [
+                  Expanded(
+                    child: SequenceListView(
+                      selectedSequence: (value) {
+                        selectedSequence.value = value;
+                      },
+                      selectedIndex: selectedSequence.value,
+                    ),
+                  ),
+                  SizedBox(
+                    height: 8,
+                  ),
+                  Container(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        ElevatedButton(
+                          onPressed: () {},
+                          child: Text("New Sequence"),
+                        ),
+                        ElevatedButton(
+                          onPressed: () {},
+                          child: Text("Delete Sequence"),
+                        ),
+                      ],
+                    ),
+                  )
+                ],
               ),
             ),
           ),
