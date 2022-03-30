@@ -1,13 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:keysight_gui/screens/profile_sequence/sequence_list_view.dart';
 import 'package:flutter_spinbox/material.dart';
-import 'package:flutter_spinbox/cupertino.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
 class ProfileSequenceWidget extends HookWidget {
+  final List<String> categories = ["joe"];
+
   @override
   Widget build(BuildContext context) {
-    final selectedSequence = useState<int>(0);
+    final sequenceList = useState(<String>["New Sequence"]);
+    final selectedSequence = useState<int>(sequenceList.value.length - 1);
+
+    void addNewSequence() {
+      sequenceList.value = List.from(sequenceList.value)..add("New Sequence");
+      selectedSequence.value = sequenceList.value.length - 1;
+    }
 
     return Container(
       child: Row(
@@ -25,6 +32,7 @@ class ProfileSequenceWidget extends HookWidget {
                         selectedSequence.value = value;
                       },
                       selectedIndex: selectedSequence.value,
+                      sequenceList: sequenceList.value,
                     ),
                   ),
                   SizedBox(
@@ -35,12 +43,18 @@ class ProfileSequenceWidget extends HookWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         ElevatedButton(
-                          onPressed: () {},
-                          child: Text("New Sequence"),
+                          onPressed: () {
+                            addNewSequence();
+                          },
+                          child: Text("New"),
                         ),
                         ElevatedButton(
                           onPressed: () {},
-                          child: Text("Delete Sequence"),
+                          child: Text("Delete"),
+                        ),
+                        ElevatedButton(
+                          onPressed: () {},
+                          child: Text("Save"),
                         ),
                       ],
                     ),
