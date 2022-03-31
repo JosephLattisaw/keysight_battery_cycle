@@ -78,8 +78,8 @@ class MeasurementWidget extends HookWidget {
             ),
             Expanded(
               child: DataTable(
-                headingRowColor:
-                    MaterialStateColor.resolveWith((states) => Colors.blue),
+                headingRowColor: MaterialStateColor.resolveWith(
+                    (states) => Colors.blue.shade900),
                 columns: [
                   DataColumn(
                     label: Text(
