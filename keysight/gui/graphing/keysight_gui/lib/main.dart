@@ -16,7 +16,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
           primarySwatch: Colors.blue,
           scaffoldBackgroundColor: Color(Colors.black.value).withOpacity(0.86)),
-      home: const HomePage(title: 'Keysight Battery Charge/Discharge System'),
+      home: const HomePage(),
     );
   }
 }

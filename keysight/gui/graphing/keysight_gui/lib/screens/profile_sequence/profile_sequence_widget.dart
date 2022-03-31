@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:keysight_gui/screens/profile_sequence/add_sequence_step_widget.dart';
 import 'package:keysight_gui/screens/profile_sequence/sequence_list_view.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:keysight_gui/screens/profile_sequence/sequence_step_table.dart';
+import 'package:keysight_gui/home_page.dart';
+import 'package:keysight_gui/router_utility.dart';
 
 class ProfileSequenceWidget extends HookWidget {
   late ValueNotifier<List<String>> sequenceList;
@@ -265,7 +268,8 @@ class ProfileSequenceWidget extends HookWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         ElevatedButton(
-                          onPressed: () {},
+                          onPressed: () => RouterUtility.routerUtility(
+                              context, AddSequenceStepWidget()),
                           child: Text("Add Step"),
                         ),
                         SizedBox(

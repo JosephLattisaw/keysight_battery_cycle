@@ -8,9 +8,7 @@ import 'package:keysight_gui/screens/measurements/measurement_widget.dart';
 import 'package:keysight_gui/screens/test/test_widget.dart';
 
 class HomePage extends HookWidget {
-  const HomePage({Key? key, required this.title}) : super(key: key);
-
-  final String title;
+  const HomePage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
