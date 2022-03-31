@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:keysight_gui/screens/profile_sequence/sequence_list_view.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:keysight_gui/screens/profile_sequence/sequence_step_table.dart';
 
 class ProfileSequenceWidget extends HookWidget {
   late ValueNotifier<List<String>> sequenceList;
@@ -113,6 +114,50 @@ class ProfileSequenceWidget extends HookWidget {
                   const EdgeInsets.only(left: 12.0, top: 12.0, bottom: 12.0),
               child: Column(
                 children: [
+                  Text(
+                    "Save, Create or Delete Profile Sequences:",
+                    style: TextStyle(
+                      color: Colors.grey,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                  Container(
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          ElevatedButton(
+                            onPressed: () =>
+                                saveSequence(selectedSequence.value),
+                            child: Text(
+                              "Save",
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              primary: Colors.green,
+                            ),
+                          ),
+                          SizedBox(width: 8),
+                          ElevatedButton(
+                            onPressed: () => addNewSequence(),
+                            child: Text("New"),
+                          ),
+                          SizedBox(width: 8),
+                          ElevatedButton(
+                            onPressed: () =>
+                                deleteSequence(selectedSequence.value),
+                            style: ElevatedButton.styleFrom(
+                              primary: Colors.red,
+                            ),
+                            child: Text("Delete"),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    height: 8,
+                  ),
                   Expanded(
                     child: SequenceListView(
                       selectedSequence: (value) => setSequenceIndex(value),
@@ -121,35 +166,6 @@ class ProfileSequenceWidget extends HookWidget {
                       sequenceItalic: sequenceSaveList.value,
                     ),
                   ),
-                  SizedBox(
-                    height: 8,
-                  ),
-                  Container(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        ElevatedButton(
-                          onPressed: () => addNewSequence(),
-                          child: Text("New Profile"),
-                        ),
-                        SizedBox(
-                          height: 8,
-                        ),
-                        ElevatedButton(
-                          onPressed: () =>
-                              deleteSequence(selectedSequence.value),
-                          child: Text("Delete Profile"),
-                        ),
-                        SizedBox(
-                          height: 8,
-                        ),
-                        ElevatedButton(
-                          onPressed: () => saveSequence(selectedSequence.value),
-                          child: Text("Save Profile"),
-                        ),
-                      ],
-                    ),
-                  )
                 ],
               ),
             ),
@@ -241,105 +257,60 @@ class ProfileSequenceWidget extends HookWidget {
                     SizedBox(
                       height: 12,
                     ),
-                    DataTable(
-                      headingRowColor: MaterialStateColor.resolveWith(
-                          (states) => Colors.blue.shade900),
-                      showCheckboxColumn: false,
-                      columns: [
-                        DataColumn(
-                          label: Text(
-                            'Function',
-                            style: TextStyle(color: Colors.white),
+                    SequenceStepTable(),
+                    SizedBox(
+                      height: 12,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        ElevatedButton(
+                          onPressed: () {},
+                          child: Text("Add Step"),
+                        ),
+                        SizedBox(
+                          width: 4,
+                        ),
+                        ElevatedButton(
+                          onPressed: null,
+                          child: Text("Add Test",
+                              style: TextStyle(color: Colors.grey)),
+                          style: ElevatedButton.styleFrom(
+                            onSurface: Colors.grey,
                           ),
                         ),
-                        DataColumn(
-                          label: Text(
-                            'Step',
-                            style: TextStyle(color: Colors.white),
-                          ),
+                        SizedBox(
+                          width: 4,
                         ),
-                        DataColumn(
-                          label: Text(
-                            'Action / Step Type',
-                            style: TextStyle(color: Colors.white),
-                          ),
+                        ElevatedButton(
+                          onPressed: () {},
+                          child: Text("Edit"),
                         ),
-                        DataColumn(
-                          label: Text(
-                            'Voltage (V)',
-                            style: TextStyle(color: Colors.white),
-                          ),
+                        SizedBox(
+                          width: 32,
                         ),
-                        DataColumn(
-                          label: Text(
-                            'Current (A)',
-                            style: TextStyle(color: Colors.white),
-                          ),
+                        ElevatedButton(
+                          onPressed: () {},
+                          child: Text("Move Up"),
                         ),
-                        DataColumn(
-                          label: Text(
-                            'Time',
-                            style: TextStyle(color: Colors.white),
+                        SizedBox(
+                          width: 4,
+                        ),
+                        ElevatedButton(
+                          onPressed: () {},
+                          child: Text("Move Down"),
+                        ),
+                        SizedBox(
+                          width: 32,
+                        ),
+                        ElevatedButton(
+                          onPressed: () {},
+                          child: Text("Delete Step"),
+                          style: ElevatedButton.styleFrom(
+                            primary: Colors.red,
                           ),
                         ),
                       ],
-                      rows: List<DataRow>.generate(
-                        5,
-                        (index) => DataRow(
-                          color: MaterialStateProperty.resolveWith<Color>(
-                              (states) {
-                            if (index == dataTableSelectedIndex.value)
-                              return Colors.blue;
-                            if (index % 2 == 0) return Colors.grey.shade700;
-                            return Colors.grey.shade800;
-                          }),
-                          onSelectChanged: (value) {
-                            if (value == false)
-                              dataTableSelectedIndex.value = -1;
-                            else
-                              dataTableSelectedIndex.value = index;
-                          },
-                          selected: index == dataTableSelectedIndex.value,
-                          cells: <DataCell>[
-                            DataCell(
-                              Text(
-                                'Step',
-                                style: TextStyle(color: Colors.white),
-                              ),
-                            ),
-                            DataCell(
-                              Text(
-                                '1',
-                                style: TextStyle(color: Colors.white),
-                              ),
-                            ),
-                            DataCell(
-                              Text(
-                                'Charge at',
-                                style: TextStyle(color: Colors.white),
-                              ),
-                            ),
-                            DataCell(
-                              Text(
-                                '4.0V',
-                                style: TextStyle(color: Colors.white),
-                              ),
-                            ),
-                            DataCell(
-                              Text(
-                                '20A',
-                                style: TextStyle(color: Colors.white),
-                              ),
-                            ),
-                            DataCell(
-                              Text(
-                                '1200s',
-                                style: TextStyle(color: Colors.white),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
                     ),
                   ],
                 ),
