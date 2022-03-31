@@ -8,7 +8,6 @@ class MeasurementWidget extends HookWidget {
     final speedComboBoxSelection = useState(0);
 
     return Container(
-      color: Colors.green,
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Row(
