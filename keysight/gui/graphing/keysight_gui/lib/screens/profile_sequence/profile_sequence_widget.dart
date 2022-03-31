@@ -1,31 +1,106 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:keysight_gui/screens/profile_sequence/sequence_list_view.dart';
 import 'package:flutter_spinbox/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
 class ProfileSequenceWidget extends HookWidget {
-  @override
-  Widget build(BuildContext context) {
-    final sequenceList = useState(<String>["New Sequence"]);
-    final selectedSequence = useState<int>(sequenceList.value.length - 1);
+  late ValueNotifier<List<String>> sequenceList;
+  late ValueNotifier<List<bool>> sequenceSaveList;
+  late ValueNotifier<List<String>> sequenceTextList;
+  late ValueNotifier<List<String>> cellTextList;
+  late ValueNotifier<List<String>> commentsTextList;
 
-    void addNewSequence() {
-      sequenceList.value = List.from(sequenceList.value)..add("New Sequence");
+  late TextEditingController sequenceTextController;
+  late TextEditingController cellTextController;
+  late TextEditingController commentsTextController;
+
+  late ValueNotifier<int> selectedSequence;
+  late ValueNotifier<bool> sequenceTextError;
+
+  void addNewSequence() {
+    sequenceList.value = List.from(sequenceList.value)..add("New Sequence");
+    sequenceSaveList.value = List.from(sequenceSaveList.value)..add(false);
+    sequenceTextList.value = List.from(sequenceTextList.value)..add("");
+    cellTextList.value = List.from(cellTextList.value)..add("");
+    commentsTextList.value = List.from(commentsTextList.value)..add("");
+
+    selectedSequence.value = sequenceList.value.length - 1;
+
+    refreshSequencePage();
+  }
+
+  void deleteSequence(int index) {
+    int length = sequenceList.value.length;
+    sequenceList.value = List.from(sequenceList.value)..removeAt(index);
+    sequenceSaveList.value = List.from(sequenceSaveList.value)..removeAt(index);
+    sequenceTextList.value = List.from(sequenceTextList.value)..removeAt(index);
+    cellTextList.value = List.from(cellTextList.value)..removeAt(index);
+    commentsTextList.value = List.from(commentsTextList.value)..removeAt(index);
+
+    //just goto last index if we're deleting last index
+    if (index == (length - 1)) {
       selectedSequence.value = sequenceList.value.length - 1;
     }
 
-    void deleteSequence(int index) {
-      int length = sequenceList.value.length;
-      sequenceList.value = List.from(sequenceList.value)..removeAt(index);
+    //never want the list to be completey empty
+    if (sequenceList.value.isEmpty) addNewSequence();
 
-      //just goto last index if we're deleting last index
-      if (index == (length - 1)) {
-        selectedSequence.value = sequenceList.value.length - 1;
-      }
+    refreshSequencePage();
+  }
 
-      //never want the list to be completey empty
-      if (sequenceList.value.length == 0) addNewSequence();
+  void saveSequence(int index) {
+    if (sequenceTextController.text.isEmpty) {
+      sequenceTextError.value = true;
+      return;
+    } else if (sequenceTextError.value) {
+      sequenceTextError.value = false;
     }
+
+    //we made it to a save
+    sequenceSaveList.value = List.from(sequenceSaveList.value)..[index] = true;
+    sequenceList.value = List.from(sequenceList.value)
+      ..[index] = sequenceTextController.text;
+    sequenceTextList.value = List.from(sequenceTextList.value)
+      ..[index] = sequenceTextController.text;
+    cellTextList.value = List.from(cellTextList.value)
+      ..[index] = cellTextController.text;
+    commentsTextList.value = List.from(commentsTextList.value)
+      ..[index] = commentsTextController.text;
+
+    refreshSequencePage();
+  }
+
+  void refreshSequencePage() {
+    sequenceTextError.value = false;
+
+    sequenceTextController.text =
+        sequenceTextList.value.elementAt(selectedSequence.value);
+    cellTextController.text =
+        cellTextList.value.elementAt(selectedSequence.value);
+    commentsTextController.text =
+        commentsTextList.value.elementAt(selectedSequence.value);
+  }
+
+  void setSequenceIndex(int index) {
+    selectedSequence.value = index;
+    refreshSequencePage();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    sequenceList = useState(<String>["New Sequence"]);
+    selectedSequence = useState<int>(sequenceList.value.length - 1);
+    sequenceTextList = useState(<String>[""]);
+    cellTextList = useState(<String>[""]);
+    commentsTextList = useState(<String>[""]);
+
+    sequenceTextController = useTextEditingController();
+    cellTextController = useTextEditingController();
+    commentsTextController = useTextEditingController();
+
+    sequenceTextError = useState<bool>(false);
+    sequenceSaveList = useState(<bool>[false]);
 
     return Container(
       child: Row(
@@ -39,11 +114,10 @@ class ProfileSequenceWidget extends HookWidget {
                 children: [
                   Expanded(
                     child: SequenceListView(
-                      selectedSequence: (value) {
-                        selectedSequence.value = value;
-                      },
+                      selectedSequence: (value) => setSequenceIndex(value),
                       selectedIndex: selectedSequence.value,
                       sequenceList: sequenceList.value,
+                      sequenceItalic: sequenceSaveList.value,
                     ),
                   ),
                   SizedBox(
@@ -63,7 +137,7 @@ class ProfileSequenceWidget extends HookWidget {
                           child: Text("Delete"),
                         ),
                         ElevatedButton(
-                          onPressed: () {},
+                          onPressed: () => saveSequence(selectedSequence.value),
                           child: Text("Save"),
                         ),
                       ],
@@ -87,10 +161,18 @@ class ProfileSequenceWidget extends HookWidget {
                         Expanded(
                           flex: 3,
                           child: TextField(
+                            controller: sequenceTextController,
                             decoration: InputDecoration(
                               border: OutlineInputBorder(),
                               hintText: "Enter Name of Sequence",
+                              errorText: sequenceTextError.value
+                                  ? "A Name of a Sequence Must be Given"
+                                  : null,
                             ),
+                            inputFormatters: [
+                              FilteringTextInputFormatter.allow(
+                                  RegExp("[0-9a-zA-Z_ ]"))
+                            ],
                           ),
                         ),
                         SizedBox(width: 8),
@@ -145,6 +227,7 @@ class ProfileSequenceWidget extends HookWidget {
                         Expanded(
                           flex: 3,
                           child: TextField(
+                            controller: cellTextController,
                             decoration: InputDecoration(
                               border: OutlineInputBorder(),
                               hintText: "Enter Serial Number of Cell",
@@ -199,6 +282,7 @@ class ProfileSequenceWidget extends HookWidget {
                       height: 12,
                     ),
                     TextField(
+                      controller: commentsTextController,
                       decoration: InputDecoration(
                         border: OutlineInputBorder(),
                         hintText: "Include any additional comments here.",

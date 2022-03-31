@@ -2,11 +2,16 @@ import 'package:flutter/material.dart';
 
 class SequenceListItem extends StatelessWidget {
   const SequenceListItem(
-      {Key? key, required this.title, required this.onTap, required this.color})
+      {Key? key,
+      required this.title,
+      required this.onTap,
+      required this.color,
+      required this.italic})
       : super(key: key);
 
   final Color color;
   final String title;
+  final bool italic;
 
   final void Function() onTap;
 
@@ -20,7 +25,10 @@ class SequenceListItem extends StatelessWidget {
             padding: const EdgeInsets.all(8.0),
             child: Text(
               title,
-              style: TextStyle(color: Colors.white),
+              style: TextStyle(
+                color: Colors.white,
+                fontStyle: italic ? FontStyle.italic : null,
+              ),
               textAlign: TextAlign.center,
             ),
           ),

@@ -6,10 +6,9 @@ class SequenceListView extends StatelessWidget {
       {Key? key,
       required this.selectedSequence,
       required this.selectedIndex,
-      required this.sequenceList})
-      : super(key: key) {
-    print("does this get called again");
-  }
+      required this.sequenceList,
+      required this.sequenceItalic})
+      : super(key: key);
 
   static Color nonSelectedColor = Colors.black.withOpacity(0.8);
   static Color selectedColor = Colors.black.withOpacity(0.4);
@@ -17,6 +16,7 @@ class SequenceListView extends StatelessWidget {
   final void Function(int) selectedSequence;
   final int selectedIndex;
   final List<String> sequenceList;
+  final List<bool> sequenceItalic;
 
   @override
   Widget build(BuildContext context) {
@@ -46,6 +46,7 @@ class SequenceListView extends StatelessWidget {
                 },
                 color:
                     selectedIndex == index ? selectedColor : nonSelectedColor,
+                italic: !sequenceItalic.elementAt(index),
               );
             },
             shrinkWrap: true,
