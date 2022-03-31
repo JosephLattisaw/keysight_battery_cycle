@@ -156,7 +156,7 @@ class ProfileSequenceWidget extends HookWidget {
             flex: 3,
             child: Container(
               height: double.infinity,
-              color: Colors.white,
+              color: Colors.grey.shade900,
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Column(
@@ -168,19 +168,28 @@ class ProfileSequenceWidget extends HookWidget {
                           child: TextField(
                             controller: sequenceTextController,
                             decoration: InputDecoration(
+                              enabledBorder: OutlineInputBorder(
+                                borderSide: BorderSide(color: Colors.white),
+                              ),
                               border: OutlineInputBorder(),
                               hintText: "Enter Name of Profile Sequence",
+                              hintStyle: TextStyle(
+                                  color: Colors.grey.shade500,
+                                  fontStyle: FontStyle.italic),
                               errorText: sequenceTextError.value
                                   ? "A Name of a Sequence Must be Given"
                                   : null,
+                              filled: true,
+                              fillColor: Colors.grey.shade800,
                             ),
                             inputFormatters: [
                               FilteringTextInputFormatter.allow(
                                   RegExp("[0-9a-zA-Z_ ]"))
                             ],
+                            style: TextStyle(color: Colors.white),
                           ),
                         ),
-                        SizedBox(width: 8),
+                        /*SizedBox(width: 8),
                         Expanded(
                           child: SpinBox(
                             min: 0,
@@ -189,6 +198,9 @@ class ProfileSequenceWidget extends HookWidget {
                             spacing: 24,
                             textAlign: TextAlign.center,
                             decoration: InputDecoration(
+                              enabledBorder: OutlineInputBorder(
+                                borderSide: BorderSide(color: Colors.white),
+                              ),
                               border: OutlineInputBorder(),
                               contentPadding: const EdgeInsets.only(
                                 left: 0,
@@ -198,6 +210,8 @@ class ProfileSequenceWidget extends HookWidget {
                               ),
                               hintText: "hint",
                               labelText: "C Rating (A)",
+                              filled: true,
+                              fillColor: Colors.grey.shade800,
                             ),
                           ),
                         ),
@@ -210,6 +224,9 @@ class ProfileSequenceWidget extends HookWidget {
                             spacing: 24,
                             textAlign: TextAlign.center,
                             decoration: InputDecoration(
+                              enabledBorder: OutlineInputBorder(
+                                borderSide: BorderSide(color: Colors.white),
+                              ),
                               border: OutlineInputBorder(),
                               contentPadding: const EdgeInsets.only(
                                 left: 0,
@@ -219,9 +236,11 @@ class ProfileSequenceWidget extends HookWidget {
                               ),
                               hintText: "hint",
                               labelText: "Over Voltage (V)",
+                              filled: true,
+                              fillColor: Colors.grey.shade800,
                             ),
                           ),
-                        ),
+                        ),*/
                       ],
                     ),
                     SizedBox(
@@ -234,12 +253,21 @@ class ProfileSequenceWidget extends HookWidget {
                           child: TextField(
                             controller: cellTextController,
                             decoration: InputDecoration(
+                              enabledBorder: OutlineInputBorder(
+                                borderSide: BorderSide(color: Colors.white),
+                              ),
                               border: OutlineInputBorder(),
                               hintText: "Enter Serial Number of Cell",
+                              hintStyle: TextStyle(
+                                  color: Colors.grey.shade500,
+                                  fontStyle: FontStyle.italic),
+                              filled: true,
+                              fillColor: Colors.grey.shade800,
                             ),
+                            style: TextStyle(color: Colors.white),
                           ),
                         ),
-                        SizedBox(width: 8),
+                        /*SizedBox(width: 8),
                         Expanded(
                           child: SpinBox(
                             min: 0,
@@ -248,6 +276,9 @@ class ProfileSequenceWidget extends HookWidget {
                             spacing: 24,
                             textAlign: TextAlign.center,
                             decoration: InputDecoration(
+                              enabledBorder: OutlineInputBorder(
+                                borderSide: BorderSide(color: Colors.white),
+                              ),
                               border: OutlineInputBorder(),
                               contentPadding: const EdgeInsets.only(
                                 left: 0,
@@ -257,6 +288,8 @@ class ProfileSequenceWidget extends HookWidget {
                               ),
                               hintText: "hint",
                               labelText: "Capacity (Ah)",
+                              filled: true,
+                              fillColor: Colors.grey.shade800,
                             ),
                           ),
                         ),
@@ -269,6 +302,9 @@ class ProfileSequenceWidget extends HookWidget {
                             spacing: 24,
                             textAlign: TextAlign.center,
                             decoration: InputDecoration(
+                              enabledBorder: OutlineInputBorder(
+                                borderSide: BorderSide(color: Colors.white),
+                              ),
                               border: OutlineInputBorder(),
                               contentPadding: const EdgeInsets.only(
                                 left: 0,
@@ -278,9 +314,11 @@ class ProfileSequenceWidget extends HookWidget {
                               ),
                               hintText: "hint",
                               labelText: "Under Voltage (V)",
+                              filled: true,
+                              fillColor: Colors.grey.shade800,
                             ),
                           ),
-                        ),
+                        ),*/
                       ],
                     ),
                     SizedBox(
@@ -289,9 +327,18 @@ class ProfileSequenceWidget extends HookWidget {
                     TextField(
                       controller: commentsTextController,
                       decoration: InputDecoration(
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.white),
+                        ),
                         border: OutlineInputBorder(),
                         hintText: "Include any additional comments here.",
+                        hintStyle: TextStyle(
+                            color: Colors.grey.shade500,
+                            fontStyle: FontStyle.italic),
+                        filled: true,
+                        fillColor: Colors.grey.shade800,
                       ),
+                      style: TextStyle(color: Colors.white),
                     ),
                     Expanded(child: StepWidgetView(value: 0)),
                     /*AnimatedSwitcher(
