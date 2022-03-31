@@ -30,7 +30,7 @@ class SequenceListView extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: Text(
-                "Sequences",
+                "Profiles",
                 style: TextStyle(color: Colors.white),
                 textAlign: TextAlign.center,
               ),

@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:keysight_gui/screens/profile_sequence/sequence_list_view.dart';
 import 'package:flutter_spinbox/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:keysight_gui/screens/profile_sequence/step_widget_view.dart';
+import 'package:keysight_gui/screens/profile_sequence/edit_steps_widget_view.dart';
 
 class ProfileSequenceWidget extends HookWidget {
   late ValueNotifier<List<String>> sequenceList;
@@ -19,7 +21,7 @@ class ProfileSequenceWidget extends HookWidget {
   late ValueNotifier<bool> sequenceTextError;
 
   void addNewSequence() {
-    sequenceList.value = List.from(sequenceList.value)..add("New Sequence");
+    sequenceList.value = List.from(sequenceList.value)..add("New Profile");
     sequenceSaveList.value = List.from(sequenceSaveList.value)..add(false);
     sequenceTextList.value = List.from(sequenceTextList.value)..add("");
     cellTextList.value = List.from(cellTextList.value)..add("");
@@ -89,7 +91,7 @@ class ProfileSequenceWidget extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    sequenceList = useState(<String>["New Sequence"]);
+    sequenceList = useState(<String>["New Profile"]);
     selectedSequence = useState<int>(sequenceList.value.length - 1);
     sequenceTextList = useState(<String>[""]);
     cellTextList = useState(<String>[""]);
@@ -101,6 +103,9 @@ class ProfileSequenceWidget extends HookWidget {
 
     sequenceTextError = useState<bool>(false);
     sequenceSaveList = useState(<bool>[false]);
+
+    final count = useState(0);
+    final editStepsView = useState(0);
 
     return Container(
       child: Row(
@@ -164,7 +169,7 @@ class ProfileSequenceWidget extends HookWidget {
                             controller: sequenceTextController,
                             decoration: InputDecoration(
                               border: OutlineInputBorder(),
-                              hintText: "Enter Name of Sequence",
+                              hintText: "Enter Name of Profile Sequence",
                               errorText: sequenceTextError.value
                                   ? "A Name of a Sequence Must be Given"
                                   : null,
@@ -288,87 +293,20 @@ class ProfileSequenceWidget extends HookWidget {
                         hintText: "Include any additional comments here.",
                       ),
                     ),
-                    Spacer(),
-                    Text(
-                      "The sequence is empty. Use Create New Step to add a step.",
-                    ),
-                    Spacer(),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          color: Colors.black,
-                          child: Column(
-                            children: [
-                              Text(
-                                "Create New",
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Row(
-                                  children: [
-                                    ElevatedButton(
-                                      child: Text("Step"),
-                                      onPressed: () {},
-                                    ),
-                                    SizedBox(width: 8),
-                                    ElevatedButton(
-                                      child: Text("Test"),
-                                      onPressed: () {},
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(width: 8),
-                        Container(
-                          color: Colors.black,
-                          child: Column(
-                            children: [
-                              Text(
-                                "Selection",
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Row(
-                                  children: [
-                                    ElevatedButton(
-                                      child: Text("Step"),
-                                      onPressed: () {},
-                                    ),
-                                    SizedBox(width: 8),
-                                    ElevatedButton(
-                                      child: Text("Step"),
-                                      onPressed: () {},
-                                    ),
-                                    SizedBox(width: 8),
-                                    ElevatedButton(
-                                      child: Text("Step"),
-                                      onPressed: () {},
-                                    ),
-                                    SizedBox(width: 8),
-                                    ElevatedButton(
-                                      child: Text("Step"),
-                                      onPressed: () {},
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
+                    Expanded(child: StepWidgetView(value: 0)),
+                    /*AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 500),
+                      transitionBuilder: (child, animation) {
+                        return ScaleTransition(
+                          scale: animation,
+                          child: child,
+                        );
+                      },
+                      child: StepWidgetView(
+                        key: ValueKey<int>(count.value),
+                        value: count.value,
+                      ),
+                    ),*/
                   ],
                 ),
               ),
