@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:keysight_gui/screens/profile_sequence/sequence_list_view.dart';
-import 'package:flutter_spinbox/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:keysight_gui/screens/profile_sequence/step_widget_view.dart';
-import 'package:keysight_gui/screens/profile_sequence/edit_steps_widget_view.dart';
 
 class ProfileSequenceWidget extends HookWidget {
   late ValueNotifier<List<String>> sequenceList;
@@ -104,8 +101,6 @@ class ProfileSequenceWidget extends HookWidget {
     sequenceTextError = useState<bool>(false);
     sequenceSaveList = useState(<bool>[false]);
 
-    final count = useState(0);
-    final editStepsView = useState(0);
     final dataTableSelectedIndex = useState(-1);
 
     return Container(
@@ -130,21 +125,27 @@ class ProfileSequenceWidget extends HookWidget {
                     height: 8,
                   ),
                   Container(
-                    child: Row(
+                    child: Column(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         ElevatedButton(
                           onPressed: () => addNewSequence(),
-                          child: Text("New"),
+                          child: Text("New Profile"),
+                        ),
+                        SizedBox(
+                          height: 8,
                         ),
                         ElevatedButton(
                           onPressed: () =>
                               deleteSequence(selectedSequence.value),
-                          child: Text("Delete"),
+                          child: Text("Delete Profile"),
+                        ),
+                        SizedBox(
+                          height: 8,
                         ),
                         ElevatedButton(
                           onPressed: () => saveSequence(selectedSequence.value),
-                          child: Text("Save"),
+                          child: Text("Save Profile"),
                         ),
                       ],
                     ),
@@ -190,58 +191,6 @@ class ProfileSequenceWidget extends HookWidget {
                             style: TextStyle(color: Colors.white),
                           ),
                         ),
-                        /*SizedBox(width: 8),
-                        Expanded(
-                          child: SpinBox(
-                            min: 0,
-                            max: 50,
-                            value: 15,
-                            spacing: 24,
-                            textAlign: TextAlign.center,
-                            decoration: InputDecoration(
-                              enabledBorder: OutlineInputBorder(
-                                borderSide: BorderSide(color: Colors.white),
-                              ),
-                              border: OutlineInputBorder(),
-                              contentPadding: const EdgeInsets.only(
-                                left: 0,
-                                bottom: 20,
-                                right: 0,
-                                top: 20,
-                              ),
-                              hintText: "hint",
-                              labelText: "C Rating (A)",
-                              filled: true,
-                              fillColor: Colors.grey.shade800,
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: 8),
-                        Expanded(
-                          child: SpinBox(
-                            min: 0,
-                            max: 50,
-                            value: 15,
-                            spacing: 24,
-                            textAlign: TextAlign.center,
-                            decoration: InputDecoration(
-                              enabledBorder: OutlineInputBorder(
-                                borderSide: BorderSide(color: Colors.white),
-                              ),
-                              border: OutlineInputBorder(),
-                              contentPadding: const EdgeInsets.only(
-                                left: 0,
-                                bottom: 20,
-                                right: 0,
-                                top: 20,
-                              ),
-                              hintText: "hint",
-                              labelText: "Over Voltage (V)",
-                              filled: true,
-                              fillColor: Colors.grey.shade800,
-                            ),
-                          ),
-                        ),*/
                       ],
                     ),
                     SizedBox(
@@ -268,58 +217,6 @@ class ProfileSequenceWidget extends HookWidget {
                             style: TextStyle(color: Colors.white),
                           ),
                         ),
-                        /*SizedBox(width: 8),
-                        Expanded(
-                          child: SpinBox(
-                            min: 0,
-                            max: 50,
-                            value: 15,
-                            spacing: 24,
-                            textAlign: TextAlign.center,
-                            decoration: InputDecoration(
-                              enabledBorder: OutlineInputBorder(
-                                borderSide: BorderSide(color: Colors.white),
-                              ),
-                              border: OutlineInputBorder(),
-                              contentPadding: const EdgeInsets.only(
-                                left: 0,
-                                bottom: 20,
-                                right: 0,
-                                top: 20,
-                              ),
-                              hintText: "hint",
-                              labelText: "Capacity (Ah)",
-                              filled: true,
-                              fillColor: Colors.grey.shade800,
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: 8),
-                        Expanded(
-                          child: SpinBox(
-                            min: 0,
-                            max: 50,
-                            value: 15,
-                            spacing: 24,
-                            textAlign: TextAlign.center,
-                            decoration: InputDecoration(
-                              enabledBorder: OutlineInputBorder(
-                                borderSide: BorderSide(color: Colors.white),
-                              ),
-                              border: OutlineInputBorder(),
-                              contentPadding: const EdgeInsets.only(
-                                left: 0,
-                                bottom: 20,
-                                right: 0,
-                                top: 20,
-                              ),
-                              hintText: "hint",
-                              labelText: "Under Voltage (V)",
-                              filled: true,
-                              fillColor: Colors.grey.shade800,
-                            ),
-                          ),
-                        ),*/
                       ],
                     ),
                     SizedBox(
@@ -444,20 +341,6 @@ class ProfileSequenceWidget extends HookWidget {
                         ),
                       ),
                     ),
-                    //Expanded(child: StepWidgetView(value: 0)),
-                    /*AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 500),
-                      transitionBuilder: (child, animation) {
-                        return ScaleTransition(
-                          scale: animation,
-                          child: child,
-                        );
-                      },
-                      child: StepWidgetView(
-                        key: ValueKey<int>(count.value),
-                        value: count.value,
-                      ),
-                    ),*/
                   ],
                 ),
               ),
