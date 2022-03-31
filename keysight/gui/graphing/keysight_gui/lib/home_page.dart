@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:keysight_gui/application_bar.dart';
 import 'package:keysight_gui/tab_widget.dart';
+import 'package:keysight_gui/screens/instrument_connection/instrument_widget.dart';
+import 'package:keysight_gui/screens/profile_sequence/profile_sequence_widget.dart';
+import 'package:keysight_gui/screens/measurements/measurement_widget.dart';
 
 class HomePage extends HookWidget {
   const HomePage({Key? key, required this.title}) : super(key: key);
@@ -49,7 +52,20 @@ class HomePage extends HookWidget {
               Expanded(
                 child: Padding(
                   padding: EdgeInsets.all(8.0),
-                  child: TabWidget(),
+                  child: TabWidget(
+                    tabs: [
+                      Text("Instrument Connection"),
+                      Text("Profile Sequence"),
+                      Text("Measurements"),
+                      Text("Test"),
+                    ],
+                    tabWidgets: [
+                      InstrumentWidget(),
+                      ProfileSequenceWidget(),
+                      MeasurementWidget(),
+                      Text("tab 4"),
+                    ],
+                  ),
                 ),
               ),
             ],

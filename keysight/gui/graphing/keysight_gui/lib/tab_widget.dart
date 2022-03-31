@@ -4,13 +4,18 @@ import 'package:keysight_gui/screens/instrument_connection/instrument_widget.dar
 import 'package:keysight_gui/screens/profile_sequence/profile_sequence_widget.dart';
 
 class TabWidget extends HookWidget {
-  const TabWidget({Key? key}) : super(key: key);
+  const TabWidget({Key? key, required this.tabs, required this.tabWidgets})
+      : assert(tabs.length == tabWidgets.length),
+        super(key: key);
+
+  final List<Widget> tabs;
+  final List<Widget> tabWidgets;
 
   @override
   Widget build(BuildContext context) {
     final ticker = useSingleTickerProvider();
     final tabController =
-        useMemoized(() => TabController(length: 4, vsync: ticker));
+        useMemoized(() => TabController(length: tabs.length, vsync: ticker));
 
     useEffect(() {
       return tabController.dispose;
@@ -21,24 +26,13 @@ class TabWidget extends HookWidget {
         Container(
           color: Color(Colors.black.value).withOpacity(0.95),
           child: TabBar(
-            tabs: const [
-              Padding(
+            tabs: List.generate(
+              tabs.length,
+              (index) => Padding(
                 padding: EdgeInsets.all(8.0),
-                child: Text("Instrument Connection"),
+                child: tabs.elementAt(index),
               ),
-              Padding(
-                padding: EdgeInsets.all(8.0),
-                child: Text("Profile Sequence"),
-              ),
-              Padding(
-                padding: EdgeInsets.all(8.0),
-                child: Text("Measurements"),
-              ),
-              Padding(
-                padding: EdgeInsets.all(8.0),
-                child: Text("Test"),
-              ),
-            ],
+            ),
             controller: tabController,
             indicator: BoxDecoration(color: Colors.blue.shade900),
           ),
@@ -57,12 +51,8 @@ class TabWidget extends HookWidget {
               ],
             ),
             child: TabBarView(
-              children: [
-                InstrumentWidget(),
-                ProfileSequenceWidget(),
-                Text("tab 3"),
-                Text("tab 4"),
-              ],
+              children: List.generate(
+                  tabWidgets.length, (index) => tabWidgets.elementAt(index)),
               controller: tabController,
             ),
           ),
