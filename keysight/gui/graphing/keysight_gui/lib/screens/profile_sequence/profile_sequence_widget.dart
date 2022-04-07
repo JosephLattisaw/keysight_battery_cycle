@@ -268,8 +268,14 @@ class ProfileSequenceWidget extends HookWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         ElevatedButton(
-                          onPressed: () => RouterUtility.routerUtility(
-                              context, AddSequenceStepWidget()),
+                          onPressed: () => RouterUtility.routerUtility(context,
+                              AddSequenceStepWidget(
+                            onSave: (int mode, int seconds, double current,
+                                double voltage) {
+                              print(
+                                  "on save got called yall $mode $seconds $current $voltage");
+                            },
+                          )),
                           child: Text("Add Step"),
                         ),
                         SizedBox(

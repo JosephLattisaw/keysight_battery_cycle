@@ -1,172 +1,472 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:keysight_gui/application_bar.dart';
+import 'package:flutter_spinbox/flutter_spinbox.dart';
 
 class AddSequenceStepWidget extends HookWidget {
+  const AddSequenceStepWidget({Key? key, required this.onSave})
+      : super(key: key);
+
+  final void Function(int mode, int seconds, double current, double voltage)
+      onSave;
+
   @override
   Widget build(BuildContext context) {
-    final actionComboSelection = useState(0);
+    final modeSelection = useState(0);
+    final durationSeconds = useState(1);
+    final currentLimit = useState(0.1);
+    final voltageLimit = useState(2.0);
 
     return Scaffold(
       appBar: PreferredSize(
         child: const ApplicationBar(),
         preferredSize: AppBar().preferredSize,
       ),
-      body: Center(
-        child: SizedBox(
-          height: MediaQuery.of(context).size.height,
-          width: MediaQuery.of(context).size.width,
-          child: Container(
-            color: Colors.white,
-            child: Column(
-              children: [
-                Container(
-                  color: Colors.blue,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Align(
-                      alignment: Alignment.topLeft,
-                      child: Text(
-                        "Add a Step to the Profile Sequence:",
-                        style: TextStyle(
-                            fontStyle: FontStyle.italic,
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold),
-                        textAlign: TextAlign.left,
-                      ),
-                    ),
+      backgroundColor: Colors.black,
+      body: SizedBox(
+        height: MediaQuery.of(context).size.height,
+        width: MediaQuery.of(context).size.width,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            Container(
+              color: Colors.blue,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text(
+                  'Add a Step to a Profile Sequence',
+                  textAlign: TextAlign.left,
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontStyle: FontStyle.italic,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
                   ),
                 ),
-                Row(
+              ),
+            ),
+            Expanded(
+              child: Container(
+                color: Colors.black,
+                child: Column(
                   children: [
-                    Text(
-                      "Mode:",
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
+                    Padding(
+                      padding: const EdgeInsets.only(
+                        left: 16.0,
+                        top: 8.0,
+                        right: 16.0,
                       ),
-                    ),
-                    DecoratedBox(
-                      decoration: BoxDecoration(
+                      child: Container(
+                        decoration: BoxDecoration(
                           color: Colors.grey.shade800,
-                          border: Border.all(color: Colors.black38, width: 0),
-                          boxShadow: <BoxShadow>[
+                          border: Border.all(
+                            width: 2.0,
+                            style: BorderStyle.solid,
+                            color: Colors.grey.shade800,
+                          ),
+                          boxShadow: [
                             BoxShadow(
-                              color: Color.fromRGBO(0, 0, 0, 0.57),
-                              blurRadius: 5,
-                            )
-                          ]),
-                      child: Padding(
-                        padding: const EdgeInsets.only(left: 8),
-                        child: DropdownButton(
-                          value: actionComboSelection.value,
-                          items: [
-                            DropdownMenuItem(child: Text("Charge"), value: 0),
-                            DropdownMenuItem(
-                                child: Text("Discharge"), value: 1),
-                            DropdownMenuItem(child: Text("Rest"), value: 2),
+                              color: Colors.black.withOpacity(0.5),
+                              spreadRadius: 1,
+                              blurRadius: 7,
+                              offset:
+                                  Offset(0, 3), // changes position of shadow
+                            ),
                           ],
-                          onChanged: (int? value) {
-                            actionComboSelection.value = value ?? 0;
-                          },
-                          style: TextStyle(color: Colors.white),
-                          underline: Container(), //empty line
-                          dropdownColor: Colors.grey.shade800,
-                          focusColor: Colors.black,
-                          iconEnabledColor: Colors.white,
-                          icon: Icon(Icons.arrow_drop_down),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(10.0),
+                              child: Column(
+                                children: [
+                                  Text(
+                                    "Select a Mode From the Dropdown to Decide What Action Will Be Taken During This Step",
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                        fontStyle: FontStyle.italic),
+                                  ),
+                                  SizedBox(
+                                    height: 8,
+                                  ),
+                                  IntrinsicWidth(
+                                    child: DropdownButtonFormField(
+                                      items: [
+                                        DropdownMenuItem(
+                                            child: Text("Rest"), value: 0),
+                                        DropdownMenuItem(
+                                            child: Text("Charge"), value: 1),
+                                        DropdownMenuItem(
+                                            child: Text("Discharge"), value: 2),
+                                      ],
+                                      value: modeSelection.value,
+                                      onChanged: (int? value) {
+                                        modeSelection.value = value ?? 0;
+                                      },
+                                      dropdownColor: Colors.blueAccent,
+                                      decoration: InputDecoration(
+                                        enabledBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                              color: Colors.black, width: 1.4),
+                                          borderRadius:
+                                              BorderRadius.circular(5),
+                                        ),
+                                        border: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                              color: Colors.blue, width: 2),
+                                          borderRadius:
+                                              BorderRadius.circular(20),
+                                        ),
+                                        filled: true,
+                                        fillColor: Colors.blueAccent,
+                                      ),
+                                      icon: Icon(
+                                        Icons.arrow_drop_down,
+                                        color: Colors.black,
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    height: 8,
+                                  ),
+                                  Text(
+                                    "This specifies whether the channel is sinking current, sourcing current, or resting.",
+                                    style: TextStyle(
+                                      color: Colors.grey.shade400,
+                                      fontStyle: FontStyle.italic,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
-                  ],
-                ),
-                Text(
-                  "This specifies whether the channel is sinking current, sourcing current, or resting while the output is disconnected.",
-                  style: TextStyle(
-                    fontStyle: FontStyle.italic,
-                  ),
-                ),
-                Row(
-                  children: [
-                    Text("Duration"),
-                    Text("Seconds"),
-                  ],
-                ),
-                Text(
-                  "Maximum Allowable Step Time in Seconds. Note that the step can terminate earlier than the duration due to a test condition being met.",
-                  style: TextStyle(
-                    fontStyle: FontStyle.italic,
-                  ),
-                ),
-                Row(
-                  children: [
-                    Text("Target Current (Current Limit) <CC>"),
-                    Text("Amps"),
-                  ],
-                ),
-                Text(
-                  "The Current Limit for this Step. The channel will limit the current to this value.\n In charge mode <CC> refers to the current source limit. In discharge mode, the <CC> refers to the current sink limit. ",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontStyle: FontStyle.italic,
-                  ),
-                ),
-                Row(
-                  children: [
-                    Text("Target Voltage (Voltage Limit) <CV>"),
-                    Text("Volts"),
-                  ],
-                ),
-                Text(
-                  "The Voltage Limit for this Step. The channel will limit the voltage to this value.",
-                  style: TextStyle(fontStyle: FontStyle.italic),
-                ),
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        decoration: InputDecoration(
-                          enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.white),
-                          ),
-                          border: OutlineInputBorder(),
-                          hintText: "Include any additional comments here.",
-                          hintStyle: TextStyle(
-                              color: Colors.grey.shade500,
-                              fontStyle: FontStyle.italic),
-                          filled: true,
-                          fillColor: Colors.grey.shade800,
-                        ),
-                        style: TextStyle(color: Colors.white),
+                    Padding(
+                      padding: const EdgeInsets.only(
+                        left: 16.0,
+                        top: 8.0,
+                        right: 16.0,
                       ),
-                    )
-                  ],
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    ElevatedButton(
-                      onPressed: () {},
-                      child: Text("Save"),
-                      style: ElevatedButton.styleFrom(
-                        primary: Colors.green,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade800,
+                          border: Border.all(
+                            width: 2.0,
+                            style: BorderStyle.solid,
+                            color: Colors.grey.shade800,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.5),
+                              spreadRadius: 1,
+                              blurRadius: 7,
+                              offset:
+                                  Offset(0, 3), // changes position of shadow
+                            ),
+                          ],
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(10.0),
+                              child: Column(
+                                children: [
+                                  Text(
+                                    "Specify the Duration. (The Maximum Allowable Step Time in Seconds)",
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                        fontStyle: FontStyle.italic),
+                                  ),
+                                  SizedBox(
+                                    height: 8,
+                                  ),
+                                  IntrinsicWidth(
+                                    child: SpinBox(
+                                      value: durationSeconds.value.toDouble(),
+                                      min: 1,
+                                      max: 2147483647,
+                                      step: 1.0,
+                                      decimals: 0,
+                                      onChanged: (value) {
+                                        durationSeconds.value = value.toInt();
+                                      },
+                                      incrementIcon: Icon(
+                                        Icons.add,
+                                        color: Colors.black,
+                                      ),
+                                      decrementIcon: Icon(
+                                        Icons.remove,
+                                        color: Colors.black,
+                                      ),
+                                      decoration: InputDecoration(
+                                        enabledBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                              color: Colors.black, width: 1.4),
+                                        ),
+                                        border: OutlineInputBorder(),
+                                        hintStyle: TextStyle(
+                                          color: Colors.black,
+                                          fontStyle: FontStyle.italic,
+                                        ),
+                                        hintText: "Centered Text",
+                                        filled: true,
+                                        fillColor: Colors.blue,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    height: 8,
+                                  ),
+                                  Text(
+                                    "Note: that the step can terminate earlier than the duration due to a test condition being met.",
+                                    style: TextStyle(
+                                      color: Colors.grey.shade400,
+                                      fontStyle: FontStyle.italic,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    Container(
+                      child: IntrinsicHeight(
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Padding(
+                                padding: const EdgeInsets.only(
+                                    left: 16, top: 8, right: 4),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey.shade800,
+                                    border: Border.all(
+                                      width: 2.0,
+                                      style: BorderStyle.solid,
+                                      color: Colors.grey.shade800,
+                                    ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.5),
+                                        spreadRadius: 1,
+                                        blurRadius: 7,
+                                        offset: Offset(
+                                            0, 3), // changes position of shadow
+                                      ),
+                                    ],
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(10.0),
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Text(
+                                          "Specify the Current Limit for the Step <CC> (Amps)",
+                                          style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 16,
+                                              fontStyle: FontStyle.italic),
+                                        ),
+                                        SizedBox(
+                                          height: 8,
+                                        ),
+                                        IntrinsicWidth(
+                                          child: SpinBox(
+                                            value: currentLimit.value,
+                                            min: 0.01,
+                                            max: 6.25,
+                                            step: 0.1,
+                                            decimals: 2,
+                                            onChanged: (value) {
+                                              currentLimit.value = value;
+                                            },
+                                            incrementIcon: Icon(
+                                              Icons.add,
+                                              color: Colors.black,
+                                            ),
+                                            decrementIcon: Icon(
+                                              Icons.remove,
+                                              color: Colors.black,
+                                            ),
+                                            decoration: InputDecoration(
+                                              enabledBorder: OutlineInputBorder(
+                                                borderSide: BorderSide(
+                                                    color: Colors.black,
+                                                    width: 1.4),
+                                              ),
+                                              border: OutlineInputBorder(),
+                                              hintStyle: TextStyle(
+                                                color: Colors.black,
+                                                fontStyle: FontStyle.italic,
+                                              ),
+                                              hintText: "Centered Text",
+                                              filled: true,
+                                              fillColor: Colors.blue,
+                                            ),
+                                            textAlign: TextAlign.center,
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          height: 8,
+                                        ),
+                                        Text(
+                                          "In charge mode, this refers to the current source limit.\n In discharge mode, this refers to the current sink limit.",
+                                          style: TextStyle(
+                                            color: Colors.grey.shade400,
+                                            fontStyle: FontStyle.italic,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              child: Padding(
+                                padding: const EdgeInsets.only(
+                                  right: 16.0,
+                                  top: 8.0,
+                                  left: 4,
+                                ),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey.shade800,
+                                    border: Border.all(
+                                      width: 2.0,
+                                      style: BorderStyle.solid,
+                                      color: Colors.grey.shade800,
+                                    ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.5),
+                                        spreadRadius: 1,
+                                        blurRadius: 7,
+                                        offset: Offset(
+                                            0, 3), // changes position of shadow
+                                      ),
+                                    ],
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(10.0),
+                                    child: Column(
+                                      children: [
+                                        Text(
+                                          "Specify the Voltage Limit for the Step <CV> (Volts)",
+                                          style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 16,
+                                              fontStyle: FontStyle.italic),
+                                        ),
+                                        SizedBox(
+                                          height: 8,
+                                        ),
+                                        IntrinsicWidth(
+                                          child: SpinBox(
+                                            value: voltageLimit.value,
+                                            min: 2.0,
+                                            max: 4.5,
+                                            decimals: 2,
+                                            step: 0.1,
+                                            onChanged: (value) {
+                                              voltageLimit.value = value;
+                                            },
+                                            incrementIcon: Icon(
+                                              Icons.add,
+                                              color: Colors.black,
+                                            ),
+                                            decrementIcon: Icon(
+                                              Icons.remove,
+                                              color: Colors.black,
+                                            ),
+                                            decoration: InputDecoration(
+                                              enabledBorder: OutlineInputBorder(
+                                                borderSide: BorderSide(
+                                                    color: Colors.black,
+                                                    width: 1.4),
+                                              ),
+                                              border: OutlineInputBorder(),
+                                              hintStyle: TextStyle(
+                                                color: Colors.black,
+                                                fontStyle: FontStyle.italic,
+                                              ),
+                                              hintText: "Centered Text",
+                                              filled: true,
+                                              fillColor: Colors.blue,
+                                            ),
+                                            textAlign: TextAlign.center,
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          height: 8,
+                                        ),
+                                        Text(
+                                          "The channel will limit the voltage to this value.",
+                                          style: TextStyle(
+                                            color: Colors.grey.shade400,
+                                            fontStyle: FontStyle.italic,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                     SizedBox(
-                      width: 8,
+                      height: 24,
                     ),
-                    ElevatedButton(
-                      onPressed: () {},
-                      child: Text("Cancel"),
-                      style: ElevatedButton.styleFrom(
-                        primary: Colors.red,
+                    Container(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          ElevatedButton(
+                            onPressed: () {
+                              onSave(modeSelection.value, durationSeconds.value,
+                                  currentLimit.value, voltageLimit.value);
+                              Navigator.of(context).maybePop();
+                            },
+                            child: Text("Save"),
+                            style:
+                                ElevatedButton.styleFrom(primary: Colors.green),
+                          ),
+                          SizedBox(
+                            width: 8,
+                          ),
+                          ElevatedButton(
+                            onPressed: () {
+                              Navigator.of(context).maybePop();
+                            },
+                            child: Text("Cancel"),
+                            style:
+                                ElevatedButton.styleFrom(primary: Colors.red),
+                          ),
+                        ],
                       ),
-                    )
+                    ),
                   ],
                 ),
-              ],
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );
