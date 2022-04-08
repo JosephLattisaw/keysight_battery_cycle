@@ -2,6 +2,45 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
 class SequenceStepTable extends HookWidget {
+  const SequenceStepTable({Key? key, required this.table}) : super(key: key);
+
+  final List<List<dynamic>> table;
+
+  String modeName(int action) {
+    String result = "";
+
+    if (action == 0) {
+      result = "Rest";
+    } else if (action == 1) {
+      result = "Charge at";
+    } else if (action == 2) {
+      result = "Discharge at";
+    }
+
+    return result;
+  }
+
+  String voltageString(double value) {
+    String result = "";
+    result = value.toString() + "V";
+
+    return result;
+  }
+
+  String currentString(double value) {
+    String result = "";
+    result = value.toString() + "A";
+
+    return result;
+  }
+
+  String secondsString(int value) {
+    String result = "";
+    result = value.toString() + "s";
+
+    return result;
+  }
+
   @override
   Widget build(BuildContext context) {
     final dataTableSelectedIndex = useState(-1);
@@ -49,7 +88,7 @@ class SequenceStepTable extends HookWidget {
         ),
       ],
       rows: List<DataRow>.generate(
-        5,
+        table.length,
         (index) => DataRow(
           color: MaterialStateProperty.resolveWith<Color>((states) {
             if (index == dataTableSelectedIndex.value) return Colors.blue;
@@ -72,31 +111,31 @@ class SequenceStepTable extends HookWidget {
             ),
             DataCell(
               Text(
-                '1',
+                (index + 1).toString(),
                 style: TextStyle(color: Colors.white),
               ),
             ),
             DataCell(
               Text(
-                'Charge at',
+                modeName(table.elementAt(index).elementAt(0)),
                 style: TextStyle(color: Colors.white),
               ),
             ),
             DataCell(
               Text(
-                '4.0V',
+                voltageString(table.elementAt(index).elementAt(3)),
                 style: TextStyle(color: Colors.white),
               ),
             ),
             DataCell(
               Text(
-                '20A',
+                currentString(table.elementAt(index).elementAt(2)),
                 style: TextStyle(color: Colors.white),
               ),
             ),
             DataCell(
               Text(
-                '1200s',
+                secondsString(table.elementAt(index).elementAt(1)),
                 style: TextStyle(color: Colors.white),
               ),
             ),

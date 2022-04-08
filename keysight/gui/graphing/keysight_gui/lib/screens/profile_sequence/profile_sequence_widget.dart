@@ -21,6 +21,8 @@ class ProfileSequenceWidget extends HookWidget {
   late ValueNotifier<int> selectedSequence;
   late ValueNotifier<bool> sequenceTextError;
 
+  late ValueNotifier<List<List<dynamic>>> table;
+
   void addNewSequence() {
     sequenceList.value = List.from(sequenceList.value)..add("New Profile");
     sequenceSaveList.value = List.from(sequenceSaveList.value)..add(false);
@@ -90,6 +92,10 @@ class ProfileSequenceWidget extends HookWidget {
     refreshSequencePage();
   }
 
+  void addTableStep(List<dynamic> step) {
+    table.value = List.from(table.value)..add(step);
+  }
+
   @override
   Widget build(BuildContext context) {
     sequenceList = useState(<String>["New Profile"]);
@@ -106,6 +112,8 @@ class ProfileSequenceWidget extends HookWidget {
     sequenceSaveList = useState(<bool>[false]);
 
     final dataTableSelectedIndex = useState(-1);
+
+    table = useState(<List<dynamic>>[]);
 
     return Container(
       child: Row(
@@ -260,7 +268,9 @@ class ProfileSequenceWidget extends HookWidget {
                     SizedBox(
                       height: 12,
                     ),
-                    SequenceStepTable(),
+                    SequenceStepTable(
+                      table: table.value,
+                    ),
                     SizedBox(
                       height: 12,
                     ),
@@ -274,6 +284,8 @@ class ProfileSequenceWidget extends HookWidget {
                                 double voltage) {
                               print(
                                   "on save got called yall $mode $seconds $current $voltage");
+                              addTableStep(
+                                  <dynamic>[mode, seconds, current, voltage]);
                             },
                           )),
                           child: Text("Add Step"),
