@@ -22,6 +22,7 @@ class ProfileSequenceWidget extends HookWidget {
   late ValueNotifier<bool> sequenceTextError;
 
   late ValueNotifier<List<List<dynamic>>> table;
+  late ValueNotifier<int> dataTableSelectedIndex;
 
   void addNewSequence() {
     sequenceList.value = List.from(sequenceList.value)..add("New Profile");
@@ -96,6 +97,32 @@ class ProfileSequenceWidget extends HookWidget {
     table.value = List.from(table.value)..add(step);
   }
 
+  bool moveUpPossible() {
+    bool result = false;
+
+    if (dataTableSelectedIndex.value <= 0) {
+      result = false;
+    } else {
+      result = true;
+    }
+
+    return result;
+  }
+
+  bool moveDownPossible() {
+    bool result = false;
+
+    if (dataTableSelectedIndex.value < 0) {
+      result = false;
+    } else if (dataTableSelectedIndex.value < table.value.length - 1) {
+      result = true;
+    } else {
+      result = false;
+    }
+
+    return result;
+  }
+
   @override
   Widget build(BuildContext context) {
     sequenceList = useState(<String>["New Profile"]);
@@ -111,7 +138,7 @@ class ProfileSequenceWidget extends HookWidget {
     sequenceTextError = useState<bool>(false);
     sequenceSaveList = useState(<bool>[false]);
 
-    final dataTableSelectedIndex = useState(-1);
+    dataTableSelectedIndex = useState(-1);
 
     table = useState(<List<dynamic>>[]);
 
@@ -299,9 +326,10 @@ class ProfileSequenceWidget extends HookWidget {
                           width: 4,
                         ),
                         ElevatedButton(
-                          onPressed: null,
-                          child: Text("Add Test",
-                              style: TextStyle(color: Colors.grey)),
+                          onPressed: (dataTableSelectedIndex.value == -1)
+                              ? null
+                              : () {},
+                          child: Text("Add Test"),
                           style: ElevatedButton.styleFrom(
                             onSurface: Colors.grey,
                           ),
@@ -310,22 +338,33 @@ class ProfileSequenceWidget extends HookWidget {
                           width: 4,
                         ),
                         ElevatedButton(
-                          onPressed: () {},
+                          onPressed: (dataTableSelectedIndex.value == -1)
+                              ? null
+                              : () {},
                           child: Text("Edit"),
+                          style: ElevatedButton.styleFrom(
+                            onSurface: Colors.grey,
+                          ),
                         ),
                         SizedBox(
                           width: 32,
                         ),
                         ElevatedButton(
-                          onPressed: () {},
+                          onPressed: !moveUpPossible() ? null : () {},
                           child: Text("Move Up"),
+                          style: ElevatedButton.styleFrom(
+                            onSurface: Colors.grey,
+                          ),
                         ),
                         SizedBox(
                           width: 4,
                         ),
                         ElevatedButton(
-                          onPressed: () {},
+                          onPressed: !moveDownPossible() ? null : () {},
                           child: Text("Move Down"),
+                          style: ElevatedButton.styleFrom(
+                            onSurface: Colors.grey,
+                          ),
                         ),
                         SizedBox(
                           width: 32,
