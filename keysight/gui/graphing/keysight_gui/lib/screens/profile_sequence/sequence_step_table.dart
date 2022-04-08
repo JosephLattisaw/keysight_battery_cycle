@@ -2,9 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
 class SequenceStepTable extends HookWidget {
-  const SequenceStepTable({Key? key, required this.table}) : super(key: key);
+  const SequenceStepTable(
+      {Key? key, required this.table, required this.onIndexChanged})
+      : super(key: key);
 
   final List<List<dynamic>> table;
+
+  final void Function(int) onIndexChanged;
 
   String modeName(int action) {
     String result = "";
@@ -100,6 +104,8 @@ class SequenceStepTable extends HookWidget {
               dataTableSelectedIndex.value = -1;
             else
               dataTableSelectedIndex.value = index;
+
+            onIndexChanged(dataTableSelectedIndex.value);
           },
           selected: index == dataTableSelectedIndex.value,
           cells: <DataCell>[

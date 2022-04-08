@@ -270,6 +270,11 @@ class ProfileSequenceWidget extends HookWidget {
                     ),
                     SequenceStepTable(
                       table: table.value,
+                      onIndexChanged: (p0) {
+                        dataTableSelectedIndex.value = p0;
+                        print(
+                            "data table index ${dataTableSelectedIndex.value}");
+                      },
                     ),
                     SizedBox(
                       height: 12,
@@ -326,10 +331,13 @@ class ProfileSequenceWidget extends HookWidget {
                           width: 32,
                         ),
                         ElevatedButton(
-                          onPressed: () {},
+                          onPressed: (dataTableSelectedIndex.value == -1)
+                              ? null
+                              : () {},
                           child: Text("Delete Step"),
                           style: ElevatedButton.styleFrom(
                             primary: Colors.red,
+                            onSurface: Colors.grey,
                           ),
                         ),
                       ],
