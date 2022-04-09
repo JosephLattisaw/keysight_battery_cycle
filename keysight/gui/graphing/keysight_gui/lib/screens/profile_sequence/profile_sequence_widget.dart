@@ -145,7 +145,11 @@ class ProfileSequenceWidget extends HookWidget {
   bool moveUpPossible() {
     bool result = false;
 
-    if (dataTableSelectedIndex.value <= 0) {
+    List<int> mapping = getTableIndexes(dataTableSelectedIndex.value);
+
+    if (mapping.elementAt(1) >= 0) {
+      result = false;
+    } else if (dataTableSelectedIndex.value <= 0) {
       result = false;
     } else {
       result = true;
@@ -157,15 +161,54 @@ class ProfileSequenceWidget extends HookWidget {
   bool moveDownPossible() {
     bool result = false;
 
+    List<int> mapping = getTableIndexes(dataTableSelectedIndex.value);
+
     if (dataTableSelectedIndex.value < 0) {
       result = false;
-    } else if (dataTableSelectedIndex.value < table.value.length - 1) {
+    } else if (mapping.elementAt(1) >= 0) {
+      result = false;
+    } else if (mapping.elementAt(0) < table.value.length - 1) {
       result = true;
     } else {
       result = false;
     }
 
     return result;
+  }
+
+  void deleteStep() {
+    List<int> mapping = getTableIndexes(dataTableSelectedIndex.value);
+
+    if (mapping.elementAt(1) >= 0) {
+      table.value = List.from(table.value)
+        ..elementAt(mapping.elementAt(0))
+            .elementAt(4)
+            .removeAt(mapping.elementAt(1));
+    } else {
+      table.value = List.from(table.value)..removeAt(mapping.elementAt(0));
+    }
+  }
+
+  void moveUp() {
+    List<int> mapping = getTableIndexes(dataTableSelectedIndex.value);
+
+    if (mapping.elementAt(1) < 0) {
+      table.value = List.from(table.value);
+      dynamic removedItem = table.value.elementAt(mapping.elementAt(0));
+      table.value.removeAt(mapping.elementAt(0));
+      table.value.insert(mapping.elementAt(0) - 1, removedItem);
+    }
+  }
+
+  void moveDown() {
+    List<int> mapping = getTableIndexes(dataTableSelectedIndex.value);
+
+    if (mapping.elementAt(1) < 0) {
+      table.value = List.from(table.value);
+      dynamic removedItem = table.value.elementAt(mapping.elementAt(0));
+      table.value.removeAt(mapping.elementAt(0));
+      table.value.insert(mapping.elementAt(0) + 1, removedItem);
+    }
   }
 
   @override
@@ -411,7 +454,11 @@ class ProfileSequenceWidget extends HookWidget {
                           width: 32,
                         ),
                         ElevatedButton(
-                          onPressed: !moveUpPossible() ? null : () {},
+                          onPressed: !moveUpPossible()
+                              ? null
+                              : () {
+                                  moveUp();
+                                },
                           child: Text("Move Up"),
                           style: ElevatedButton.styleFrom(
                             onSurface: Colors.grey,
@@ -421,7 +468,11 @@ class ProfileSequenceWidget extends HookWidget {
                           width: 4,
                         ),
                         ElevatedButton(
-                          onPressed: !moveDownPossible() ? null : () {},
+                          onPressed: !moveDownPossible()
+                              ? null
+                              : () {
+                                  moveDown();
+                                },
                           child: Text("Move Down"),
                           style: ElevatedButton.styleFrom(
                             onSurface: Colors.grey,
@@ -433,7 +484,10 @@ class ProfileSequenceWidget extends HookWidget {
                         ElevatedButton(
                           onPressed: (dataTableSelectedIndex.value == -1)
                               ? null
-                              : () {},
+                              : () {
+                                  print("does this happen?");
+                                  deleteStep();
+                                },
                           child: Text("Delete Step"),
                           style: ElevatedButton.styleFrom(
                             primary: Colors.red,
