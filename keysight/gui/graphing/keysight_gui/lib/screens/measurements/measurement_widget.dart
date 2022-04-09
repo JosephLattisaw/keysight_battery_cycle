@@ -78,6 +78,7 @@ class MeasurementWidget extends HookWidget {
             ),
             Expanded(
               child: SingleChildScrollView(
+                primary: false,
                 child: DataTable(
                   headingRowColor: MaterialStateColor.resolveWith(
                       (states) => Colors.blue.shade900),
