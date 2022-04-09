@@ -240,128 +240,134 @@ class SequenceStepTable extends HookWidget {
   Widget build(BuildContext context) {
     final dataTableSelectedIndex = useState(-1);
 
-    return DataTable(
-      headingRowColor:
-          MaterialStateColor.resolveWith((states) => Colors.blue.shade900),
-      showCheckboxColumn: false,
-      columns: [
-        DataColumn(
-          label: Text(
-            'Function',
-            style: TextStyle(color: Colors.white),
-          ),
-        ),
-        DataColumn(
-          label: Text(
-            'Step',
-            style: TextStyle(color: Colors.white),
-          ),
-        ),
-        DataColumn(
-          label: Text(
-            'Action',
-            style: TextStyle(color: Colors.white),
-          ),
-        ),
-        DataColumn(
-          label: Text(
-            'Voltage (V)',
-            style: TextStyle(color: Colors.white),
-          ),
-        ),
-        DataColumn(
-          label: Text(
-            'Current (A)',
-            style: TextStyle(color: Colors.white),
-          ),
-        ),
-        DataColumn(
-          label: Text(
-            'Other',
-            style: TextStyle(color: Colors.white),
-          ),
-        ),
-        DataColumn(
-          label: Text(
-            'Time',
-            style: TextStyle(color: Colors.white),
-          ),
-        ),
-        DataColumn(
-          label: Text(
-            'Test',
-            style: TextStyle(color: Colors.white),
-          ),
-        ),
-      ],
-      rows: List<DataRow>.generate(
-        totalTableLength,
-        (index) => DataRow(
-          color: MaterialStateProperty.resolveWith<Color>((states) {
-            if (index == dataTableSelectedIndex.value) return Colors.blue;
-            if (index % 2 == 0) return Colors.grey.shade700;
-            return Colors.grey.shade800;
-          }),
-          onSelectChanged: (value) {
-            if (value == false) {
-              dataTableSelectedIndex.value = -1;
-            } else {
-              dataTableSelectedIndex.value = index;
-            }
-
-            onIndexChanged(dataTableSelectedIndex.value);
-          },
-          selected: index == dataTableSelectedIndex.value,
-          cells: <DataCell>[
-            DataCell(
-              Text(
-                getFunctionType(index),
+    return Expanded(
+      child: SingleChildScrollView(
+        primary: false,
+        scrollDirection: Axis.vertical,
+        child: DataTable(
+          headingRowColor:
+              MaterialStateColor.resolveWith((states) => Colors.blue.shade900),
+          showCheckboxColumn: false,
+          columns: [
+            DataColumn(
+              label: Text(
+                'Function',
                 style: TextStyle(color: Colors.white),
               ),
             ),
-            DataCell(
-              Text(
-                getStepNumber(index),
+            DataColumn(
+              label: Text(
+                'Step',
                 style: TextStyle(color: Colors.white),
               ),
             ),
-            DataCell(
-              Text(
-                getActionType(index),
+            DataColumn(
+              label: Text(
+                'Action',
                 style: TextStyle(color: Colors.white),
               ),
             ),
-            DataCell(
-              Text(
-                getVoltageString(index),
+            DataColumn(
+              label: Text(
+                'Voltage (V)',
                 style: TextStyle(color: Colors.white),
               ),
             ),
-            DataCell(
-              Text(
-                getCurrentString(index),
+            DataColumn(
+              label: Text(
+                'Current (A)',
                 style: TextStyle(color: Colors.white),
               ),
             ),
-            DataCell(
-              Text(
-                getOtherString(index),
+            DataColumn(
+              label: Text(
+                'Other',
                 style: TextStyle(color: Colors.white),
               ),
             ),
-            DataCell(
-              Text(
-                getTimeString(index),
+            DataColumn(
+              label: Text(
+                'Time',
                 style: TextStyle(color: Colors.white),
               ),
             ),
-            DataCell(
-              Text(
-                getTestString(index),
+            DataColumn(
+              label: Text(
+                'Test',
                 style: TextStyle(color: Colors.white),
               ),
             ),
           ],
+          rows: List<DataRow>.generate(
+            totalTableLength,
+            (index) => DataRow(
+              color: MaterialStateProperty.resolveWith<Color>((states) {
+                if (index == dataTableSelectedIndex.value) return Colors.blue;
+                if (index % 2 == 0) return Colors.grey.shade700;
+                return Colors.grey.shade800;
+              }),
+              onSelectChanged: (value) {
+                if (value == false) {
+                  dataTableSelectedIndex.value = -1;
+                } else {
+                  dataTableSelectedIndex.value = index;
+                }
+
+                onIndexChanged(dataTableSelectedIndex.value);
+              },
+              selected: index == dataTableSelectedIndex.value,
+              cells: <DataCell>[
+                DataCell(
+                  Text(
+                    getFunctionType(index),
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+                DataCell(
+                  Text(
+                    getStepNumber(index),
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+                DataCell(
+                  Text(
+                    getActionType(index),
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+                DataCell(
+                  Text(
+                    getVoltageString(index),
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+                DataCell(
+                  Text(
+                    getCurrentString(index),
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+                DataCell(
+                  Text(
+                    getOtherString(index),
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+                DataCell(
+                  Text(
+                    getTimeString(index),
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+                DataCell(
+                  Text(
+                    getTestString(index),
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );

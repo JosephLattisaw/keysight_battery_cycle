@@ -442,9 +442,7 @@ class ProfileSequenceWidget extends HookWidget {
                           width: 4,
                         ),
                         ElevatedButton(
-                          onPressed: (dataTableSelectedIndex.value == -1)
-                              ? null
-                              : () {},
+                          onPressed: null,
                           child: Text("Edit"),
                           style: ElevatedButton.styleFrom(
                             onSurface: Colors.grey,
