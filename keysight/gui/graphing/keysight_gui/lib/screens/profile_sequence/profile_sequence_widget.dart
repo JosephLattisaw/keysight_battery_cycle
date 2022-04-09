@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:keysight_gui/screens/profile_sequence/add_sequence_step_widget.dart';
+import 'package:keysight_gui/screens/profile_sequence/add_sequence_test_widget.dart';
 import 'package:keysight_gui/screens/profile_sequence/sequence_list_view.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:keysight_gui/screens/profile_sequence/sequence_step_table.dart';
@@ -95,6 +96,50 @@ class ProfileSequenceWidget extends HookWidget {
 
   void addTableStep(List<dynamic> step) {
     table.value = List.from(table.value)..add(step);
+  }
+
+  void addTableTest(List<dynamic> test) {
+    table.value = List.from(table.value);
+
+    List<int> indexes = List.filled(2, 0, growable: true);
+    indexes = getTableIndexes(dataTableSelectedIndex.value);
+
+    table.value.elementAt(indexes.elementAt(0)).elementAt(4).add(test);
+  }
+
+  List<int> getTableIndexes(int index) {
+    List<int> result = List.filled(2, 0, growable: false);
+
+    int mainIndex = 0;
+    int secondIndex = -1;
+    int totalIndex = 0;
+    bool nestedBreak = false;
+
+    for (var element in table.value) {
+      secondIndex = -1;
+
+      if (totalIndex == index) {
+        break;
+      }
+
+      for (var second in element.elementAt(4)) {
+        secondIndex++;
+        totalIndex++;
+        if (totalIndex == index) {
+          nestedBreak = true;
+          break;
+        }
+      }
+
+      if (nestedBreak) break;
+      mainIndex++;
+      totalIndex++;
+    }
+
+    result[0] = mainIndex;
+    result[1] = secondIndex;
+
+    return result;
   }
 
   bool moveUpPossible() {
@@ -299,8 +344,6 @@ class ProfileSequenceWidget extends HookWidget {
                       table: table.value,
                       onIndexChanged: (p0) {
                         dataTableSelectedIndex.value = p0;
-                        print(
-                            "data table index ${dataTableSelectedIndex.value}");
                       },
                     ),
                     SizedBox(
@@ -310,16 +353,19 @@ class ProfileSequenceWidget extends HookWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         ElevatedButton(
-                          onPressed: () => RouterUtility.routerUtility(context,
+                          onPressed: () => RouterUtility.routerUtility(
+                              context,
                               AddSequenceStepWidget(
-                            onSave: (int mode, int seconds, double current,
-                                double voltage) {
-                              print(
-                                  "on save got called yall $mode $seconds $current $voltage");
-                              addTableStep(
-                                  <dynamic>[mode, seconds, current, voltage]);
-                            },
-                          )),
+                                onSave: (int mode, int seconds, double current,
+                                        double voltage) =>
+                                    addTableStep(<dynamic>[
+                                  mode,
+                                  seconds,
+                                  current,
+                                  voltage,
+                                  <dynamic>[]
+                                ]),
+                              )),
                           child: Text("Add Step"),
                         ),
                         SizedBox(
@@ -328,7 +374,22 @@ class ProfileSequenceWidget extends HookWidget {
                         ElevatedButton(
                           onPressed: (dataTableSelectedIndex.value == -1)
                               ? null
-                              : () {},
+                              : () => RouterUtility.routerUtility(context,
+                                      AddSequenceTestWidget(
+                                    onSave: (int testType,
+                                        int testAction,
+                                        double value,
+                                        int timeType,
+                                        int timeLimit) {
+                                      addTableTest(<dynamic>[
+                                        testType,
+                                        testAction,
+                                        value,
+                                        timeType,
+                                        timeLimit
+                                      ]);
+                                    },
+                                  )),
                           child: Text("Add Test"),
                           style: ElevatedButton.styleFrom(
                             onSurface: Colors.grey,

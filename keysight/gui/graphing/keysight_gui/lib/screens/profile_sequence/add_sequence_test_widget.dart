@@ -4,19 +4,31 @@ import 'package:keysight_gui/application_bar.dart';
 import 'package:flutter_spinbox/flutter_spinbox.dart';
 import 'package:keysight_gui/screens/profile_sequence/common_profile_sequence.dart';
 
-class AddSequenceStepWidget extends HookWidget {
-  const AddSequenceStepWidget({Key? key, required this.onSave})
-      : super(key: key);
+class AddSequenceTestWidget extends HookWidget {
+  AddSequenceTestWidget({Key? key, required this.onSave}) : super(key: key) {
+    for (var element in testTypeDescription) {
+      assert(element.length == 2);
+    }
 
-  final void Function(int mode, int seconds, double current, double voltage)
-      onSave;
+    for (var element in timeTypeDescription) {
+      assert(element.length == 2);
+    }
+
+    for (var element in testActionDescriptions) {
+      assert(element.length == 2);
+    }
+  }
+
+  final void Function(int testType, int testAction, double value, int timeType,
+      int timeLimit) onSave;
 
   @override
   Widget build(BuildContext context) {
-    final modeSelection = useState(0);
-    final durationSeconds = useState(1);
-    final currentLimit = useState(0.1);
-    final voltageLimit = useState(2.0);
+    final testType = useState(0);
+    final testAction = useState(0);
+    final value = useState(2.0);
+    final timeType = useState(0);
+    final timeLimit = useState(20);
 
     return Scaffold(
       appBar: PreferredSize(
@@ -35,7 +47,7 @@ class AddSequenceStepWidget extends HookWidget {
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Text(
-                  'Add a Step to a Profile Sequence',
+                  'Add a Test to a Profile Sequence Step',
                   textAlign: TextAlign.left,
                   style: TextStyle(
                     color: Colors.black,
@@ -84,7 +96,7 @@ class AddSequenceStepWidget extends HookWidget {
                               child: Column(
                                 children: [
                                   Text(
-                                    "Select a Mode From the Dropdown to Decide What Action Will Be Taken During This Step",
+                                    "Select a Test From the Dropdown to Decide What Test Will Be Preformed During This Step",
                                     style: TextStyle(
                                         color: Colors.white,
                                         fontSize: 16,
@@ -96,16 +108,17 @@ class AddSequenceStepWidget extends HookWidget {
                                   IntrinsicWidth(
                                     child: DropdownButtonFormField(
                                       items: List.generate(
-                                        modeDescription.length,
+                                        testTypeDescription.length,
                                         (index) => DropdownMenuItem(
-                                          child: Text(
-                                              modeDescription.elementAt(index)),
+                                          child: Text(testTypeDescription
+                                              .elementAt(index)
+                                              .elementAt(0)),
                                           value: index,
                                         ),
                                       ),
-                                      value: modeSelection.value,
+                                      value: testType.value,
                                       onChanged: (int? value) {
-                                        modeSelection.value = value ?? 0;
+                                        testType.value = value ?? 0;
                                       },
                                       dropdownColor: Colors.blueAccent,
                                       decoration: InputDecoration(
@@ -134,101 +147,9 @@ class AddSequenceStepWidget extends HookWidget {
                                     height: 8,
                                   ),
                                   Text(
-                                    "This specifies whether the channel is sinking current, sourcing current, or resting.",
-                                    style: TextStyle(
-                                      color: Colors.grey.shade400,
-                                      fontStyle: FontStyle.italic,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(
-                        left: 16.0,
-                        top: 8.0,
-                        right: 16.0,
-                      ),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade800,
-                          border: Border.all(
-                            width: 2.0,
-                            style: BorderStyle.solid,
-                            color: Colors.grey.shade800,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.5),
-                              spreadRadius: 1,
-                              blurRadius: 7,
-                              offset:
-                                  Offset(0, 3), // changes position of shadow
-                            ),
-                          ],
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.all(10.0),
-                              child: Column(
-                                children: [
-                                  Text(
-                                    "Specify the Duration. (The Maximum Allowable Step Time in Seconds)",
-                                    style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 16,
-                                        fontStyle: FontStyle.italic),
-                                  ),
-                                  SizedBox(
-                                    height: 8,
-                                  ),
-                                  IntrinsicWidth(
-                                    child: SpinBox(
-                                      value: durationSeconds.value.toDouble(),
-                                      min: 1,
-                                      max: 2147483647,
-                                      step: 1.0,
-                                      decimals: 0,
-                                      onChanged: (value) {
-                                        durationSeconds.value = value.toInt();
-                                      },
-                                      incrementIcon: Icon(
-                                        Icons.add,
-                                        color: Colors.black,
-                                      ),
-                                      decrementIcon: Icon(
-                                        Icons.remove,
-                                        color: Colors.black,
-                                      ),
-                                      decoration: InputDecoration(
-                                        enabledBorder: OutlineInputBorder(
-                                          borderSide: BorderSide(
-                                              color: Colors.black, width: 1.4),
-                                        ),
-                                        border: OutlineInputBorder(),
-                                        hintStyle: TextStyle(
-                                          color: Colors.black,
-                                          fontStyle: FontStyle.italic,
-                                        ),
-                                        hintText: "Centered Text",
-                                        filled: true,
-                                        fillColor: Colors.blue,
-                                      ),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    height: 8,
-                                  ),
-                                  Text(
-                                    "Note: that the step can terminate earlier than the duration due to a test condition being met.",
+                                    testTypeDescription
+                                        .elementAt(testType.value)
+                                        .elementAt(1),
                                     style: TextStyle(
                                       color: Colors.grey.shade400,
                                       fontStyle: FontStyle.italic,
@@ -275,7 +196,7 @@ class AddSequenceStepWidget extends HookWidget {
                                           MainAxisAlignment.center,
                                       children: [
                                         Text(
-                                          "Specify the Current Limit for the Step <CC> (Amps)",
+                                          "Specify the Test Action",
                                           style: TextStyle(
                                               color: Colors.white,
                                               fontSize: 16,
@@ -285,50 +206,58 @@ class AddSequenceStepWidget extends HookWidget {
                                           height: 8,
                                         ),
                                         IntrinsicWidth(
-                                          child: SpinBox(
-                                            value: currentLimit.value,
-                                            min: 0.01,
-                                            max: 6.25,
-                                            step: 0.1,
-                                            decimals: 2,
-                                            onChanged: (value) {
-                                              currentLimit.value = value;
+                                          child: DropdownButtonFormField(
+                                            items: List.generate(
+                                              testActionDescriptions.length,
+                                              (index) => DropdownMenuItem(
+                                                child: Text(
+                                                    testActionDescriptions
+                                                        .elementAt(index)
+                                                        .elementAt(0)),
+                                                value: index,
+                                              ),
+                                            ),
+                                            value: testAction.value,
+                                            onChanged: (int? value) {
+                                              testAction.value = value ?? 0;
                                             },
-                                            incrementIcon: Icon(
-                                              Icons.add,
-                                              color: Colors.black,
-                                            ),
-                                            decrementIcon: Icon(
-                                              Icons.remove,
-                                              color: Colors.black,
-                                            ),
+                                            dropdownColor: Colors.blueAccent,
                                             decoration: InputDecoration(
                                               enabledBorder: OutlineInputBorder(
                                                 borderSide: BorderSide(
                                                     color: Colors.black,
                                                     width: 1.4),
+                                                borderRadius:
+                                                    BorderRadius.circular(5),
                                               ),
-                                              border: OutlineInputBorder(),
-                                              hintStyle: TextStyle(
-                                                color: Colors.black,
-                                                fontStyle: FontStyle.italic,
+                                              border: OutlineInputBorder(
+                                                borderSide: BorderSide(
+                                                    color: Colors.blue,
+                                                    width: 2),
+                                                borderRadius:
+                                                    BorderRadius.circular(20),
                                               ),
-                                              hintText: "Centered Text",
                                               filled: true,
-                                              fillColor: Colors.blue,
+                                              fillColor: Colors.blueAccent,
                                             ),
-                                            textAlign: TextAlign.center,
+                                            icon: Icon(
+                                              Icons.arrow_drop_down,
+                                              color: Colors.black,
+                                            ),
                                           ),
                                         ),
                                         SizedBox(
                                           height: 8,
                                         ),
                                         Text(
-                                          "In charge mode, this refers to the current source limit.\n In discharge mode, this refers to the current sink limit.",
+                                          testActionDescriptions
+                                              .elementAt(testAction.value)
+                                              .elementAt(1),
                                           style: TextStyle(
                                             color: Colors.grey.shade400,
                                             fontStyle: FontStyle.italic,
                                           ),
+                                          textAlign: TextAlign.center,
                                         ),
                                       ],
                                     ),
@@ -367,7 +296,7 @@ class AddSequenceStepWidget extends HookWidget {
                                     child: Column(
                                       children: [
                                         Text(
-                                          "Specify the Voltage Limit for the Step <CV> (Volts)",
+                                          "Specify the Value of the Test Type Above",
                                           style: TextStyle(
                                               color: Colors.white,
                                               fontSize: 16,
@@ -378,13 +307,13 @@ class AddSequenceStepWidget extends HookWidget {
                                         ),
                                         IntrinsicWidth(
                                           child: SpinBox(
-                                            value: voltageLimit.value,
+                                            value: value.value,
                                             min: 2.0,
                                             max: 4.5,
                                             decimals: 2,
                                             step: 0.1,
-                                            onChanged: (value) {
-                                              voltageLimit.value = value;
+                                            onChanged: (v) {
+                                              value.value = v;
                                             },
                                             incrementIcon: Icon(
                                               Icons.add,
@@ -416,11 +345,210 @@ class AddSequenceStepWidget extends HookWidget {
                                           height: 8,
                                         ),
                                         Text(
-                                          "The channel will limit the voltage to this value.",
+                                          "All values are in whole units.",
                                           style: TextStyle(
                                             color: Colors.grey.shade400,
                                             fontStyle: FontStyle.italic,
                                           ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    Container(
+                      child: IntrinsicHeight(
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Padding(
+                                padding: const EdgeInsets.only(
+                                    left: 16, top: 8, right: 4),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey.shade800,
+                                    border: Border.all(
+                                      width: 2.0,
+                                      style: BorderStyle.solid,
+                                      color: Colors.grey.shade800,
+                                    ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.5),
+                                        spreadRadius: 1,
+                                        blurRadius: 7,
+                                        offset: Offset(
+                                            0, 3), // changes position of shadow
+                                      ),
+                                    ],
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(10.0),
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Text(
+                                          "Specify a Time Type",
+                                          style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 16,
+                                              fontStyle: FontStyle.italic),
+                                        ),
+                                        SizedBox(
+                                          height: 8,
+                                        ),
+                                        IntrinsicWidth(
+                                          child: DropdownButtonFormField(
+                                            items: List.generate(
+                                              timeTypeDescription.length,
+                                              (index) => DropdownMenuItem(
+                                                child: Text(timeTypeDescription
+                                                    .elementAt(index)
+                                                    .elementAt(0)),
+                                                value: index,
+                                              ),
+                                            ),
+                                            value: timeType.value,
+                                            onChanged: (int? value) {
+                                              timeType.value = value ?? 0;
+                                            },
+                                            dropdownColor: Colors.blueAccent,
+                                            decoration: InputDecoration(
+                                              enabledBorder: OutlineInputBorder(
+                                                borderSide: BorderSide(
+                                                    color: Colors.black,
+                                                    width: 1.4),
+                                                borderRadius:
+                                                    BorderRadius.circular(5),
+                                              ),
+                                              border: OutlineInputBorder(
+                                                borderSide: BorderSide(
+                                                    color: Colors.blue,
+                                                    width: 2),
+                                                borderRadius:
+                                                    BorderRadius.circular(20),
+                                              ),
+                                              filled: true,
+                                              fillColor: Colors.blueAccent,
+                                            ),
+                                            icon: Icon(
+                                              Icons.arrow_drop_down,
+                                              color: Colors.black,
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          height: 8,
+                                        ),
+                                        Text(
+                                          timeTypeDescription
+                                              .elementAt(timeType.value)
+                                              .elementAt(1),
+                                          style: TextStyle(
+                                            color: Colors.grey.shade400,
+                                            fontStyle: FontStyle.italic,
+                                          ),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              child: Padding(
+                                padding: const EdgeInsets.only(
+                                  right: 16.0,
+                                  top: 8.0,
+                                  left: 4,
+                                ),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey.shade800,
+                                    border: Border.all(
+                                      width: 2.0,
+                                      style: BorderStyle.solid,
+                                      color: Colors.grey.shade800,
+                                    ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.5),
+                                        spreadRadius: 1,
+                                        blurRadius: 7,
+                                        offset: Offset(
+                                            0, 3), // changes position of shadow
+                                      ),
+                                    ],
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(10.0),
+                                    child: Column(
+                                      children: [
+                                        Text(
+                                          "Specify a Time Limit for the Step (seconds)",
+                                          style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 16,
+                                              fontStyle: FontStyle.italic),
+                                        ),
+                                        SizedBox(
+                                          height: 8,
+                                        ),
+                                        IntrinsicWidth(
+                                          child: SpinBox(
+                                            value: timeLimit.value.toDouble(),
+                                            min: 20,
+                                            max: 2147483647,
+                                            decimals: 0,
+                                            step: 1,
+                                            onChanged: (value) {
+                                              timeLimit.value = value.toInt();
+                                            },
+                                            incrementIcon: Icon(
+                                              Icons.add,
+                                              color: Colors.black,
+                                            ),
+                                            decrementIcon: Icon(
+                                              Icons.remove,
+                                              color: Colors.black,
+                                            ),
+                                            decoration: InputDecoration(
+                                              enabledBorder: OutlineInputBorder(
+                                                borderSide: BorderSide(
+                                                    color: Colors.black,
+                                                    width: 1.4),
+                                              ),
+                                              border: OutlineInputBorder(),
+                                              hintStyle: TextStyle(
+                                                color: Colors.black,
+                                                fontStyle: FontStyle.italic,
+                                              ),
+                                              hintText: "Centered Text",
+                                              filled: true,
+                                              fillColor: Colors.blue,
+                                            ),
+                                            textAlign: TextAlign.center,
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          height: 8,
+                                        ),
+                                        Text(
+                                          "A minimum of 20 seconds is required for the step to\ncomplete the initial setup procedure.",
+                                          style: TextStyle(
+                                            color: Colors.grey.shade400,
+                                            fontStyle: FontStyle.italic,
+                                          ),
+                                          textAlign: TextAlign.center,
                                         ),
                                       ],
                                     ),
@@ -441,8 +569,8 @@ class AddSequenceStepWidget extends HookWidget {
                         children: [
                           ElevatedButton(
                             onPressed: () {
-                              onSave(modeSelection.value, durationSeconds.value,
-                                  currentLimit.value, voltageLimit.value);
+                              onSave(testType.value, testAction.value,
+                                  value.value, timeType.value, timeLimit.value);
                               Navigator.of(context).maybePop();
                             },
                             child: Text("Save"),
