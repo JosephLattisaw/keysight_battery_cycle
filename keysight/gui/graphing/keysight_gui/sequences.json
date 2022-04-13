@@ -1,0 +1,78 @@
+{
+    "api": "1",
+    "jhggjh": {
+        "serial_number": "",
+        "comments": "",
+        "steps": {
+            "0": {
+                "mode": "0",
+                "seconds": "1",
+                "current": "0.10000000000000001",
+                "voltage": "2"
+            }
+        }
+    },
+    "jsdfsfd": {
+        "serial_number": "asdf",
+        "comments": "asdds",
+        "steps": {
+            "0": {
+                "mode": "0",
+                "seconds": "1",
+                "current": "0.10000000000000001",
+                "voltage": "2"
+            }
+        }
+    },
+    "jodsf": {
+        "serial_number": "2141",
+        "comments": "addditional",
+        "steps": {
+            "0": {
+                "mode": "0",
+                "seconds": "1",
+                "current": "0.10000000000000001",
+                "voltage": "2"
+            }
+        }
+    },
+    "joe": {
+        "serial_number": "",
+        "comments": "",
+        "steps": {
+            "0": {
+                "mode": "0",
+                "seconds": "1",
+                "current": "0.10000000000000001",
+                "voltage": "2"
+            },
+            "1": {
+                "mode": "0",
+                "seconds": "1",
+                "current": "0.10000000000000001",
+                "voltage": "2"
+            },
+            "2": {
+                "mode": "0",
+                "seconds": "1",
+                "current": "0.10000000000000001",
+                "voltage": "2"
+            },
+            "3": {
+                "mode": "0",
+                "seconds": "1",
+                "current": "0.10000000000000001",
+                "voltage": "2",
+                "tests": {
+                    "0": {
+                        "test_type": "0",
+                        "test_action": "0",
+                        "value": "2",
+                        "time_type": "0",
+                        "time_limit": "20"
+                    }
+                }
+            }
+        }
+    }
+}

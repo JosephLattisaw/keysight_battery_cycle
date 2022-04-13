@@ -1,3 +1,4 @@
+import 'package:ffi/src/utf8.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:keysight_gui/screens/profile_sequence/add_sequence_step_widget.dart';
@@ -5,8 +6,9 @@ import 'package:keysight_gui/screens/profile_sequence/add_sequence_test_widget.d
 import 'package:keysight_gui/screens/profile_sequence/sequence_list_view.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:keysight_gui/screens/profile_sequence/sequence_step_table.dart';
-import 'package:keysight_gui/home_page.dart';
 import 'package:keysight_gui/router_utility.dart';
+import 'package:keysight_gui/keysight_c_api.dart';
+import 'package:provider/provider.dart';
 
 class ProfileSequenceWidget extends HookWidget {
   late ValueNotifier<List<String>> sequenceList;
@@ -24,6 +26,8 @@ class ProfileSequenceWidget extends HookWidget {
 
   late ValueNotifier<List<List<dynamic>>> table;
   late ValueNotifier<int> dataTableSelectedIndex;
+
+  late KeysightCAPI backend;
 
   void addNewSequence() {
     sequenceList.value = List.from(sequenceList.value)..add("New Profile");
@@ -74,6 +78,26 @@ class ProfileSequenceWidget extends HookWidget {
       ..[index] = cellTextController.text;
     commentsTextList.value = List.from(commentsTextList.value)
       ..[index] = commentsTextController.text;
+
+    backend.startSaveSequence(
+        sequenceTextController.text.toNativeUtf8(),
+        cellTextController.text.toNativeUtf8(),
+        commentsTextController.text.toNativeUtf8());
+
+    for (int i = 0; i < table.value.length; i++) {
+      List<dynamic> step = table.value.elementAt(i);
+      backend.addSaveSequenceStep(step.elementAt(0), step.elementAt(1),
+          step.elementAt(2), step.elementAt(3));
+
+      List<dynamic> tests = step.elementAt(4);
+      for (int k = 0; k < tests.length; k++) {
+        List<dynamic> t = tests.elementAt(k);
+        backend.addSaveSequenceTest(t.elementAt(0), t.elementAt(1),
+            t.elementAt(2), t.elementAt(3), t.elementAt(4));
+      }
+    }
+
+    backend.finishSaveSequence();
 
     refreshSequencePage();
   }
@@ -229,6 +253,8 @@ class ProfileSequenceWidget extends HookWidget {
     dataTableSelectedIndex = useState(-1);
 
     table = useState(<List<dynamic>>[]);
+
+    backend = Provider.of<KeysightCAPI>(context, listen: false);
 
     return Container(
       child: Row(
