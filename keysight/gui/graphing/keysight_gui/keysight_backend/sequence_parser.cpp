@@ -107,7 +107,7 @@ void SequenceParser::delete_sequence(std::string name) {
         LOG_ERR << e.what();
     }
 
-    property_tree.erase("sequences." + name);
+    property_tree.get_child("sequences").erase(name);
 
     boost::property_tree::json_parser::write_json("sequences.json", property_tree);
 }
@@ -125,7 +125,7 @@ void SequenceParser::finish_save_sequence() {
     property_tree.put("api", 1.0);
 
     // delete the node (because we are overwriting it)
-    property_tree.erase("sequences." + last_started_saved_sequence);
+    property_tree.get_child("sequences").erase(last_started_saved_sequence);
 
     // first we're going to get the sequences info
     auto info = std::any_cast<sequence_info_type>(sequences_info.at(last_started_saved_sequence));
