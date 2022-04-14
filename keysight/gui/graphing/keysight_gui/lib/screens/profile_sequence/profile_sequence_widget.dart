@@ -19,27 +19,36 @@ class ProfileSequenceWidget extends HookWidget {
 
   late ValueNotifier<int> selectedSequence;
 
-  late List<SequenceBuilderKeepAliveClient> sequenceWidgets =
+  late ValueNotifier<List<Widget>> sequenceWidgets;
+  /*=
       <SequenceBuilderKeepAliveClient>[
     SequenceBuilderKeepAliveClient(
       key: UniqueKey(),
+      pageIndex: totalPageCount - 1,
+      currentIndex: 0,
     )
-  ];
+  ];*/
   late PageController pageController = PageController();
 
   late KeysightCAPI backend;
 
+  int totalPageCount = 1; //we start with 1 page
+
   void addNewSequence() {
-    print("add new sequence called");
     sequenceList.value = List.from(sequenceList.value)..add("New Profile");
     sequenceSaveList.value = List.from(sequenceSaveList.value)..add(false);
     sequenceTextList.value = List.from(sequenceTextList.value)..add("");
     cellTextList.value = List.from(cellTextList.value)..add("");
     commentsTextList.value = List.from(commentsTextList.value)..add("");
-    sequenceWidgets.add(SequenceBuilderKeepAliveClient(
+
+    print("add new sequence called ${sequenceList.value.length}");
+    sequenceWidgets.value.add(SequenceBuilderKeepAliveClient(
       key: UniqueKey(),
+      pageIndex: totalPageCount,
+      currentIndex: sequenceList.value.length - 1,
     ));
 
+    totalPageCount++;
     setSequenceIndex(sequenceList.value.length - 1);
   }
 
@@ -52,10 +61,17 @@ class ProfileSequenceWidget extends HookWidget {
     cellTextList.value = List.from(cellTextList.value)..removeAt(index);
     commentsTextList.value = List.from(commentsTextList.value)..removeAt(index);
 
-    SequenceBuilderKeepAliveClient sw = sequenceWidgets.elementAt(index);
+    SequenceBuilderKeepAliveClient sw = sequenceWidgets.value.elementAt(index)
+        as SequenceBuilderKeepAliveClient;
     backend.sequenceRemove(sw.sequenceTextController.text.toNativeUtf8());
     sw.keepAliveUpdate();
-    sequenceWidgets.removeAt(index);
+    sequenceWidgets.value = List.from(sequenceWidgets.value)..removeAt(index);
+
+    for (int i = index; i < sequenceWidgets.value.length; i++) {
+      //print("currentIdx: ${sequenceWidgets.value.elementAt(i).currentIndex}");
+      //sequenceWidgets.value.elementAt(i).currentIndex--;
+      //print("currentIdx: ${sequenceWidgets.value.elementAt(i).currentIndex}");
+    }
 
     //just goto last index if we're deleting last index
     if (index == (length - 1)) {
@@ -68,7 +84,8 @@ class ProfileSequenceWidget extends HookWidget {
   }
 
   void saveSequence(int index) {
-    SequenceBuilderKeepAliveClient sw = sequenceWidgets.elementAt(index);
+    SequenceBuilderKeepAliveClient sw = sequenceWidgets.value.elementAt(index)
+        as SequenceBuilderKeepAliveClient;
     if (sw.sequenceTextController.text.isEmpty) {
       sw.setSequenceTextError(true);
       return;
@@ -109,6 +126,9 @@ class ProfileSequenceWidget extends HookWidget {
   }
 
   void setSequenceIndex(int index) {
+    print("setting sequence to $index");
+    //print(
+    //  "page index ${sequenceWidgets.value.elementAt(index).pageIndex}, cidx ${sequenceWidgets.elementAt(index).pageIndex}");
     selectedSequence.value = index;
     pageController.jumpToPage(index);
   }
@@ -122,6 +142,22 @@ class ProfileSequenceWidget extends HookWidget {
     commentsTextList = useState(<String>[""]);
 
     sequenceSaveList = useState(<bool>[false]);
+
+    sequenceWidgets = useState(<Widget>[
+      SequenceBuilderKeepAliveClient(
+        key: UniqueKey(),
+        pageIndex: totalPageCount - 1,
+        currentIndex: 0,
+      )
+    ]);
+/*=
+      <SequenceBuilderKeepAliveClient>[
+    SequenceBuilderKeepAliveClient(
+      key: UniqueKey(),
+      pageIndex: totalPageCount - 1,
+      currentIndex: 0,
+    )
+  ];*/
 
     useMemoized(() {
       pageController = PageController(initialPage: 0, keepPage: false);
@@ -201,7 +237,7 @@ class ProfileSequenceWidget extends HookWidget {
           Expanded(
             flex: 3,
             child: PageView(
-              children: sequenceWidgets,
+              children: sequenceWidgets.value,
               controller: pageController,
               onPageChanged: (int index) {},
             ),
@@ -213,7 +249,12 @@ class ProfileSequenceWidget extends HookWidget {
 }
 
 class SequenceBuilderKeepAliveClient extends StatefulWidget {
-  SequenceBuilderKeepAliveClient({Key? key}) : super(key: key);
+  SequenceBuilderKeepAliveClient(
+      {Key? key, required this.pageIndex, required this.currentIndex})
+      : super(key: key);
+
+  int pageIndex;
+  int currentIndex;
 
   final TextEditingController sequenceTextController = TextEditingController();
   final TextEditingController cellTextController = TextEditingController();
