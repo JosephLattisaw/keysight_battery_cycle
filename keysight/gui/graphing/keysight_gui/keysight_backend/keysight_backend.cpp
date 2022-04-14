@@ -12,14 +12,16 @@
 #define LOG_OUT LogOut("keysight backend")
 #define LOG_ERR LogOut("keysight backend")
 
+using work_guard_type = boost::asio::executor_work_guard<boost::asio::io_context::executor_type>;
+
 namespace {
 // These are needed for the actual backend
 // Creating an actual object within frontend is overtly complicated and still being developed within
 // the language itself. No one should be accessing these outside of the library itself
 boost::asio::io_service io_service;
-std::shared_ptr<Backend> backend;
+Backend *backend = nullptr;
 
-void print_backend_doesnt_exist_error() { LOG_ERR << "backend: backend object doesn't exist"; }
+void print_backend_doesnt_exist_error() { LOG_ERR << "backend: backend object doesn't exist "; }
 }  // namespace
 
 extern "C" {
@@ -48,6 +50,9 @@ void add_save_sequence_test(int test_type, int test_action, double value, int ti
 }
 
 void finish_save_sequence() {
+    std::thread::id this_id = std::this_thread::get_id();
+    std::cout << "this thread: " << this_id << std::endl;
+
     if (backend) {
         backend->sequence_parser->finish_save_sequence();
     } else
@@ -56,9 +61,26 @@ void finish_save_sequence() {
 
 void create_backend(bool using_dart = false) {
     if (!backend)
-        backend = std::make_shared<Backend>();
+        // backend = std::make_shared<Backend>(io_service);
+        backend = new Backend(io_service);
     else
         print_backend_doesnt_exist_error();
+}
+
+void sequence_remove(const char *name) {
+    if (backend) {
+        LOG_OUT << "seq remove works";
+        backend->sequence_parser->delete_sequence(name);
+    } else
+        print_backend_doesnt_exist_error();
+}
+
+void run_service() {
+    std::thread t([&] {
+        // work_guard_type work_guard(io_service.get_executor());
+        io_service.run();
+    });
+    t.detach();
 }
 }
 

@@ -19,12 +19,11 @@ class ProfileSequenceWidget extends HookWidget {
 
   late ValueNotifier<int> selectedSequence;
 
-  late List<Widget> sequenceWidgets = <Widget>[
+  late List<SequenceBuilderKeepAliveClient> sequenceWidgets =
+      <SequenceBuilderKeepAliveClient>[
     SequenceBuilderKeepAliveClient(
-        key: UniqueKey(),
-        sequenceBuilderWidget: SequenceBuilderWidget(
-          key: GlobalKey(),
-        ))
+      key: UniqueKey(),
+    )
   ];
   late PageController pageController = PageController();
 
@@ -38,60 +37,63 @@ class ProfileSequenceWidget extends HookWidget {
     cellTextList.value = List.from(cellTextList.value)..add("");
     commentsTextList.value = List.from(commentsTextList.value)..add("");
     sequenceWidgets.add(SequenceBuilderKeepAliveClient(
-        key: UniqueKey(),
-        sequenceBuilderWidget: SequenceBuilderWidget(key: GlobalKey())));
+      key: UniqueKey(),
+    ));
 
     setSequenceIndex(sequenceList.value.length - 1);
-
-    refreshSequencePage();
   }
 
   void deleteSequence(int index) {
+    print("deleting sequence $index");
     int length = sequenceList.value.length;
     sequenceList.value = List.from(sequenceList.value)..removeAt(index);
     sequenceSaveList.value = List.from(sequenceSaveList.value)..removeAt(index);
     sequenceTextList.value = List.from(sequenceTextList.value)..removeAt(index);
     cellTextList.value = List.from(cellTextList.value)..removeAt(index);
     commentsTextList.value = List.from(commentsTextList.value)..removeAt(index);
+
+    SequenceBuilderKeepAliveClient sw = sequenceWidgets.elementAt(index);
+    backend.sequenceRemove(sw.sequenceTextController.text.toNativeUtf8());
+    sw.keepAliveUpdate();
     sequenceWidgets.removeAt(index);
 
     //just goto last index if we're deleting last index
     if (index == (length - 1)) {
-      selectedSequence.value = sequenceList.value.length - 1;
-    }
+      setSequenceIndex(sequenceList.value.length - 1);
+    } else
+      setSequenceIndex(index);
 
     //never want the list to be completey empty
     if (sequenceList.value.isEmpty) addNewSequence();
-
-    refreshSequencePage();
   }
 
   void saveSequence(int index) {
-    /*if (sequenceTextController.text.isEmpty) {
-      sequenceTextError.value = true;
+    SequenceBuilderKeepAliveClient sw = sequenceWidgets.elementAt(index);
+    if (sw.sequenceTextController.text.isEmpty) {
+      sw.setSequenceTextError(true);
       return;
-    } else if (sequenceTextError.value) {
-      sequenceTextError.value = false;
+    } else if (sw.sequenceTextError) {
+      sw.setSequenceTextError(false);
     }
 
     //we made it to a save
     sequenceSaveList.value = List.from(sequenceSaveList.value)..[index] = true;
     sequenceList.value = List.from(sequenceList.value)
-      ..[index] = sequenceTextController.text;
+      ..[index] = sw.sequenceTextController.text;
     sequenceTextList.value = List.from(sequenceTextList.value)
-      ..[index] = sequenceTextController.text;
+      ..[index] = sw.sequenceTextController.text;
     cellTextList.value = List.from(cellTextList.value)
-      ..[index] = cellTextController.text;
+      ..[index] = sw.cellTextController.text;
     commentsTextList.value = List.from(commentsTextList.value)
-      ..[index] = commentsTextController.text;
+      ..[index] = sw.commentsTextController.text;
 
     backend.startSaveSequence(
-        sequenceTextController.text.toNativeUtf8(),
-        cellTextController.text.toNativeUtf8(),
-        commentsTextController.text.toNativeUtf8());
+        sw.sequenceTextController.text.toNativeUtf8(),
+        sw.cellTextController.text.toNativeUtf8(),
+        sw.commentsTextController.text.toNativeUtf8());
 
-    for (int i = 0; i < table.value.length; i++) {
-      List<dynamic> step = table.value.elementAt(i);
+    for (int i = 0; i < sw.table.length; i++) {
+      List<dynamic> step = sw.table.elementAt(i);
       backend.addSaveSequenceStep(step.elementAt(0), step.elementAt(1),
           step.elementAt(2), step.elementAt(3));
 
@@ -104,25 +106,11 @@ class ProfileSequenceWidget extends HookWidget {
     }
 
     backend.finishSaveSequence();
-
-    refreshSequencePage();*/
-  }
-
-  void refreshSequencePage() {
-    /*sequenceTextError.value = false;
-
-    sequenceTextController.text =
-        sequenceTextList.value.elementAt(selectedSequence.value);
-    cellTextController.text =
-        cellTextList.value.elementAt(selectedSequence.value);
-    commentsTextController.text =
-        commentsTextList.value.elementAt(selectedSequence.value);*/
   }
 
   void setSequenceIndex(int index) {
     selectedSequence.value = index;
     pageController.jumpToPage(index);
-    refreshSequencePage();
   }
 
   @override
@@ -136,13 +124,11 @@ class ProfileSequenceWidget extends HookWidget {
     sequenceSaveList = useState(<bool>[false]);
 
     useMemoized(() {
-      print("how often is this happenind");
-      pageController = PageController();
+      pageController = PageController(initialPage: 0, keepPage: false);
     });
 
     backend = Provider.of<KeysightCAPI>(context, listen: false);
 
-    print("profile sequence widget being redrawn");
     return Container(
       child: Row(
         children: [
@@ -183,10 +169,13 @@ class ProfileSequenceWidget extends HookWidget {
                           ),
                           SizedBox(width: 8),
                           ElevatedButton(
-                            onPressed: () =>
-                                deleteSequence(selectedSequence.value),
+                            onPressed: !sequenceSaveList.value
+                                    .elementAt(selectedSequence.value)
+                                ? null
+                                : () => deleteSequence(selectedSequence.value),
                             style: ElevatedButton.styleFrom(
                               primary: Colors.red,
+                              onSurface: Colors.grey,
                             ),
                             child: Text("Delete"),
                           ),
@@ -224,40 +213,58 @@ class ProfileSequenceWidget extends HookWidget {
 }
 
 class SequenceBuilderKeepAliveClient extends StatefulWidget {
-  const SequenceBuilderKeepAliveClient(
-      {Key? key, required this.sequenceBuilderWidget})
-      : super(key: key);
+  SequenceBuilderKeepAliveClient({Key? key}) : super(key: key);
 
-  final SequenceBuilderWidget sequenceBuilderWidget;
+  final TextEditingController sequenceTextController = TextEditingController();
+  final TextEditingController cellTextController = TextEditingController();
+  final TextEditingController commentsTextController = TextEditingController();
+  late _SequenceBuilderKeepAliveClientState client;
+
+  void setSequenceTextError(bool flag) {
+    sequenceTextError = flag;
+    client.refresh();
+  }
+
+  void keepAliveUpdate() {
+    wantKeepAlive = false;
+    client.keepAliveUpdate();
+  }
+
+  bool sequenceTextError = false;
+
+  bool wantKeepAlive = true;
+
+  List<List<dynamic>> table = <List<dynamic>>[];
 
   @override
-  _SequenceBuilderKeepAliveClientState createState() =>
-      _SequenceBuilderKeepAliveClientState();
+  _SequenceBuilderKeepAliveClientState createState() {
+    client = _SequenceBuilderKeepAliveClientState();
+    return client;
+  }
 }
 
 class _SequenceBuilderKeepAliveClientState
     extends State<SequenceBuilderKeepAliveClient>
     with AutomaticKeepAliveClientMixin<SequenceBuilderKeepAliveClient> {
-  final TextEditingController sequenceTextController = TextEditingController();
-  final TextEditingController cellTextController = TextEditingController();
-  final TextEditingController commentsTextController = TextEditingController();
-
   int dataTableSelectedIndex = -1;
-  bool sequenceTextError = false;
 
-  List<List<dynamic>> table = <List<dynamic>>[];
+  void refresh() {
+    setState(() {});
+  }
 
   void addTableStep(List<dynamic> step) {
-    table = List.from(table)..add(step);
+    setState(() {
+      widget.table.add(step);
+    });
   }
 
   void addTableTest(List<dynamic> test) {
-    table = List.from(table);
+    setState(() {
+      List<int> indexes = List.filled(2, 0, growable: true);
+      indexes = getTableIndexes(dataTableSelectedIndex);
 
-    List<int> indexes = List.filled(2, 0, growable: true);
-    indexes = getTableIndexes(dataTableSelectedIndex);
-
-    table.elementAt(indexes.elementAt(0)).elementAt(4).add(test);
+      widget.table.elementAt(indexes.elementAt(0)).elementAt(4).add(test);
+    });
   }
 
   List<int> getTableIndexes(int index) {
@@ -268,7 +275,7 @@ class _SequenceBuilderKeepAliveClientState
     int totalIndex = 0;
     bool nestedBreak = false;
 
-    for (var element in table) {
+    for (var element in widget.table) {
       secondIndex = -1;
 
       if (totalIndex == index) {
@@ -293,6 +300,10 @@ class _SequenceBuilderKeepAliveClientState
     result[1] = secondIndex;
 
     return result;
+  }
+
+  void keepAliveUpdate() {
+    updateKeepAlive();
   }
 
   bool moveUpPossible() {
@@ -320,7 +331,7 @@ class _SequenceBuilderKeepAliveClientState
       result = false;
     } else if (mapping.elementAt(1) >= 0) {
       result = false;
-    } else if (mapping.elementAt(0) < table.length - 1) {
+    } else if (mapping.elementAt(0) < widget.table.length - 1) {
       result = true;
     } else {
       result = false;
@@ -330,44 +341,47 @@ class _SequenceBuilderKeepAliveClientState
   }
 
   void moveUp() {
-    List<int> mapping = getTableIndexes(dataTableSelectedIndex);
+    setState(() {
+      List<int> mapping = getTableIndexes(dataTableSelectedIndex);
 
-    if (mapping.elementAt(1) < 0) {
-      table = List.from(table);
-      dynamic removedItem = table.elementAt(mapping.elementAt(0));
-      table.removeAt(mapping.elementAt(0));
-      table.insert(mapping.elementAt(0) - 1, removedItem);
-    }
+      if (mapping.elementAt(1) < 0) {
+        dynamic removedItem = widget.table.elementAt(mapping.elementAt(0));
+        widget.table.removeAt(mapping.elementAt(0));
+        widget.table.insert(mapping.elementAt(0) - 1, removedItem);
+      }
+    });
   }
 
   void moveDown() {
-    List<int> mapping = getTableIndexes(dataTableSelectedIndex);
+    setState(() {
+      List<int> mapping = getTableIndexes(dataTableSelectedIndex);
 
-    if (mapping.elementAt(1) < 0) {
-      table = List.from(table);
-      dynamic removedItem = table.elementAt(mapping.elementAt(0));
-      table.removeAt(mapping.elementAt(0));
-      table.insert(mapping.elementAt(0) + 1, removedItem);
-    }
+      if (mapping.elementAt(1) < 0) {
+        widget.table = List.from(widget.table);
+        dynamic removedItem = widget.table.elementAt(mapping.elementAt(0));
+        widget.table.removeAt(mapping.elementAt(0));
+        widget.table.insert(mapping.elementAt(0) + 1, removedItem);
+      }
+    });
   }
 
   void deleteStep() {
-    List<int> mapping = getTableIndexes(dataTableSelectedIndex);
+    setState(() {
+      List<int> mapping = getTableIndexes(dataTableSelectedIndex);
 
-    if (mapping.elementAt(1) >= 0) {
-      table = List.from(table)
-        ..elementAt(mapping.elementAt(0))
-            .elementAt(4)
-            .removeAt(mapping.elementAt(1));
-    } else {
-      table = List.from(table)..removeAt(mapping.elementAt(0));
-    }
+      if (mapping.elementAt(1) >= 0) {
+        widget.table = List.from(widget.table)
+          ..elementAt(mapping.elementAt(0))
+              .elementAt(4)
+              .removeAt(mapping.elementAt(1));
+      } else {
+        widget.table = List.from(widget.table)..removeAt(mapping.elementAt(0));
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    print("this being rebuilt ${widget.key} ${sequenceTextController.text}");
-
     super.build(context);
     return Container(
       height: double.infinity,
@@ -381,7 +395,7 @@ class _SequenceBuilderKeepAliveClientState
                 Expanded(
                   flex: 3,
                   child: TextField(
-                    controller: sequenceTextController,
+                    controller: widget.sequenceTextController,
                     decoration: InputDecoration(
                       enabledBorder: OutlineInputBorder(
                         borderSide: BorderSide(color: Colors.white),
@@ -391,7 +405,7 @@ class _SequenceBuilderKeepAliveClientState
                       hintStyle: TextStyle(
                           color: Colors.grey.shade500,
                           fontStyle: FontStyle.italic),
-                      errorText: sequenceTextError
+                      errorText: widget.sequenceTextError
                           ? "A Name of a Sequence Must be Given"
                           : null,
                       filled: true,
@@ -413,7 +427,7 @@ class _SequenceBuilderKeepAliveClientState
                 Expanded(
                   flex: 3,
                   child: TextField(
-                    controller: cellTextController,
+                    controller: widget.cellTextController,
                     decoration: InputDecoration(
                       enabledBorder: OutlineInputBorder(
                         borderSide: BorderSide(color: Colors.white),
@@ -435,7 +449,7 @@ class _SequenceBuilderKeepAliveClientState
               height: 12,
             ),
             TextField(
-              controller: commentsTextController,
+              controller: widget.commentsTextController,
               decoration: InputDecoration(
                 enabledBorder: OutlineInputBorder(
                   borderSide: BorderSide(color: Colors.white),
@@ -453,9 +467,11 @@ class _SequenceBuilderKeepAliveClientState
               height: 12,
             ),
             SequenceStepTable(
-              table: table,
+              table: widget.table,
               onIndexChanged: (p0) {
-                dataTableSelectedIndex = p0;
+                setState(() {
+                  dataTableSelectedIndex = p0;
+                });
               },
             ),
             SizedBox(
@@ -549,7 +565,6 @@ class _SequenceBuilderKeepAliveClientState
                   onPressed: (dataTableSelectedIndex == -1)
                       ? null
                       : () {
-                          print("does this happen?");
                           deleteStep();
                         },
                   child: Text("Delete Step"),
@@ -568,357 +583,5 @@ class _SequenceBuilderKeepAliveClientState
   }
 
   @override
-  bool get wantKeepAlive => true;
-}
-
-class SequenceBuilderWidget extends HookWidget {
-  SequenceBuilderWidget({Key? key}) : super(key: key) {
-    print("sqb being rebuilt");
-  }
-
-  //text controllers
-  late TextEditingController sequenceTextController;
-  late TextEditingController cellTextController;
-  late TextEditingController commentsTextController;
-
-  late ValueNotifier<int> dataTableSelectedIndex;
-  late ValueNotifier<bool> sequenceTextError;
-
-  late ValueNotifier<List<List<dynamic>>> table;
-
-  void addTableStep(List<dynamic> step) {
-    table.value = List.from(table.value)..add(step);
-  }
-
-  void addTableTest(List<dynamic> test) {
-    table.value = List.from(table.value);
-
-    List<int> indexes = List.filled(2, 0, growable: true);
-    indexes = getTableIndexes(dataTableSelectedIndex.value);
-
-    table.value.elementAt(indexes.elementAt(0)).elementAt(4).add(test);
-  }
-
-  List<int> getTableIndexes(int index) {
-    List<int> result = List.filled(2, 0, growable: false);
-
-    int mainIndex = 0;
-    int secondIndex = -1;
-    int totalIndex = 0;
-    bool nestedBreak = false;
-
-    for (var element in table.value) {
-      secondIndex = -1;
-
-      if (totalIndex == index) {
-        break;
-      }
-
-      for (var second in element.elementAt(4)) {
-        secondIndex++;
-        totalIndex++;
-        if (totalIndex == index) {
-          nestedBreak = true;
-          break;
-        }
-      }
-
-      if (nestedBreak) break;
-      mainIndex++;
-      totalIndex++;
-    }
-
-    result[0] = mainIndex;
-    result[1] = secondIndex;
-
-    return result;
-  }
-
-  bool moveUpPossible() {
-    bool result = false;
-
-    List<int> mapping = getTableIndexes(dataTableSelectedIndex.value);
-
-    if (mapping.elementAt(1) >= 0) {
-      result = false;
-    } else if (dataTableSelectedIndex.value <= 0) {
-      result = false;
-    } else {
-      result = true;
-    }
-
-    return result;
-  }
-
-  bool moveDownPossible() {
-    bool result = false;
-
-    List<int> mapping = getTableIndexes(dataTableSelectedIndex.value);
-
-    if (dataTableSelectedIndex.value < 0) {
-      result = false;
-    } else if (mapping.elementAt(1) >= 0) {
-      result = false;
-    } else if (mapping.elementAt(0) < table.value.length - 1) {
-      result = true;
-    } else {
-      result = false;
-    }
-
-    return result;
-  }
-
-  void moveUp() {
-    List<int> mapping = getTableIndexes(dataTableSelectedIndex.value);
-
-    if (mapping.elementAt(1) < 0) {
-      table.value = List.from(table.value);
-      dynamic removedItem = table.value.elementAt(mapping.elementAt(0));
-      table.value.removeAt(mapping.elementAt(0));
-      table.value.insert(mapping.elementAt(0) - 1, removedItem);
-    }
-  }
-
-  void moveDown() {
-    List<int> mapping = getTableIndexes(dataTableSelectedIndex.value);
-
-    if (mapping.elementAt(1) < 0) {
-      table.value = List.from(table.value);
-      dynamic removedItem = table.value.elementAt(mapping.elementAt(0));
-      table.value.removeAt(mapping.elementAt(0));
-      table.value.insert(mapping.elementAt(0) + 1, removedItem);
-    }
-  }
-
-  void deleteStep() {
-    List<int> mapping = getTableIndexes(dataTableSelectedIndex.value);
-
-    if (mapping.elementAt(1) >= 0) {
-      table.value = List.from(table.value)
-        ..elementAt(mapping.elementAt(0))
-            .elementAt(4)
-            .removeAt(mapping.elementAt(1));
-    } else {
-      table.value = List.from(table.value)..removeAt(mapping.elementAt(0));
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    sequenceTextController = useTextEditingController();
-    cellTextController = useTextEditingController();
-    commentsTextController = useTextEditingController();
-
-    sequenceTextError = useState<bool>(false);
-    dataTableSelectedIndex = useState(-1);
-
-    table = useState(<List<dynamic>>[]);
-
-    print(
-        "sqb being redrawn text: ${sequenceTextController.text} $key $dataTableSelectedIndex");
-
-    useMemoized(() {
-      print("sqb widget memoized again");
-    });
-
-    return Expanded(
-      flex: 3,
-      child: Container(
-        height: double.infinity,
-        color: Colors.grey.shade900,
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    flex: 3,
-                    child: TextField(
-                      controller: sequenceTextController,
-                      decoration: InputDecoration(
-                        enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.white),
-                        ),
-                        border: OutlineInputBorder(),
-                        hintText: "Enter Name of Profile Sequence",
-                        hintStyle: TextStyle(
-                            color: Colors.grey.shade500,
-                            fontStyle: FontStyle.italic),
-                        errorText: sequenceTextError.value
-                            ? "A Name of a Sequence Must be Given"
-                            : null,
-                        filled: true,
-                        fillColor: Colors.grey.shade800,
-                      ),
-                      inputFormatters: [
-                        FilteringTextInputFormatter.allow(
-                            RegExp("[0-9a-zA-Z_ ]"))
-                      ],
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(
-                height: 12,
-              ),
-              Row(
-                children: [
-                  Expanded(
-                    flex: 3,
-                    child: TextField(
-                      controller: cellTextController,
-                      decoration: InputDecoration(
-                        enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.white),
-                        ),
-                        border: OutlineInputBorder(),
-                        hintText: "Enter Serial Number of Cell",
-                        hintStyle: TextStyle(
-                            color: Colors.grey.shade500,
-                            fontStyle: FontStyle.italic),
-                        filled: true,
-                        fillColor: Colors.grey.shade800,
-                      ),
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(
-                height: 12,
-              ),
-              TextField(
-                controller: commentsTextController,
-                decoration: InputDecoration(
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.white),
-                  ),
-                  border: OutlineInputBorder(),
-                  hintText: "Include any additional comments here.",
-                  hintStyle: TextStyle(
-                      color: Colors.grey.shade500, fontStyle: FontStyle.italic),
-                  filled: true,
-                  fillColor: Colors.grey.shade800,
-                ),
-                style: TextStyle(color: Colors.white),
-              ),
-              SizedBox(
-                height: 12,
-              ),
-              SequenceStepTable(
-                table: table.value,
-                onIndexChanged: (p0) {
-                  dataTableSelectedIndex.value = p0;
-                },
-              ),
-              SizedBox(
-                height: 12,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  ElevatedButton(
-                    onPressed: () => RouterUtility.routerUtility(
-                        context,
-                        AddSequenceStepWidget(
-                          onSave: (int mode, int seconds, double current,
-                                  double voltage) =>
-                              addTableStep(<dynamic>[
-                            mode,
-                            seconds,
-                            current,
-                            voltage,
-                            <dynamic>[]
-                          ]),
-                        )),
-                    child: Text("Add Step"),
-                  ),
-                  SizedBox(
-                    width: 4,
-                  ),
-                  ElevatedButton(
-                    onPressed: (dataTableSelectedIndex.value == -1)
-                        ? null
-                        : () => RouterUtility.routerUtility(context,
-                                AddSequenceTestWidget(
-                              onSave: (int testType, int testAction,
-                                  double value, int timeType, int timeLimit) {
-                                addTableTest(<dynamic>[
-                                  testType,
-                                  testAction,
-                                  value,
-                                  timeType,
-                                  timeLimit
-                                ]);
-                              },
-                            )),
-                    child: Text("Add Test"),
-                    style: ElevatedButton.styleFrom(
-                      onSurface: Colors.grey,
-                    ),
-                  ),
-                  SizedBox(
-                    width: 4,
-                  ),
-                  ElevatedButton(
-                    onPressed: null,
-                    child: Text("Edit"),
-                    style: ElevatedButton.styleFrom(
-                      onSurface: Colors.grey,
-                    ),
-                  ),
-                  SizedBox(
-                    width: 32,
-                  ),
-                  ElevatedButton(
-                    onPressed: !moveUpPossible()
-                        ? null
-                        : () {
-                            moveUp();
-                          },
-                    child: Text("Move Up"),
-                    style: ElevatedButton.styleFrom(
-                      onSurface: Colors.grey,
-                    ),
-                  ),
-                  SizedBox(
-                    width: 4,
-                  ),
-                  ElevatedButton(
-                    onPressed: !moveDownPossible()
-                        ? null
-                        : () {
-                            moveDown();
-                          },
-                    child: Text("Move Down"),
-                    style: ElevatedButton.styleFrom(
-                      onSurface: Colors.grey,
-                    ),
-                  ),
-                  SizedBox(
-                    width: 32,
-                  ),
-                  ElevatedButton(
-                    onPressed: (dataTableSelectedIndex.value == -1)
-                        ? null
-                        : () {
-                            print("does this happen?");
-                            deleteStep();
-                          },
-                    child: Text("Delete Step"),
-                    style: ElevatedButton.styleFrom(
-                      primary: Colors.red,
-                      onSurface: Colors.grey,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+  bool get wantKeepAlive => widget.wantKeepAlive;
 }

@@ -14,7 +14,9 @@ public:
     void add_save_sequence_step(int mode, int seconds, double current, double voltage);
     void add_save_sequence_test(int test_type, int test_action, double value, int time_type, int time_limit);
     void finish_save_sequence();
-    void start_save_sequence(std::string, std::string serial_number, std::string comments);
+    void start_save_sequence(std::string name, std::string serial_number, std::string comments);
+
+    void delete_sequence(std::string name);
 
 private:
     void delete_all_keys(const std::string &name);

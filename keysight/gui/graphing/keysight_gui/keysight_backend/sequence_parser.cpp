@@ -97,6 +97,21 @@ void SequenceParser::add_save_sequence_test(int test_type, int test_action, doub
     }
 }
 
+void SequenceParser::delete_sequence(std::string name) {
+    LOG_OUT << "delete sequence called: " << name;
+
+    boost::property_tree::ptree property_tree;
+    try {
+        boost::property_tree::json_parser::read_json("sequences.json", property_tree);
+    } catch (const boost::property_tree::json_parser::json_parser_error &e) {
+        LOG_ERR << e.what();
+    }
+
+    property_tree.erase(name);
+
+    boost::property_tree::json_parser::write_json("sequences.json", property_tree);
+}
+
 void SequenceParser::finish_save_sequence() {
     LOG_OUT << "finish save sequence called";
     boost::property_tree::ptree property_tree;

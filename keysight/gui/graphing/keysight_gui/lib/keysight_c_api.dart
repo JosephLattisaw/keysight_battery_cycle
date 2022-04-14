@@ -52,7 +52,16 @@ class KeysightCAPI extends ChangeNotifier {
         .lookup<ffi.NativeFunction<Void_Function_FFI>>("finish_save_sequence")
         .asFunction();
 
+    _runService = lib
+        .lookup<ffi.NativeFunction<Void_Function_FFI>>("run_service")
+        .asFunction();
+
+    sequenceRemove = lib
+        .lookup<ffi.NativeFunction<SequenceRemove_FFI>>("sequence_remove")
+        .asFunction();
+
     _createBackend(1);
+    _runService();
   }
 
   late StartSaveSequence_C startSaveSequence;
@@ -60,6 +69,8 @@ class KeysightCAPI extends ChangeNotifier {
   late AddSaveSequenceTest_C addSaveSequenceTest;
   late Void_Function_C finishSaveSequence;
   late CreateBackend_C _createBackend;
+  late Void_Function_C _runService;
+  late SequenceRemove_C sequenceRemove;
 
   static const String _LIBRARY_NAME = 'lib/libkeysight_backend.so';
 }
@@ -93,6 +104,8 @@ typedef AddSaveSequenceTest_FFI = ffi.Void Function(
     ffi.Double value,
     ffi.Int32 timeType,
     ffi.Int32 timeLimit);
-
 typedef AddSaveSequenceTest_C = void Function(
     int testType, int testAction, double value, int timeType, int timeLimit);
+
+typedef SequenceRemove_FFI = ffi.Void Function(ffi.Pointer<Utf8> name);
+typedef SequenceRemove_C = void Function(ffi.Pointer<Utf8> name);
