@@ -19,9 +19,48 @@ namespace {
 // Creating an actual object within frontend is overtly complicated and still being developed within
 // the language itself. No one should be accessing these outside of the library itself
 boost::asio::io_service io_service;
-Backend *backend = nullptr;
+std::shared_ptr<Backend> backend;
 
 void print_backend_doesnt_exist_error() { LOG_ERR << "backend: backend object doesn't exist "; }
+
+static void FreeFinalizer(void *, void *value) { free(value); }
+
+static void post_data_object(std::int64_t port, std::vector<std::uint8_t> data) {
+    void *request_buffer = malloc(sizeof(uint8_t) * data.size());
+    const size_t request_length = sizeof(uint8_t) * data.size();
+    std::copy(data.begin(), data.end(), reinterpret_cast<std::uint8_t *>(request_buffer));
+
+    Dart_CObject dart_object;
+    dart_object.type = Dart_CObject_kExternalTypedData;
+    dart_object.value.as_external_typed_data.type = Dart_TypedData_kUint8;
+    dart_object.value.as_external_typed_data.length = request_length;
+    dart_object.value.as_external_typed_data.data = reinterpret_cast<std::uint8_t *>(request_buffer);
+    dart_object.value.as_external_typed_data.peer = request_buffer;
+    dart_object.value.as_external_typed_data.callback = FreeFinalizer;
+
+    Dart_PostCObject_DL(port, &dart_object);
+}
+
+static void post_data_string(std::int64_t port, std::string str) {
+    Dart_CObject dart_object;
+    dart_object.type = Dart_CObject_kString;
+    dart_object.value.as_string = &str[0];
+    Dart_PostCObject_DL(port, &dart_object);
+}
+
+static void post_data_int(std::int64_t port, int val) {
+    Dart_CObject dart_object;
+    dart_object.type = Dart_CObject_kInt64;
+    dart_object.value.as_int64 = val;
+    Dart_PostCObject_DL(port, &dart_object);
+}
+
+static void post_data_bool(std::int64_t port, bool value) {
+    Dart_CObject dart_object;
+    dart_object.type = Dart_CObject_kBool;
+    dart_object.value.as_bool = value;
+    Dart_PostCObject_DL(port, &dart_object);
+}
 }  // namespace
 
 extern "C" {
@@ -59,10 +98,12 @@ void finish_save_sequence() {
         print_backend_doesnt_exist_error();
 }
 
-void create_backend(bool using_dart = false) {
+void create_backend(bool using_dart = false, std::int64_t load_sequences_port = 0) {
     if (!backend)
-        // backend = std::make_shared<Backend>(io_service);
-        backend = new Backend(io_service);
+        backend = std::make_shared<Backend>(io_service, [&, using_dart, load_sequences_port] {
+            // TODO
+            if (using_dart) post_data_int(load_sequences_port, 5);
+        });
     else
         print_backend_doesnt_exist_error();
 }
@@ -75,9 +116,16 @@ void sequence_remove(const char *name) {
         print_backend_doesnt_exist_error();
 }
 
+void load_all_sequences() {
+    if (backend)
+        backend->sequence_parser->load_all_sequences();
+    else
+        print_backend_doesnt_exist_error();
+}
+
 void run_service() {
     std::thread t([&] {
-        // work_guard_type work_guard(io_service.get_executor());
+        work_guard_type work_guard(io_service.get_executor());
         io_service.run();
     });
     t.detach();

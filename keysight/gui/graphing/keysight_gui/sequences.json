@@ -1,131 +1,92 @@
 {
     "api": "1",
-    "jhggjh": {
-        "serial_number": "",
-        "comments": "",
-        "steps": {
-            "0": {
-                "mode": "0",
-                "seconds": "1",
-                "current": "0.10000000000000001",
-                "voltage": "2"
+    "sequences": {
+        "joe": {
+            "serial_number": "",
+            "comments": "",
+            "steps": {
+                "0": {
+                    "mode": "0",
+                    "seconds": "1",
+                    "current": "0.10000000000000001",
+                    "voltage": "2"
+                },
+                "1": {
+                    "mode": "0",
+                    "seconds": "1",
+                    "current": "0.10000000000000001",
+                    "voltage": "2"
+                },
+                "2": {
+                    "mode": "0",
+                    "seconds": "1",
+                    "current": "0.10000000000000001",
+                    "voltage": "2"
+                },
+                "3": {
+                    "mode": "0",
+                    "seconds": "1",
+                    "current": "0.10000000000000001",
+                    "voltage": "2"
+                },
+                "4": {
+                    "mode": "0",
+                    "seconds": "1",
+                    "current": "0.10000000000000001",
+                    "voltage": "2"
+                },
+                "5": {
+                    "mode": "0",
+                    "seconds": "1",
+                    "current": "0.10000000000000001",
+                    "voltage": "2"
+                }
+            }
+        },
+        "joe1": {
+            "serial_number": "",
+            "comments": "",
+            "steps": {
+                "0": {
+                    "mode": "0",
+                    "seconds": "1",
+                    "current": "0.10000000000000001",
+                    "voltage": "2"
+                },
+                "1": {
+                    "mode": "0",
+                    "seconds": "1",
+                    "current": "0.10000000000000001",
+                    "voltage": "2"
+                },
+                "2": {
+                    "mode": "0",
+                    "seconds": "1",
+                    "current": "0.10000000000000001",
+                    "voltage": "2"
+                },
+                "3": {
+                    "mode": "0",
+                    "seconds": "1",
+                    "current": "0.10000000000000001",
+                    "voltage": "2"
+                },
+                "4": {
+                    "mode": "0",
+                    "seconds": "1",
+                    "current": "0.10000000000000001",
+                    "voltage": "2",
+                    "tests": {
+                        "0": {
+                            "test_type": "0",
+                            "test_action": "0",
+                            "value": "2",
+                            "time_type": "0",
+                            "time_limit": "20"
+                        }
+                    }
+                }
             }
         }
-    },
-    "jsdfsfd": {
-        "serial_number": "asdf",
-        "comments": "asdds",
-        "steps": {
-            "0": {
-                "mode": "0",
-                "seconds": "1",
-                "current": "0.10000000000000001",
-                "voltage": "2"
-            }
-        }
-    },
-    "jodsf": {
-        "serial_number": "2141",
-        "comments": "addditional",
-        "steps": {
-            "0": {
-                "mode": "0",
-                "seconds": "1",
-                "current": "0.10000000000000001",
-                "voltage": "2"
-            }
-        }
-    },
-    "sdfdsf": {
-        "serial_number": "",
-        "comments": ""
-    },
-    "sad": {
-        "serial_number": "",
-        "comments": ""
-    },
-    "fhcvbcv": {
-        "serial_number": "",
-        "comments": ""
-    },
-    "jow": {
-        "serial_number": "",
-        "comments": ""
-    },
-    "asfsdfd": {
-        "serial_number": "",
-        "comments": ""
-    },
-    "xcvvcx": {
-        "serial_number": "",
-        "comments": ""
-    },
-    "gsddfgfd": {
-        "serial_number": "",
-        "comments": ""
-    },
-    "gjhghjjgh": {
-        "serial_number": "",
-        "comments": ""
-    },
-    "cvbbvcvb": {
-        "serial_number": "",
-        "comments": ""
-    },
-    "joe32443": {
-        "serial_number": "",
-        "comments": ""
-    },
-    "jor": {
-        "serial_number": "",
-        "comments": ""
-    },
-    "jkkjhhjk": {
-        "serial_number": "",
-        "comments": ""
-    },
-    "joew": {
-        "serial_number": "",
-        "comments": ""
-    },
-    "saddsadsa": {
-        "serial_number": "",
-        "comments": ""
-    },
-    "sdffsdf": {
-        "serial_number": "",
-        "comments": ""
-    },
-    "sdadsa": {
-        "serial_number": "",
-        "comments": ""
-    },
-    "ghjjhg": {
-        "serial_number": "",
-        "comments": ""
-    },
-    "jhkhjkjh": {
-        "serial_number": "",
-        "comments": ""
-    },
-    "hgjjghjhg": {
-        "serial_number": "",
-        "comments": ""
-    },
-    "joe": {
-        "serial_number": "",
-        "comments": ""
-    },
-    "aaa": {
-        "serial_number": "",
-        "comments": ""
-    },
-    "ccc": {
-        "serial_number": "",
-        "comments": ""
-    },
-    "ddd": {
-        "serial_number": "",
-        "comments": ""
     }
 }

@@ -20,14 +20,7 @@ class ProfileSequenceWidget extends HookWidget {
   late ValueNotifier<int> selectedSequence;
 
   late ValueNotifier<List<Widget>> sequenceWidgets;
-  /*=
-      <SequenceBuilderKeepAliveClient>[
-    SequenceBuilderKeepAliveClient(
-      key: UniqueKey(),
-      pageIndex: totalPageCount - 1,
-      currentIndex: 0,
-    )
-  ];*/
+
   late PageController pageController = PageController();
 
   late KeysightCAPI backend;
@@ -66,12 +59,6 @@ class ProfileSequenceWidget extends HookWidget {
     backend.sequenceRemove(sw.sequenceTextController.text.toNativeUtf8());
     sw.keepAliveUpdate();
     sequenceWidgets.value = List.from(sequenceWidgets.value)..removeAt(index);
-
-    for (int i = index; i < sequenceWidgets.value.length; i++) {
-      //print("currentIdx: ${sequenceWidgets.value.elementAt(i).currentIndex}");
-      //sequenceWidgets.value.elementAt(i).currentIndex--;
-      //print("currentIdx: ${sequenceWidgets.value.elementAt(i).currentIndex}");
-    }
 
     //just goto last index if we're deleting last index
     if (index == (length - 1)) {
@@ -126,9 +113,6 @@ class ProfileSequenceWidget extends HookWidget {
   }
 
   void setSequenceIndex(int index) {
-    print("setting sequence to $index");
-    //print(
-    //  "page index ${sequenceWidgets.value.elementAt(index).pageIndex}, cidx ${sequenceWidgets.elementAt(index).pageIndex}");
     selectedSequence.value = index;
     pageController.jumpToPage(index);
   }
@@ -150,20 +134,13 @@ class ProfileSequenceWidget extends HookWidget {
         currentIndex: 0,
       )
     ]);
-/*=
-      <SequenceBuilderKeepAliveClient>[
-    SequenceBuilderKeepAliveClient(
-      key: UniqueKey(),
-      pageIndex: totalPageCount - 1,
-      currentIndex: 0,
-    )
-  ];*/
-
-    useMemoized(() {
-      pageController = PageController(initialPage: 0, keepPage: false);
-    });
 
     backend = Provider.of<KeysightCAPI>(context, listen: false);
+
+    useMemoized(() {
+      backend.loadAllSequences();
+      pageController = PageController(initialPage: 0, keepPage: false);
+    });
 
     return Container(
       child: Row(

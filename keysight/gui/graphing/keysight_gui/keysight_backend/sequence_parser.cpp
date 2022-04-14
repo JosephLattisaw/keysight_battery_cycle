@@ -42,7 +42,7 @@ enum sequence_test_access_type {
     TIME_LIMIT = 4,
 };
 
-SequenceParser::SequenceParser() {}
+SequenceParser::SequenceParser(LoadSequencesCallback ls_cb) : load_sequences_callback{ls_cb} {}
 
 void SequenceParser::start_save_sequence(std::string name, std::string serial_number, std::string comments) {
     LOG_OUT << "saving sequence called, name: " << name << ", serial number: " << serial_number << ", comments: " << comments;
@@ -107,7 +107,7 @@ void SequenceParser::delete_sequence(std::string name) {
         LOG_ERR << e.what();
     }
 
-    property_tree.erase(name);
+    property_tree.erase("sequences." + name);
 
     boost::property_tree::json_parser::write_json("sequences.json", property_tree);
 }
@@ -116,9 +116,7 @@ void SequenceParser::finish_save_sequence() {
     LOG_OUT << "finish save sequence called";
     boost::property_tree::ptree property_tree;
     try {
-        // boost::property_tree::ini_parser::read_ini("sequences.ini", property_tree);
         boost::property_tree::json_parser::read_json("sequences.json", property_tree);
-        //} catch (const boost::property_tree::ini_parser::ini_parser_error &e) {
     } catch (const boost::property_tree::json_parser::json_parser_error &e) {
         LOG_ERR << e.what();
     }
@@ -127,14 +125,14 @@ void SequenceParser::finish_save_sequence() {
     property_tree.put("api", 1.0);
 
     // delete the node (because we are overwriting it)
-    property_tree.erase(last_started_saved_sequence);
+    property_tree.erase("sequences." + last_started_saved_sequence);
 
     // first we're going to get the sequences info
     auto info = std::any_cast<sequence_info_type>(sequences_info.at(last_started_saved_sequence));
 
     // place the sequences info in the property tree
-    property_tree.put(last_started_saved_sequence + ".serial_number", info.at(sequence_info_access_type::SERIAL_NUMBER));
-    property_tree.put(last_started_saved_sequence + ".comments", info.at(sequence_info_access_type::COMMENTS));
+    property_tree.put("sequences." + last_started_saved_sequence + ".serial_number", info.at(sequence_info_access_type::SERIAL_NUMBER));
+    property_tree.put("sequences." + last_started_saved_sequence + ".comments", info.at(sequence_info_access_type::COMMENTS));
 
     // get the sequences steps
     sequence_step_vector steps;
@@ -152,25 +150,34 @@ void SequenceParser::finish_save_sequence() {
     // placing the steps in the property tree
     for (auto i = 0; i < steps.size(); i++) {
         auto s = steps.at(i);
-        property_tree.put(last_started_saved_sequence + ".steps." + std::to_string(i) + ".mode", s.at(sequence_step_access_type::MODE));
-        property_tree.put(last_started_saved_sequence + ".steps." + std::to_string(i) + ".seconds", s.at(sequence_step_access_type::SECONDS));
-        property_tree.put(last_started_saved_sequence + ".steps." + std::to_string(i) + ".current", s.at(sequence_step_access_type::CURRENT));
-        property_tree.put(last_started_saved_sequence + ".steps." + std::to_string(i) + ".voltage", s.at(sequence_step_access_type::VOLTAGE));
+        property_tree.put("sequences." + last_started_saved_sequence + ".steps." + std::to_string(i) + ".mode",
+                          s.at(sequence_step_access_type::MODE));
+        property_tree.put("sequences." + last_started_saved_sequence + ".steps." + std::to_string(i) + ".seconds",
+                          s.at(sequence_step_access_type::SECONDS));
+        property_tree.put("sequences." + last_started_saved_sequence + ".steps." + std::to_string(i) + ".current",
+                          s.at(sequence_step_access_type::CURRENT));
+        property_tree.put("sequences." + last_started_saved_sequence + ".steps." + std::to_string(i) + ".voltage",
+                          s.at(sequence_step_access_type::VOLTAGE));
 
         if (test_map.find(i) != test_map.end()) {
             auto stv = test_map.at(i);
             for (auto k = 0; k < stv.size(); k++) {
                 auto st = stv.at(k);
-                property_tree.put(last_started_saved_sequence + ".steps." + std::to_string(i) + ".tests." + std::to_string(k) + ".test_type",
-                                  st.at(sequence_test_access_type::TEST_TYPE));
-                property_tree.put(last_started_saved_sequence + ".steps." + std::to_string(i) + ".tests." + std::to_string(k) + ".test_action",
-                                  st.at(sequence_test_access_type::TEST_ACTION));
-                property_tree.put(last_started_saved_sequence + ".steps." + std::to_string(i) + ".tests." + std::to_string(k) + ".value",
-                                  st.at(sequence_test_access_type::VALUE));
-                property_tree.put(last_started_saved_sequence + ".steps." + std::to_string(i) + ".tests." + std::to_string(k) + ".time_type",
-                                  st.at(sequence_test_access_type::TIME_TYPE));
-                property_tree.put(last_started_saved_sequence + ".steps." + std::to_string(i) + ".tests." + std::to_string(k) + ".time_limit",
-                                  st.at(sequence_test_access_type::TIME_LIMIT));
+                property_tree.put(
+                    "sequences." + last_started_saved_sequence + ".steps." + std::to_string(i) + ".tests." + std::to_string(k) + ".test_type",
+                    st.at(sequence_test_access_type::TEST_TYPE));
+                property_tree.put(
+                    "sequences." + last_started_saved_sequence + ".steps." + std::to_string(i) + ".tests." + std::to_string(k) + ".test_action",
+                    st.at(sequence_test_access_type::TEST_ACTION));
+                property_tree.put(
+                    "sequences." + last_started_saved_sequence + ".steps." + std::to_string(i) + ".tests." + std::to_string(k) + ".value",
+                    st.at(sequence_test_access_type::VALUE));
+                property_tree.put(
+                    "sequences." + last_started_saved_sequence + ".steps." + std::to_string(i) + ".tests." + std::to_string(k) + ".time_type",
+                    st.at(sequence_test_access_type::TIME_TYPE));
+                property_tree.put(
+                    "sequences." + last_started_saved_sequence + ".steps." + std::to_string(i) + ".tests." + std::to_string(k) + ".time_limit",
+                    st.at(sequence_test_access_type::TIME_LIMIT));
             }
         }
     }
@@ -200,4 +207,17 @@ void SequenceParser::delete_all_keys(const std::string &name) {
     sequences_info = key_array.at(0);
     sequences_steps = key_array.at(1);
     sequences_tests = key_array.at(2);
+}
+
+void SequenceParser::load_all_sequences() {
+    LOG_OUT << "load all sequences called";
+
+    boost::property_tree::ptree property_tree;
+    try {
+        boost::property_tree::json_parser::read_json("sequences.json", property_tree);
+    } catch (const boost::property_tree::json_parser::json_parser_error &e) {
+        LOG_ERR << e.what();
+    }
+
+    load_sequences_callback();
 }

@@ -60,7 +60,18 @@ class KeysightCAPI extends ChangeNotifier {
         .lookup<ffi.NativeFunction<SequenceRemove_FFI>>("sequence_remove")
         .asFunction();
 
-    _createBackend(1);
+    ReceivePort loadSequencesPort = ReceivePort()
+      ..listen((data) {
+        print("received $data");
+      });
+
+    int loadSequencesNativePort = loadSequencesPort.sendPort.nativePort;
+
+    loadAllSequences = lib
+        .lookup<ffi.NativeFunction<Void_Function_FFI>>("load_all_sequences")
+        .asFunction();
+
+    _createBackend(1, loadSequencesNativePort);
     _runService();
   }
 
@@ -71,6 +82,7 @@ class KeysightCAPI extends ChangeNotifier {
   late CreateBackend_C _createBackend;
   late Void_Function_C _runService;
   late SequenceRemove_C sequenceRemove;
+  late Void_Function_C loadAllSequences;
 
   static const String _LIBRARY_NAME = 'lib/libkeysight_backend.so';
 }
@@ -82,8 +94,8 @@ typedef Void_Function_FFI = ffi.Void Function();
 typedef Void_Function_C = void Function();
 
 //create backend
-typedef CreateBackend_FFI = ffi.Void Function(ffi.Uint8);
-typedef CreateBackend_C = void Function(int);
+typedef CreateBackend_FFI = ffi.Void Function(ffi.Uint8, ffi.Int64);
+typedef CreateBackend_C = void Function(int, int);
 
 //start save sequence
 typedef StartSaveSequence_FFI = ffi.Void Function(ffi.Pointer<Utf8> name,

@@ -2,13 +2,16 @@
 #define SEQUENCE_PARSER_HPP
 
 #include <any>
+#include <functional>
 #include <map>
 #include <string>
 #include <vector>
 
 class SequenceParser {
+    using LoadSequencesCallback = std::function<void()>;
+
 public:
-    SequenceParser();
+    SequenceParser(LoadSequencesCallback load_sequences_callback);
 
     // function set for saving a sequence
     void add_save_sequence_step(int mode, int seconds, double current, double voltage);
@@ -17,6 +20,7 @@ public:
     void start_save_sequence(std::string name, std::string serial_number, std::string comments);
 
     void delete_sequence(std::string name);
+    void load_all_sequences();
 
 private:
     void delete_all_keys(const std::string &name);
@@ -26,6 +30,8 @@ private:
     std::map<std::string, std::any> sequences_steps;
     std::map<std::string, std::any> sequences_tests;
     std::string last_started_saved_sequence;
+
+    LoadSequencesCallback load_sequences_callback;
 };
 
 #endif
