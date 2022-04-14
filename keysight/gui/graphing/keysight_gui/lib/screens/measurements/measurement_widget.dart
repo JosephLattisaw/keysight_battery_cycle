@@ -3,9 +3,13 @@ import 'package:keysight_gui/tab_widget.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
 class MeasurementWidget extends HookWidget {
+  MeasurementWidget({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     final speedComboBoxSelection = useState(0);
+
+    print("Measuremnet key: $key");
 
     return Container(
       child: Padding(

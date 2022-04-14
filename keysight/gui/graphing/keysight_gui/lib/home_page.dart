@@ -61,7 +61,9 @@ class HomePage extends HookWidget {
                     tabWidgets: [
                       InstrumentWidget(),
                       ProfileSequenceWidget(),
-                      MeasurementWidget(),
+                      MeasurementWidget(
+                        key: UniqueKey(),
+                      ),
                       TestWidget(),
                     ],
                   ),
