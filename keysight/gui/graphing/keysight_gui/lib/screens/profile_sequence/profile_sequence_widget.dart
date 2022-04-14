@@ -209,7 +209,6 @@ class ProfileSequenceWidget extends HookWidget {
               ),
             ),
           ),
-          //sequenceWidgets[selectedSequence.value],
           Expanded(
             flex: 3,
             child: PageView(
@@ -370,202 +369,198 @@ class _SequenceBuilderKeepAliveClientState
     print("this being rebuilt ${widget.key} ${sequenceTextController.text}");
 
     super.build(context);
-    return Expanded(
-      flex: 3,
-      child: Container(
-        height: double.infinity,
-        color: Colors.grey.shade900,
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    flex: 3,
-                    child: TextField(
-                      controller: sequenceTextController,
-                      decoration: InputDecoration(
-                        enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.white),
-                        ),
-                        border: OutlineInputBorder(),
-                        hintText: "Enter Name of Profile Sequence",
-                        hintStyle: TextStyle(
-                            color: Colors.grey.shade500,
-                            fontStyle: FontStyle.italic),
-                        errorText: sequenceTextError
-                            ? "A Name of a Sequence Must be Given"
-                            : null,
-                        filled: true,
-                        fillColor: Colors.grey.shade800,
+    return Container(
+      height: double.infinity,
+      color: Colors.grey.shade900,
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  flex: 3,
+                  child: TextField(
+                    controller: sequenceTextController,
+                    decoration: InputDecoration(
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white),
                       ),
-                      inputFormatters: [
-                        FilteringTextInputFormatter.allow(
-                            RegExp("[0-9a-zA-Z_ ]"))
-                      ],
-                      style: TextStyle(color: Colors.white),
+                      border: OutlineInputBorder(),
+                      hintText: "Enter Name of Profile Sequence",
+                      hintStyle: TextStyle(
+                          color: Colors.grey.shade500,
+                          fontStyle: FontStyle.italic),
+                      errorText: sequenceTextError
+                          ? "A Name of a Sequence Must be Given"
+                          : null,
+                      filled: true,
+                      fillColor: Colors.grey.shade800,
                     ),
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp("[0-9a-zA-Z_ ]"))
+                    ],
+                    style: TextStyle(color: Colors.white),
                   ),
-                ],
-              ),
-              SizedBox(
-                height: 12,
-              ),
-              Row(
-                children: [
-                  Expanded(
-                    flex: 3,
-                    child: TextField(
-                      controller: cellTextController,
-                      decoration: InputDecoration(
-                        enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.white),
-                        ),
-                        border: OutlineInputBorder(),
-                        hintText: "Enter Serial Number of Cell",
-                        hintStyle: TextStyle(
-                            color: Colors.grey.shade500,
-                            fontStyle: FontStyle.italic),
-                        filled: true,
-                        fillColor: Colors.grey.shade800,
-                      ),
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(
-                height: 12,
-              ),
-              TextField(
-                controller: commentsTextController,
-                decoration: InputDecoration(
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.white),
-                  ),
-                  border: OutlineInputBorder(),
-                  hintText: "Include any additional comments here.",
-                  hintStyle: TextStyle(
-                      color: Colors.grey.shade500, fontStyle: FontStyle.italic),
-                  filled: true,
-                  fillColor: Colors.grey.shade800,
                 ),
-                style: TextStyle(color: Colors.white),
-              ),
-              SizedBox(
-                height: 12,
-              ),
-              SequenceStepTable(
-                table: table,
-                onIndexChanged: (p0) {
-                  dataTableSelectedIndex = p0;
-                },
-              ),
-              SizedBox(
-                height: 12,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  ElevatedButton(
-                    onPressed: () => RouterUtility.routerUtility(
-                        context,
-                        AddSequenceStepWidget(
-                          onSave: (int mode, int seconds, double current,
-                                  double voltage) =>
-                              addTableStep(<dynamic>[
-                            mode,
-                            seconds,
-                            current,
-                            voltage,
-                            <dynamic>[]
-                          ]),
-                        )),
-                    child: Text("Add Step"),
-                  ),
-                  SizedBox(
-                    width: 4,
-                  ),
-                  ElevatedButton(
-                    onPressed: (dataTableSelectedIndex == -1)
-                        ? null
-                        : () => RouterUtility.routerUtility(context,
-                                AddSequenceTestWidget(
-                              onSave: (int testType, int testAction,
-                                  double value, int timeType, int timeLimit) {
-                                addTableTest(<dynamic>[
-                                  testType,
-                                  testAction,
-                                  value,
-                                  timeType,
-                                  timeLimit
-                                ]);
-                              },
-                            )),
-                    child: Text("Add Test"),
-                    style: ElevatedButton.styleFrom(
-                      onSurface: Colors.grey,
+              ],
+            ),
+            SizedBox(
+              height: 12,
+            ),
+            Row(
+              children: [
+                Expanded(
+                  flex: 3,
+                  child: TextField(
+                    controller: cellTextController,
+                    decoration: InputDecoration(
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
+                      border: OutlineInputBorder(),
+                      hintText: "Enter Serial Number of Cell",
+                      hintStyle: TextStyle(
+                          color: Colors.grey.shade500,
+                          fontStyle: FontStyle.italic),
+                      filled: true,
+                      fillColor: Colors.grey.shade800,
                     ),
+                    style: TextStyle(color: Colors.white),
                   ),
-                  SizedBox(
-                    width: 4,
-                  ),
-                  ElevatedButton(
-                    onPressed: null,
-                    child: Text("Edit"),
-                    style: ElevatedButton.styleFrom(
-                      onSurface: Colors.grey,
-                    ),
-                  ),
-                  SizedBox(
-                    width: 32,
-                  ),
-                  ElevatedButton(
-                    onPressed: !moveUpPossible()
-                        ? null
-                        : () {
-                            moveUp();
-                          },
-                    child: Text("Move Up"),
-                    style: ElevatedButton.styleFrom(
-                      onSurface: Colors.grey,
-                    ),
-                  ),
-                  SizedBox(
-                    width: 4,
-                  ),
-                  ElevatedButton(
-                    onPressed: !moveDownPossible()
-                        ? null
-                        : () {
-                            moveDown();
-                          },
-                    child: Text("Move Down"),
-                    style: ElevatedButton.styleFrom(
-                      onSurface: Colors.grey,
-                    ),
-                  ),
-                  SizedBox(
-                    width: 32,
-                  ),
-                  ElevatedButton(
-                    onPressed: (dataTableSelectedIndex == -1)
-                        ? null
-                        : () {
-                            print("does this happen?");
-                            deleteStep();
-                          },
-                    child: Text("Delete Step"),
-                    style: ElevatedButton.styleFrom(
-                      primary: Colors.red,
-                      onSurface: Colors.grey,
-                    ),
-                  ),
-                ],
+                ),
+              ],
+            ),
+            SizedBox(
+              height: 12,
+            ),
+            TextField(
+              controller: commentsTextController,
+              decoration: InputDecoration(
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.white),
+                ),
+                border: OutlineInputBorder(),
+                hintText: "Include any additional comments here.",
+                hintStyle: TextStyle(
+                    color: Colors.grey.shade500, fontStyle: FontStyle.italic),
+                filled: true,
+                fillColor: Colors.grey.shade800,
               ),
-            ],
-          ),
+              style: TextStyle(color: Colors.white),
+            ),
+            SizedBox(
+              height: 12,
+            ),
+            SequenceStepTable(
+              table: table,
+              onIndexChanged: (p0) {
+                dataTableSelectedIndex = p0;
+              },
+            ),
+            SizedBox(
+              height: 12,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton(
+                  onPressed: () => RouterUtility.routerUtility(
+                      context,
+                      AddSequenceStepWidget(
+                        onSave: (int mode, int seconds, double current,
+                                double voltage) =>
+                            addTableStep(<dynamic>[
+                          mode,
+                          seconds,
+                          current,
+                          voltage,
+                          <dynamic>[]
+                        ]),
+                      )),
+                  child: Text("Add Step"),
+                ),
+                SizedBox(
+                  width: 4,
+                ),
+                ElevatedButton(
+                  onPressed: (dataTableSelectedIndex == -1)
+                      ? null
+                      : () => RouterUtility.routerUtility(context,
+                              AddSequenceTestWidget(
+                            onSave: (int testType, int testAction, double value,
+                                int timeType, int timeLimit) {
+                              addTableTest(<dynamic>[
+                                testType,
+                                testAction,
+                                value,
+                                timeType,
+                                timeLimit
+                              ]);
+                            },
+                          )),
+                  child: Text("Add Test"),
+                  style: ElevatedButton.styleFrom(
+                    onSurface: Colors.grey,
+                  ),
+                ),
+                SizedBox(
+                  width: 4,
+                ),
+                ElevatedButton(
+                  onPressed: null,
+                  child: Text("Edit"),
+                  style: ElevatedButton.styleFrom(
+                    onSurface: Colors.grey,
+                  ),
+                ),
+                SizedBox(
+                  width: 32,
+                ),
+                ElevatedButton(
+                  onPressed: !moveUpPossible()
+                      ? null
+                      : () {
+                          moveUp();
+                        },
+                  child: Text("Move Up"),
+                  style: ElevatedButton.styleFrom(
+                    onSurface: Colors.grey,
+                  ),
+                ),
+                SizedBox(
+                  width: 4,
+                ),
+                ElevatedButton(
+                  onPressed: !moveDownPossible()
+                      ? null
+                      : () {
+                          moveDown();
+                        },
+                  child: Text("Move Down"),
+                  style: ElevatedButton.styleFrom(
+                    onSurface: Colors.grey,
+                  ),
+                ),
+                SizedBox(
+                  width: 32,
+                ),
+                ElevatedButton(
+                  onPressed: (dataTableSelectedIndex == -1)
+                      ? null
+                      : () {
+                          print("does this happen?");
+                          deleteStep();
+                        },
+                  child: Text("Delete Step"),
+                  style: ElevatedButton.styleFrom(
+                    primary: Colors.red,
+                    onSurface: Colors.grey,
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
