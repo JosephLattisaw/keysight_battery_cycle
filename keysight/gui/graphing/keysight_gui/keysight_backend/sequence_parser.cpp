@@ -12,10 +12,6 @@
 #define LOG_OUT LogOut("sequence_parser")
 #define LOG_ERR LogOut("sequence parser")
 
-typedef std::array<std::string, 2> sequence_info_type;
-typedef std::array<double, 4> sequence_step_type;
-typedef std::array<double, 5> sequence_test_type;
-
 typedef std::vector<sequence_step_type> sequence_step_vector;
 typedef std::vector<sequence_test_type> sequence_test_vector;
 
@@ -63,8 +59,8 @@ void SequenceParser::add_save_sequence_step(int mode, int seconds, double curren
         sequences_steps.insert(
             {last_started_saved_sequence, sequence_step_vector{{static_cast<double>(mode), static_cast<double>(seconds), current, voltage}}});
     } else {
-        LOG_OUT << "attempting to add additional step to a sequence";
         sequence_step_vector x = std::any_cast<sequence_step_vector>(sequences_steps.at(last_started_saved_sequence));
+        LOG_OUT << "attempting to add additional step to a sequence " << x.size() << " name: " << last_started_saved_sequence;
         x.push_back({static_cast<double>(mode), static_cast<double>(seconds), current, voltage});
 
         sequences_steps.at(last_started_saved_sequence) = x;
@@ -185,28 +181,33 @@ void SequenceParser::finish_save_sequence() {
     char tmp[66535];
     getcwd(tmp, 65535);
 
-    // boost::property_tree::ini_parser::write_ini("sequences.ini", property_tree);
     boost::property_tree::json_parser::write_json("sequences.json", property_tree);
     LOG_OUT << "finished writing sequence: " << tmp;
 }
 
 void SequenceParser::delete_key(const std::string &name, std::map<std::string, std::any> &map) const {
     // key was found if this happens
+    std::cout << "deleting key" << std::endl;
     if (map.find(name) != map.end()) {
+        std::cout << "found map" << std::endl;
         map.erase(name);
-    }
+    } else
+        std::cout << "didn't find map" << std::endl;
 }
 
 void SequenceParser::delete_all_keys(const std::string &name) {
-    std::array<std::map<std::string, std::any>, 3> key_array = {sequences_info, sequences_steps, sequences_tests};
-
-    for (auto i : key_array) {
-        delete_key(name, i);
+    if (sequences_info.find(name) != sequences_info.end()) {
+        sequences_info.erase(name);
     }
 
-    sequences_info = key_array.at(0);
-    sequences_steps = key_array.at(1);
-    sequences_tests = key_array.at(2);
+    if (sequences_steps.find(name) != sequences_steps.end()) {
+        std::cout << "deleted steps!" << std::endl;
+        sequences_steps.erase(name);
+    }
+
+    if (sequences_tests.find(name) != sequences_tests.end()) {
+        sequences_tests.erase(name);
+    }
 }
 
 void SequenceParser::load_all_sequences() {
