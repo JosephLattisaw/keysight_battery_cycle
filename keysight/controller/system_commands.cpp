@@ -1,111 +1,55 @@
 #include "system_commands.hpp"
 
+#include "logger.hpp"
+
+#define LOG_OUT LogOut("system_commands")
+#define LOG_ERR LogOut("system_commands")
+
 SystemCommands::SystemCommands() {}
 
-void SystemCommands::card_detect_boot(std::string card) {
-    // TODO do we need to implement?
-}
+std::vector<int> SystemCommands::detect_cards_at_boot(const ViSession &session) {
+    LOG_OUT << "sending the detect cards command";
 
-void SystemCommands::card_detect_now(std::string card) {
-    // TODO do we need to implement?
-}
+    viPrintf(session, "SYST:CARD:DET:BOOT? 0\n");  // sending the detect all cards command
 
-void SystemCommands::communicate_lan_dhcp(std::string value) {
-    // TODO do we need to implement?
-}
+    // getting the response for the card detection query
+    ViChar cards_detected[65535];
+    viScanf(session, "%t", cards_detected);
 
-void SystemCommands::communicate_lan_dhcp() {
-    // TODO do we need to implement?
-}
+    LOG_OUT << "cards detected: " << cards_detected;
 
-void SystemCommands::communicate_lan_domain() {
-    // TODO do we need to implement?
-}
+    std::vector<int> result;
 
-void SystemCommands::communicate_lan_gateway(std::string address) {
-    // TODO do we need to implement?
-}
+    // std::string s = "0,0,0,0,0,0,0,0";
+    // std::string s = "1";
+    std::string s = std::string(cards_detected);
+    std::string delimiter = ",";
 
-void SystemCommands::communicate_lan_gateway_(std::string static_host) {
-    // TODO do we need to implement?
-}
+    std::size_t pos = 0;
+    std::string token;
 
-void SystemCommands::communicate_lan_hostname(std::string address) {
-    // TODO do we need to implement?
-}
+    std::size_t expected_size = 7;
 
-void SystemCommands::communicate_lan_hostname_(std::string static_host) {
-    // TODO do we need to implement?
-}
+    while ((pos = s.find(delimiter)) != std::string::npos) {
+        token = s.substr(0, pos);
+        result.push_back(static_cast<bool>(std::stoi(token)));
+        s.erase(0, pos + delimiter.length());
+    }
 
-void SystemCommands::communicate_lan_ipaddress(std::string address) {
-    // TODO do we need to implement?
-}
+    result.push_back(std::stoi(s));
 
-void SystemCommands::communicate_lan_ipaddress_(std::string static_host) {
-    // TODO do we need to implement?
-}
+    if (result.size() == 1) {
+        // if result is same number across the board we need to initialize the entire vector
+        bool val = result.at(0);
+        result = std::vector<int>(8, val);
+        LOG_OUT << "all cards were same value: " << static_cast<int>(val);
+    } else if (result.size() != 8) {
+        // if we get an invalid result size, just say all the cards are off to be safe
+        result = std::vector<int>(8, false);
+        LOG_ERR << "cards returned an invalid size: " << result.size() << ", marking all cards off";
+    } else {
+        LOG_OUT << "successfully detected all the cards";
+    }
 
-void SystemCommands::communicate_lan_mac() {
-    // TODO do we need to implement?
-}
-
-void SystemCommands::communicate_lan_smask(std::string mask) {
-    // TODO do we need to implement?
-}
-
-void SystemCommands::communicate_lan_smask_(std::string mask) {
-    // TODO do we need to implement?
-}
-
-void SystemCommands::communicate_lan_telnet_prompt(std::string value) {
-    // TODO do we need to implement?
-}
-
-void SystemCommands::communicate_lan_telnet_prompt() {
-    // TODO do we need to implement?
-}
-
-void SystemCommands::communicate_lan_telnet_wmessage(std::string value) {
-    // TODO do we need to implement?
-}
-
-void SystemCommands::communicate_lan_telnet_wmessage() {
-    // TODO do we need to implement?
-}
-
-void SystemCommands::communicate_lan_update() {
-    // TODO do we need to implement?
-}
-
-void SystemCommands::error() {
-    // TODO do we need to implement?
-}
-
-void SystemCommands::probe_check_limit(std::string value) {
-    // TODO do we need to implement?
-}
-
-void SystemCommands::probe_check_limit() {
-    // TODO do we need to implement?
-}
-
-void SystemCommands::reboot_system() {
-    // TODO do we need to implement?
-}
-
-void SystemCommands::test_all() {
-    // TODO do we need to implement?
-}
-
-void SystemCommands::test_mainframe() {
-    // TODO do we need to implement?
-}
-
-void SystemCommands::test_channel() {
-    // TODO do we need to implement?
-}
-
-void SystemCommands::uptime() {
-    // TODO do we need to implement?
+    return result;
 }

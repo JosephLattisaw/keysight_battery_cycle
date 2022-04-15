@@ -9,6 +9,7 @@
 #include "cell_commands.hpp"
 #include "ieee488_common_commands.hpp"
 #include "sequence_commands.hpp"
+#include "system_commands.hpp"
 
 class Controller {
 public:
@@ -26,6 +27,7 @@ private:
     std::shared_ptr<CellCommands> cell_commands;
     std::shared_ptr<IEEE488CommonCommands> ieee488_common_commands;
     std::shared_ptr<SequenceCommands> sequence_commands;
+    std::shared_ptr<SystemCommands> system_commands;
 
     // session to instrument
     ViSession resource_manager = 0;

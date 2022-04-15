@@ -10,30 +10,6 @@
 
 IEEE488CommonCommands::IEEE488CommonCommands() {}
 
-void IEEE488CommonCommands::abort() {
-    // TODO do we need to implement?
-}
-
-void IEEE488CommonCommands::calibrate(std::string channels) {
-    // TODO do we need to implement?
-}
-
-void IEEE488CommonCommands::clear_status() {
-    // TODO do we need to implement?
-}
-
-void IEEE488CommonCommands::event_status_enable_command(std::string value) {
-    // TODO do we need to implement?
-}
-
-void IEEE488CommonCommands::event_status_enable_query() {
-    // TODO do we need to implement?
-}
-
-void IEEE488CommonCommands::event_status_event_query() {
-    // TODO do we need to implement?
-}
-
 std::string IEEE488CommonCommands::identification_query(const ViSession &session) const {
     LOG_OUT << "sending the identification query command";
 
@@ -46,33 +22,4 @@ std::string IEEE488CommonCommands::identification_query(const ViSession &session
     LOG_OUT << "identification query response: " << idn_response;
 
     return idn_response;
-}
-
-void IEEE488CommonCommands::operation_complete_command() {
-    // TODO do we need to implement?
-}
-
-void IEEE488CommonCommands::operation_complete_query() {
-    // TODO do we need to implement?
-}
-
-void IEEE488CommonCommands::reset_command(const ViSession &session) const {
-    LOG_OUT << "sending the reset command";
-
-    viPrintf(session, "*RST\n");
-
-    // allow at least 4 seconds for the reset to complete
-    std::this_thread::sleep_for(std::chrono::seconds(4));
-}
-
-void IEEE488CommonCommands::status_byte_query() {
-    // TODO do we need to implement?
-}
-
-void IEEE488CommonCommands::self_test_query() {
-    // TODO do we need to implement?
-}
-
-void IEEE488CommonCommands::wait() {
-    // TODO do we need to implement?
 }

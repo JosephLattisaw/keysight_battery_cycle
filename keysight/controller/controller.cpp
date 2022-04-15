@@ -12,6 +12,7 @@ Controller::Controller() {
     cell_commands = std::make_shared<CellCommands>();
     ieee488_common_commands = std::make_shared<IEEE488CommonCommands>();
     sequence_commands = std::make_shared<SequenceCommands>();
+    system_commands = std::make_shared<SystemCommands>();
 
     // opening the Keysight BT2203A
     open_resource_manager();
@@ -23,6 +24,16 @@ Controller::Controller() {
 
     // ieee488_common_commands->reset_command(session);
     ieee488_common_commands->identification_query(session);
+
+    // getting all the active cards in the hardware
+    auto active_cards = system_commands->detect_cards_at_boot(session);
+
+    // defining all cell names
+    auto cell_names = cell_commands->define_cells_for_all_cards(session, active_cards);
+
+    // first step is to get the system cards detected
+
+    //
     /*
         // sequence example
 
@@ -50,7 +61,8 @@ Controller::Controller() {
         viScanf(session, "%t", step_time_response);
         std::cout << "step time: " << step_time_response << std::endl;*/
 
-    viPrintf(session, "CELL:ABORT 0\n");
+    // sequence example
+    /*viPrintf(session, "CELL:ABORT 0\n");
     viPrintf(session, "CELL:CLEAR 0\n");
     viPrintf(session, "SEQ:CLEAR 0\n");
 
@@ -93,7 +105,48 @@ Controller::Controller() {
 
     viPrintf(session, "CELL:STEP:TIME? (@1027,1028)\n");
     viScanf(session, "%t", step_time_response);
-    std::cout << "response: " << step_time_response << std::endl;
+    std::cout << "response: " << step_time_response << std::endl;*/
+
+    // first step
+    // get the system cards detected
+    // cards detected
+    /*viPrintf(session, "SYST:CARD:DET:BOOT? 0\n");
+    ViChar cards_detected[65535];
+    viScanf(session, "%t", cards_detected);
+    std::cout << "cards detected: " << cards_detected << std::endl;*/
+
+    // second step
+    // get the status of the cells
+    /*for (auto i = 0; i < 33; i++) {
+        ViChar cell_status[65535];
+        viPrintf(session, ("STATUS:CELL:VERBOSE? 100" + std::to_string(i) + "\n").c_str());
+        viScanf(session, "%t", cell_status);
+        std::cout << "cell status: " << cell_status << std::endl;
+    }*/
+    /*
+    ViChar cards_status[65535];
+    viPrintf(session, "STAT:OPER:ENAB 16\n");
+    viPrintf(session, "STAT:CELL:REP? (@1001:1004)\n");
+    viScanf(session, "%t", cards_status);
+    std::cout << "cards status: " << cards_status << std::endl;*/
+    /*viPrintf(session, "CELL:DEFINE 1001,(@101)\n");
+    viPrintf(session, "CELL:DEFINE 1002,(@102)\n");
+    viPrintf(session, "CELL:DEFINE 1003,(@103)\n");
+    viPrintf(session, "CELL:DEFINE 1004,(@104)\n");*/
+
+    ViChar cell_voltage[65535];
+    viPrintf(session, "MEAS:CELL:VOLT? (@1001:1004)\n");
+    viScanf(session, "%t", cell_voltage);
+    std::cout << "cell voltage: " << cell_voltage << std::endl;
+
+    viPrintf(session, "MEAS:VOLT? (@101,102,103,104)\n");
+    viScanf(session, "%t", cell_voltage);
+    std::cout << "cell voltage: " << cell_voltage << std::endl;
+
+    ViChar cell_status[65535];
+    viPrintf(session, "STATUS:CELL:VERBOSE? 1001\n");
+    viScanf(session, "%t", cell_status);
+    std::cout << "cell status: " << cell_status << std::endl;
 }
 
 Controller::~Controller() {
