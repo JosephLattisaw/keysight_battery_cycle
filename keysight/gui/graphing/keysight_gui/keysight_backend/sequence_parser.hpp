@@ -7,20 +7,10 @@
 #include <string>
 #include <vector>
 
-// TODO
-// create an array of maps or a map of maps so we can iterate through them
-typedef std::array<std::string, 2> sequence_info_type;
-typedef std::array<double, 4> sequence_step_type;
-typedef std::array<double, 5> sequence_test_type;
-
-typedef std::vector<sequence_step_type> sequence_step_vector;
-typedef std::vector<sequence_test_type> sequence_test_vector;
-
-typedef std::map<std::string, sequence_info_type> sequence_info_map;
-typedef std::map<int, sequence_test_vector> sequence_test_map;
+#include "types.hpp"
 
 class SequenceParser {
-    using LoadSequencesCallback = std::function<void()>;
+    using LoadSequencesCallback = std::function<void(sequences_info_map_type)>;
 
 public:
     SequenceParser(LoadSequencesCallback load_sequences_callback);
@@ -35,12 +25,13 @@ public:
     void load_all_sequences();
 
 private:
+    void clear_all_maps();
     void delete_all_keys(const std::string &name);
     void delete_key(const std::string &name, std::map<std::string, std::any> &map) const;
 
-    std::map<std::string, std::any> sequences_info;
-    std::map<std::string, sequence_step_vector> sequences_steps;
-    std::map<std::string, std::any> sequences_tests;
+    sequences_info_map_type sequences_info;
+    seqeunces_steps_map_type sequences_steps;
+    sequences_tests_map_type sequences_tests;
     std::string last_started_saved_sequence;
 
     LoadSequencesCallback load_sequences_callback;

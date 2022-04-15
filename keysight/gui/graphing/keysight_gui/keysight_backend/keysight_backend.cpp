@@ -3,6 +3,7 @@
 
 #include "backend.hpp"
 #include "logger.hpp"
+#include "types.hpp"
 
 // dart api headers
 #include "include/dart_api.h"
@@ -98,12 +99,20 @@ void finish_save_sequence() {
         print_backend_doesnt_exist_error();
 }
 
-void create_backend(bool using_dart = false, std::int64_t load_sequences_port = 0) {
+void create_backend(bool using_dart = false, std::int64_t load_sequences_port = 0, std::int64_t fin_load_sequences_port = 0,
+                    std::int64_t load_steps_port = 0, std::int64_t load_tests_port = 0) {
     if (!backend)
-        backend = std::make_shared<Backend>(io_service, [&, using_dart, load_sequences_port] {
-            // TODO
-            if (using_dart) post_data_int(load_sequences_port, 5);
-        });
+        backend = std::make_shared<Backend>(io_service,
+                                            [&, using_dart, load_sequences_port, fin_load_sequences_port](sequences_info_map_type sequences_info) {
+                                                for (auto const &[name, val] : sequences_info) {
+                                                    post_data_string(load_sequences_port, name);  // sending name
+
+                                                    // sending info
+                                                    for (auto const &info : val) {
+                                                        post_data_string(load_sequences_port, info);
+                                                    }
+                                                }
+                                            });
     else
         print_backend_doesnt_exist_error();
 }

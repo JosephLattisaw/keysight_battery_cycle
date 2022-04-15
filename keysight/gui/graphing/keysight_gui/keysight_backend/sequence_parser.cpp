@@ -12,31 +12,11 @@
 #define LOG_OUT LogOut("sequence_parser")
 #define LOG_ERR LogOut("sequence parser")
 
-typedef std::vector<sequence_step_type> sequence_step_vector;
-typedef std::vector<sequence_test_type> sequence_test_vector;
+// typedef std::vector<sequence_step_type> sequence_step_vector;
+// typedef std::vector<sequence_test_type> sequence_test_vector;
 
-typedef std::map<std::string, sequence_info_type> sequence_info_map;
-typedef std::map<int, sequence_test_vector> sequence_test_map;
-
-enum sequence_info_access_type {
-    SERIAL_NUMBER = 0,
-    COMMENTS = 1,
-};
-
-enum sequence_step_access_type {
-    MODE = 0,
-    SECONDS = 1,
-    CURRENT = 2,
-    VOLTAGE = 3,
-};
-
-enum sequence_test_access_type {
-    TEST_TYPE = 0,
-    TEST_ACTION = 1,
-    VALUE = 2,
-    TIME_TYPE = 3,
-    TIME_LIMIT = 4,
-};
+// typedef std::map<std::string, sequence_info_type> sequence_info_map;
+// typedef std::map<int, sequence_test_vector> sequence_test_map;
 
 SequenceParser::SequenceParser(LoadSequencesCallback ls_cb) : load_sequences_callback{ls_cb} {}
 
@@ -46,7 +26,7 @@ void SequenceParser::start_save_sequence(std::string name, std::string serial_nu
     last_started_saved_sequence = name;
 
     // first things first, clear any instances of a sequence by that name
-    delete_all_keys(name);
+    clear_all_maps();
 
     // next step is adding sequence to the sequence info map
     sequences_info.insert({name, sequence_info_type{serial_number, comments}});
@@ -210,8 +190,16 @@ void SequenceParser::delete_all_keys(const std::string &name) {
     }
 }
 
+void SequenceParser::clear_all_maps() {
+    sequences_info.clear();
+    sequences_steps.clear();
+    sequences_steps.clear();
+}
+
 void SequenceParser::load_all_sequences() {
     LOG_OUT << "load all sequences called";
+
+    clear_all_maps();
 
     boost::property_tree::ptree property_tree;
     try {
@@ -220,5 +208,35 @@ void SequenceParser::load_all_sequences() {
         LOG_ERR << e.what();
     }
 
-    load_sequences_callback();
+    for (auto &it : property_tree) {
+        std::cout << it.first << std::endl;  // seqeunces
+        if (std::string("sequences").compare(it.first) == 0) {
+            std::cout << "found sequences" << std::endl;
+            auto seq_tree = property_tree.get_child(it.first);
+            for (auto &st_it : seq_tree) {
+                std::cout << "found sequence name: " << st_it.first << std::endl;  // sequencename
+                auto name = st_it.first;
+                auto serial_number = st_it.second.get<std::string>("serial_number");
+                auto comments = st_it.second.get<std::string>("comments");
+                sequences_info.insert({name, sequence_info_type{serial_number, comments}});
+
+                auto steps_tree = st_it.second.get_child_optional("steps");
+                sequence_step_vector ssv;
+                if (steps_tree.get_ptr()) {
+                    for (auto &steps_it : *steps_tree) {
+                        std::cout << "steps " << steps_it.first << std::endl;
+                        auto mode = steps_it.second.get<double>("mode");
+                        auto seconds = steps_it.second.get<double>("seconds");
+                        auto current = steps_it.second.get<double>("current");
+                        auto voltage = steps_it.second.get<double>("voltage");
+                        ssv.push_back({mode, seconds, current, voltage});
+                    }
+                }
+
+                // auto tests_tree = st_it.second.get_child_optional("tests");
+            }
+        }
+    }
+
+    // load_sequences_callback(sequence_info);
 }

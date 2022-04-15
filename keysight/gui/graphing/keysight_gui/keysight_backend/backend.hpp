@@ -6,9 +6,10 @@
 #include <memory>
 
 #include "sequence_parser.hpp"
+#include "types.hpp"
 
 class Backend {
-    using LoadSequencesCallback = std::function<void()>;
+    using LoadSequencesCallback = std::function<void(sequences_info_map_type)>;
 
 public:
     Backend(boost::asio::io_service &io_service, LoadSequencesCallback load_sequences_callback);

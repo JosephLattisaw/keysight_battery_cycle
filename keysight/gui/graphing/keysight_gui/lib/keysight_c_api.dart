@@ -62,16 +62,39 @@ class KeysightCAPI extends ChangeNotifier {
 
     ReceivePort loadSequencesPort = ReceivePort()
       ..listen((data) {
-        print("received $data");
+        print("seq received $data ${data}");
       });
 
     int loadSequencesNativePort = loadSequencesPort.sendPort.nativePort;
+
+    ReceivePort finishLoadSequencesPort = ReceivePort()
+      ..listen((data) {
+        print("finished seq received $data ${data}");
+      });
+
+    int finishLoadSequencesNativePort =
+        finishLoadSequencesPort.sendPort.nativePort;
+
+    ReceivePort loadStepsPort = ReceivePort()
+      ..listen((data) {
+        print("received $data");
+      });
+
+    int loadStepsNativePort = loadStepsPort.sendPort.nativePort;
+
+    ReceivePort loadTestsPort = ReceivePort()
+      ..listen((data) {
+        print("received $data");
+      });
+
+    int loadTestsNativePort = loadTestsPort.sendPort.nativePort;
 
     loadAllSequences = lib
         .lookup<ffi.NativeFunction<Void_Function_FFI>>("load_all_sequences")
         .asFunction();
 
-    _createBackend(1, loadSequencesNativePort);
+    _createBackend(1, loadSequencesNativePort, finishLoadSequencesNativePort,
+        loadStepsNativePort, loadTestsNativePort);
     _runService();
   }
 
@@ -94,8 +117,14 @@ typedef Void_Function_FFI = ffi.Void Function();
 typedef Void_Function_C = void Function();
 
 //create backend
-typedef CreateBackend_FFI = ffi.Void Function(ffi.Uint8, ffi.Int64);
-typedef CreateBackend_C = void Function(int, int);
+typedef CreateBackend_FFI = ffi.Void Function(
+    ffi.Uint8 usingDart,
+    ffi.Int64 seqPort,
+    ffi.Int64 seqFinPort,
+    ffi.Int64 stepsPort,
+    ffi.Int64 testsPort);
+typedef CreateBackend_C = void Function(
+    int usingDart, int seqPort, int seqFinPort, int stepsPort, int testsPort);
 
 //start save sequence
 typedef StartSaveSequence_FFI = ffi.Void Function(ffi.Pointer<Utf8> name,
