@@ -3,6 +3,7 @@
 
 #include <visa.h>
 
+#include <boost/asio.hpp>
 #include <memory>
 #include <string>
 
@@ -13,7 +14,7 @@
 
 class Controller {
 public:
-    Controller();
+    Controller(boost::asio::io_service &io_service);
     ~Controller();
 
 private:
@@ -22,6 +23,12 @@ private:
     void open_resource_manager();
 
     void enable_read_termination_character();
+
+    // void start_polling_cell_status();
+
+    boost::asio::io_service &io_service;
+
+    int cell_status_poll_time_seconds = 1;
 
     // commands
     std::shared_ptr<CellCommands> cell_commands;

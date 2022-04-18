@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:keysight_gui/screens/test/test_sequence_cells_tab.dart';
+import 'package:keysight_gui/screens/test/test_sequence_measurements_tab.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
+import 'package:keysight_gui/tab_widget.dart';
+import 'package:keysight_gui/screens/test/test_sequence_chart_tab.dart';
 
 class TestTabbedWidget extends StatelessWidget {
   @override
@@ -43,8 +47,21 @@ class TestTabbedWidget extends StatelessWidget {
               ),
             ),
             Expanded(
-              child: SfCartesianChart(
-                backgroundColor: Colors.grey.shade900,
+              child: Padding(
+                padding: EdgeInsets.all(8.0),
+                child: TabWidget(
+                  useShadow: false,
+                  tabs: [
+                    Text("Channels / Cells"),
+                    Text("Measurements"),
+                    Text("Chart"),
+                  ],
+                  tabWidgets: [
+                    TestSequenceCellsTab(),
+                    TestSequenceMeasurementsTab(),
+                    TestSequenceChartTab(),
+                  ],
+                ),
               ),
             ),
             Padding(

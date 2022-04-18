@@ -8,8 +8,8 @@
 #define LOG_OUT LogOut("controller")
 #define LOG_ERR LogOut("controller")
 
-Controller::Controller() {
-    cell_commands = std::make_shared<CellCommands>();
+Controller::Controller(boost::asio::io_service &io_service) : io_service(io_service) {
+    cell_commands = std::make_shared<CellCommands>(io_service);
     ieee488_common_commands = std::make_shared<IEEE488CommonCommands>();
     sequence_commands = std::make_shared<SequenceCommands>();
     system_commands = std::make_shared<SystemCommands>();
@@ -31,7 +31,10 @@ Controller::Controller() {
     // defining all cell names
     auto cell_names = cell_commands->define_cells_for_all_cards(session, active_cards);
 
-    // first step is to get the system cards detected
+    // start polling the statuses
+    cell_commands->start_polling_cell_status(session, cell_names);
+
+    // start_polling_cell_status();  // polling the cell statuses
 
     //
     /*
@@ -134,7 +137,7 @@ Controller::Controller() {
     viPrintf(session, "CELL:DEFINE 1003,(@103)\n");
     viPrintf(session, "CELL:DEFINE 1004,(@104)\n");*/
 
-    ViChar cell_voltage[65535];
+    /*ViChar cell_voltage[65535];
     viPrintf(session, "MEAS:CELL:VOLT? (@1001:1004)\n");
     viScanf(session, "%t", cell_voltage);
     std::cout << "cell voltage: " << cell_voltage << std::endl;
@@ -146,7 +149,7 @@ Controller::Controller() {
     ViChar cell_status[65535];
     viPrintf(session, "STATUS:CELL:VERBOSE? 1001\n");
     viScanf(session, "%t", cell_status);
-    std::cout << "cell status: " << cell_status << std::endl;
+    std::cout << "cell status: " << cell_status << std::endl;*/
 }
 
 Controller::~Controller() {

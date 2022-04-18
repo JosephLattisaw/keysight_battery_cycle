@@ -4,12 +4,17 @@ import 'package:keysight_gui/screens/instrument_connection/instrument_widget.dar
 import 'package:keysight_gui/screens/profile_sequence/profile_sequence_widget.dart';
 
 class TabWidget extends HookWidget {
-  const TabWidget({Key? key, required this.tabs, required this.tabWidgets})
+  const TabWidget(
+      {Key? key,
+      required this.tabs,
+      required this.tabWidgets,
+      this.useShadow = true})
       : assert(tabs.length == tabWidgets.length),
         super(key: key);
 
   final List<Widget> tabs;
   final List<Widget> tabWidgets;
+  final bool useShadow;
 
   @override
   Widget build(BuildContext context) {
@@ -41,14 +46,19 @@ class TabWidget extends HookWidget {
           child: Container(
             decoration: BoxDecoration(
               color: Colors.grey.shade900,
-              boxShadow: [
-                BoxShadow(
-                  blurRadius: 5,
-                  spreadRadius: 4,
-                  color: Colors.black.withOpacity(0.8),
-                  offset: Offset(0, 5),
-                )
-              ],
+              border: useShadow
+                  ? null
+                  : Border.all(color: Colors.black.withAlpha(100), width: 2.0),
+              boxShadow: !useShadow
+                  ? null
+                  : [
+                      BoxShadow(
+                        blurRadius: 5,
+                        spreadRadius: 4,
+                        color: Colors.black.withOpacity(0.8),
+                        offset: Offset(0, 5),
+                      )
+                    ],
             ),
             child: TabBarView(
               children: List.generate(

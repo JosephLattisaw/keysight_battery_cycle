@@ -3,6 +3,7 @@
 
 #include <visa.h>
 
+#include <boost/asio.hpp>
 #include <string>
 #include <vector>
 
@@ -12,9 +13,16 @@
 
 class CellCommands {
 public:
-    CellCommands();
+    CellCommands(boost::asio::io_service &io_service);
 
     std::vector<std::string> define_cells_for_all_cards(const ViSession &session, std::vector<int> active_cards) const;
+
+    void start_polling_cell_status(const ViSession &session, std::vector<std::string> cells);
+
+private:
+    boost::asio::io_service &io_service;
+
+    boost::asio::steady_timer cell_status_timer;
 };
 
 #endif
