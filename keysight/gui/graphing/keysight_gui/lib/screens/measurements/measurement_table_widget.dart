@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 
 class MeasurementTableWidget extends StatelessWidget {
+  MeasurementTableWidget({Key? key, this.sequenceNumber = -1})
+      : super(key: key);
+
+  final int sequenceNumber;
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(

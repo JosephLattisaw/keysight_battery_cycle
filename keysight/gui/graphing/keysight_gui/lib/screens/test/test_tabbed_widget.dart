@@ -5,16 +5,24 @@ import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:keysight_gui/tab_widget.dart';
 import 'package:keysight_gui/screens/test/test_sequence_chart_tab.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:provider/provider.dart';
+import 'package:keysight_gui/keysight_c_api.dart';
 
 class TestTabbedWidget extends HookWidget {
   TestTabbedWidget({Key? key, required this.sequenceNumber}) : super(key: key);
 
   final int sequenceNumber;
+  late ValueNotifier<List<List<bool>>> checkCount;
 
   @override
   Widget build(BuildContext context) {
     final canStartSequence = useState(false);
-    final sequenceStarted = useState(false);
+    final sequenceStarted = context.select(
+        (KeysightCAPI k) => k.sequencesStarted.elementAt(sequenceNumber));
+    final c_api = Provider.of<KeysightCAPI>(context, listen: false);
+
+    checkCount =
+        useState(List<List<bool>>.filled(8, List<bool>.filled(32, false)));
 
     return Padding(
       padding: const EdgeInsets.only(top: 8),
@@ -65,10 +73,17 @@ class TestTabbedWidget extends HookWidget {
                     Text("Chart"),
                   ],
                   tabWidgets: [
-                    TestSequenceCellsTab(canStartSequence: ((value) {
-                      canStartSequence.value = value;
-                    })),
-                    TestSequenceMeasurementsTab(),
+                    TestSequenceCellsTab(
+                        canStartSequence: ((value, count) {
+                          Future.delayed(Duration.zero, () async {
+                            canStartSequence.value = value;
+                            checkCount.value = count;
+                          });
+                        }),
+                        sequenceStarted: sequenceStarted),
+                    TestSequenceMeasurementsTab(
+                      sequenceNumber: sequenceNumber,
+                    ),
                     TestSequenceChartTab(),
                   ],
                 ),
@@ -126,14 +141,17 @@ class TestTabbedWidget extends HookWidget {
                     onPressed: !canStartSequence.value
                         ? null
                         : () {
-                            sequenceStarted.value = !sequenceStarted.value;
+                            Future.delayed(Duration.zero, () async {
+                              c_api.setSequenceStarted(
+                                  sequenceNumber, !sequenceStarted);
+                            });
+                            /*c_api.setSequenceStarted(
+                                sequenceNumber, !sequenceStarted);*/
                           },
-                    child: Text(!sequenceStarted.value
-                        ? "Stop Sequence"
-                        : "Start Sequence"),
+                    child: Text(
+                        sequenceStarted ? "Stop Sequence" : "Start Sequence"),
                     style: ElevatedButton.styleFrom(
-                      primary:
-                          !sequenceStarted.value ? Colors.red : Colors.green,
+                      primary: sequenceStarted ? Colors.red : Colors.green,
                     ),
                   ),
                 ],

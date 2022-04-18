@@ -98,9 +98,19 @@ class KeysightCAPI extends ChangeNotifier {
     _runService();
   }
 
-  final List<bool> sequencesStarted = List<bool>.filled(8, false);
-  final List<List<int>> cellsStarted =
+  final List<bool> sequencesStarted = [
+    true,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+  ];
+  final List<List<int>> cellsSelected =
       List<List<int>>.filled(8, List<int>.filled(32, -1));
+
   final List<bool> cardsActive = [
     true,
     true,
@@ -112,15 +122,11 @@ class KeysightCAPI extends ChangeNotifier {
     false,
   ];
 
-  void startSequence(int index) {
+  void setSequenceStarted(int index, bool value) {
     if (index < sequencesStarted.length) {
-      sequencesStarted[index] = true;
+      sequencesStarted[index] = value;
       notifyListeners();
     }
-  }
-
-  void startCells(int index) {
-    //TODO
   }
 
   late StartSaveSequence_C startSaveSequence;

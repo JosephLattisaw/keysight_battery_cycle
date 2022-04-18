@@ -4,12 +4,14 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:keysight_gui/keysight_c_api.dart';
 
 class TestSequenceCellsTab extends HookWidget {
-  TestSequenceCellsTab({Key? key, required this.canStartSequence})
+  TestSequenceCellsTab(
+      {Key? key, required this.canStartSequence, required this.sequenceStarted})
       : super(key: key);
 
-  final void Function(bool value) canStartSequence;
+  final void Function(bool value, List<List<bool>> cells) canStartSequence;
 
   late ValueNotifier<List<List<bool>>> checkCount;
+  final bool sequenceStarted;
 
   bool isOneBoxChecked() {
     for (var i in checkCount.value) {
@@ -24,9 +26,7 @@ class TestSequenceCellsTab extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final cardsActive = context.select((KeysightCAPI k) => k.cardsActive);
-    final sequencesStarted =
-        context.select((KeysightCAPI k) => k.sequencesStarted);
-    final cellsStarted = context.select((KeysightCAPI k) => k.cellsStarted);
+    final cellsSelected = context.select((KeysightCAPI k) => k.cellsSelected);
 
     checkCount =
         useState(List<List<bool>>.filled(8, List<bool>.filled(32, false)));
@@ -45,13 +45,14 @@ class TestSequenceCellsTab extends HookWidget {
                           cellNumber: c_idx,
                           moduleNumber: l_idx,
                           moduleActive: cardsActive.elementAt(l_idx),
-                          sequenceStarted: sequencesStarted.elementAt(l_idx),
+                          sequenceStarted: sequenceStarted,
                           cellActiveInSequence:
-                              cellsStarted.elementAt(l_idx).elementAt(c_idx) ==
+                              cellsSelected.elementAt(l_idx).elementAt(c_idx) ==
                                   l_idx,
                           onChanged: (bool value) {
                             checkCount.value[l_idx][c_idx] = value;
-                            canStartSequence(isOneBoxChecked());
+                            canStartSequence(
+                                isOneBoxChecked(), checkCount.value);
                           },
                         ),
                       ),
