@@ -4,14 +4,17 @@ import 'package:keysight_gui/screens/test/test_sequence_measurements_tab.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:keysight_gui/tab_widget.dart';
 import 'package:keysight_gui/screens/test/test_sequence_chart_tab.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 
-class TestTabbedWidget extends StatelessWidget {
+class TestTabbedWidget extends HookWidget {
   TestTabbedWidget({Key? key, required this.sequenceNumber}) : super(key: key);
 
   final int sequenceNumber;
 
   @override
   Widget build(BuildContext context) {
+    final canStartSequence = useState(false);
+
     return Padding(
       padding: const EdgeInsets.only(top: 8),
       child: Container(
@@ -61,7 +64,9 @@ class TestTabbedWidget extends StatelessWidget {
                     Text("Chart"),
                   ],
                   tabWidgets: [
-                    TestSequenceCellsTab(),
+                    TestSequenceCellsTab(canStartSequence: ((value) {
+                      canStartSequence.value = value;
+                    })),
                     TestSequenceMeasurementsTab(),
                     TestSequenceChartTab(),
                   ],
@@ -117,7 +122,7 @@ class TestTabbedWidget extends StatelessWidget {
                   ),
                   Spacer(),
                   ElevatedButton(
-                    onPressed: () {},
+                    onPressed: !canStartSequence.value ? null : () {},
                     child: Text("Start Sequence"),
                     style: ElevatedButton.styleFrom(
                       primary: Colors.green,
