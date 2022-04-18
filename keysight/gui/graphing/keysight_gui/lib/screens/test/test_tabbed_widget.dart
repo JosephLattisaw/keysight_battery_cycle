@@ -14,6 +14,7 @@ class TestTabbedWidget extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final canStartSequence = useState(false);
+    final sequenceStarted = useState(false);
 
     return Padding(
       padding: const EdgeInsets.only(top: 8),
@@ -122,10 +123,17 @@ class TestTabbedWidget extends HookWidget {
                   ),
                   Spacer(),
                   ElevatedButton(
-                    onPressed: !canStartSequence.value ? null : () {},
-                    child: Text("Start Sequence"),
+                    onPressed: !canStartSequence.value
+                        ? null
+                        : () {
+                            sequenceStarted.value = !sequenceStarted.value;
+                          },
+                    child: Text(!sequenceStarted.value
+                        ? "Stop Sequence"
+                        : "Start Sequence"),
                     style: ElevatedButton.styleFrom(
-                      primary: Colors.green,
+                      primary:
+                          !sequenceStarted.value ? Colors.red : Colors.green,
                     ),
                   ),
                 ],
