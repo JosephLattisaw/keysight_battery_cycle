@@ -76,6 +76,7 @@ class TestTabbedWidget extends HookWidget {
                     TestSequenceCellsTab(
                         canStartSequence: ((value, count) {
                           Future.delayed(Duration.zero, () async {
+                            print("can start ${canStartSequence.value} $value");
                             canStartSequence.value = value;
                             checkCount.value = count;
                           });
@@ -138,15 +139,13 @@ class TestTabbedWidget extends HookWidget {
                   ),
                   Spacer(),
                   ElevatedButton(
-                    onPressed: !canStartSequence.value
+                    onPressed: !canStartSequence.value && !sequenceStarted
                         ? null
                         : () {
                             Future.delayed(Duration.zero, () async {
                               c_api.setSequenceStarted(
                                   sequenceNumber, !sequenceStarted);
                             });
-                            /*c_api.setSequenceStarted(
-                                sequenceNumber, !sequenceStarted);*/
                           },
                     child: Text(
                         sequenceStarted ? "Stop Sequence" : "Start Sequence"),

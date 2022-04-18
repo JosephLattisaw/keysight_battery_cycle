@@ -148,22 +148,24 @@ class TestCellsCheckboxWidget extends HookWidget {
   bool getModeCheckable() {
     switch (getMode()) {
       case StatusCellCheckbox.running:
-        checkFalseState();
+        checkedChange(false);
         return false;
       case StatusCellCheckbox.active:
+        checkedChange(true);
         return true;
       case StatusCellCheckbox.inactive:
-        checkFalseState();
+        checkedChange(false);
         return false;
       default:
-        checkFalseState();
+        checkedChange(false);
         return false;
     }
   }
 
-  void checkFalseState() {
-    if (checked.value) {
-      onChanged(false);
+  void checkedChange(bool flag) {
+    if (checked.value != flag) {
+      checked.value = flag;
+      onChanged(flag);
     }
   }
 
