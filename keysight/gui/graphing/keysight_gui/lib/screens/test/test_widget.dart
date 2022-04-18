@@ -7,6 +7,8 @@ import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:keysight_gui/screens/test/test_tabbed_widget.dart';
 
 class TestWidget extends StatelessWidget {
+  TestWidget({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -16,26 +18,12 @@ class TestWidget extends StatelessWidget {
             child: Padding(
               padding: EdgeInsets.all(8.0),
               child: TabWidget(
-                tabs: [
-                  Text("Test #1"),
-                  Text("Test #2"),
-                  Text("Test #3"),
-                  Text("Test #4"),
-                  Text("Test #5"),
-                  Text("Test #6"),
-                  Text("Test #7"),
-                  Text("Test #8"),
-                ],
-                tabWidgets: [
-                  TestTabbedWidget(),
-                  TestTabbedWidget(),
-                  TestTabbedWidget(),
-                  TestTabbedWidget(),
-                  TestTabbedWidget(),
-                  TestTabbedWidget(),
-                  TestTabbedWidget(),
-                  TestTabbedWidget(),
-                ],
+                tabs: List.generate(8, (index) => Text("Test #${index + 1}")),
+                tabWidgets: List.generate(
+                    8,
+                    (index) => TestTabbedWidget(
+                          sequenceNumber: index,
+                        )),
               ),
             ),
           ),

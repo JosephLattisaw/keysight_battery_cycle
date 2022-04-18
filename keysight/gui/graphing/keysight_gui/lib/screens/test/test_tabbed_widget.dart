@@ -6,6 +6,10 @@ import 'package:keysight_gui/tab_widget.dart';
 import 'package:keysight_gui/screens/test/test_sequence_chart_tab.dart';
 
 class TestTabbedWidget extends StatelessWidget {
+  TestTabbedWidget({Key? key, required this.sequenceNumber}) : super(key: key);
+
+  final int sequenceNumber;
+
   @override
   Widget build(BuildContext context) {
     return Padding(

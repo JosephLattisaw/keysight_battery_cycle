@@ -98,6 +98,22 @@ class KeysightCAPI extends ChangeNotifier {
     _runService();
   }
 
+  final List<bool> sequencesStarted = List<bool>.filled(8, false);
+  final List<List<int>> cellsStarted =
+      List<List<int>>.filled(8, List<int>.filled(32, -1));
+  final List<bool> cardsActive = List<bool>.filled(8, true);
+
+  void startSequence(int index) {
+    if (index < sequencesStarted.length) {
+      sequencesStarted[index] = true;
+      notifyListeners();
+    }
+  }
+
+  void startCells(int index) {
+    //TODO
+  }
+
   late StartSaveSequence_C startSaveSequence;
   late AddSaveSequenceStep_C addSaveSequenceStep;
   late AddSaveSequenceTest_C addSaveSequenceTest;
