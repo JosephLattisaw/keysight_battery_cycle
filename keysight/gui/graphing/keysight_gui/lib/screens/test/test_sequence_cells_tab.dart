@@ -110,7 +110,7 @@ class TestCellsCheckboxWidget extends HookWidget {
       case StatusCellCheckbox.active:
         return Colors.white;
       case StatusCellCheckbox.inactive:
-        return Colors.grey.shade900;
+        return Colors.black;
       default:
         return Colors.white;
     }
