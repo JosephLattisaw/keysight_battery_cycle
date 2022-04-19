@@ -101,7 +101,7 @@ class KeysightCAPI extends ChangeNotifier {
   }
 
   final List<bool> sequencesStarted = [
-    true,
+    false,
     false,
     false,
     false,
@@ -118,11 +118,11 @@ class KeysightCAPI extends ChangeNotifier {
     true,
     true,
     true,
-    true,
-    true,
-    true,
-    true,
-    true,
+    false,
+    false,
+    false,
+    false,
+    false,
   ];
 
   void setSequenceStarted(int index, bool value) {
@@ -142,20 +142,15 @@ class KeysightCAPI extends ChangeNotifier {
         print(
             "val: $value c: ${cellsSelected[module][index]} seq: $sequenceNumber");
         if (value && cellsSelected[module][index] == -1) {
-          print("$cellsSelected");
-          print("${cellsSelected[module]}");
-          print("${cellsSelected[module][index]}");
           print(
               "value was true and module $module cell $index seq $sequenceNumber");
           cellsSelected[module][index] = sequenceNumber;
-          print("$cellsSelected");
           notifyListeners();
         } else if (!value && cellsSelected[module][index] == sequenceNumber) {
           print(
               "value was false and module $module cell $index seq $sequenceNumber");
 
           cellsSelected[module][index] = -1;
-          print("$cellsSelected");
           notifyListeners();
         }
       } else

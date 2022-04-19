@@ -58,8 +58,6 @@ class TestSequenceCellsTab extends HookWidget {
                             checkCount.value[l_idx][c_idx] = value;
                             canStartSequence(
                                 isOneBoxChecked(), checkCount.value);
-                            //c_api.setCellSequenceStarted(
-                            //  l_idx, c_idx, sequenceNumber, value);
                           },
                         ),
                       ),
@@ -73,6 +71,7 @@ enum StatusCellCheckbox {
   inactive,
   active,
   running,
+  running_in_another_sequence,
 }
 
 class TestCellsCheckboxWidget extends HookWidget {
@@ -117,26 +116,27 @@ class TestCellsCheckboxWidget extends HookWidget {
   }
 
   StatusCellCheckbox getMode() {
-    //0 = inactive
-    //1 = active
-    //2 = running already
-    if (sequenceNumber == 0) {
-      //print(
-      //  "seq $sequenceNumber mod $moduleNumber, cell $cellNumber active $cellActiveInSequence");
-      //print(
-      //  "${c_api.cellsSelected.elementAt(moduleNumber).elementAt(cellNumber)}");
-    }
-
-    /*if (sequenceStarted && cellActiveInSequence == sequenceNumber) {
-      return StatusCellCheckbox.running; //can't select this but it's checked
-    } else if (!moduleActive || sequenceStarted) {
-      checked.value = false;
-      return StatusCellCheckbox.inactive; //module is not active
+    if (sequenceStarted) {
+      if (cellActiveInSequence == sequenceNumber) {
+        checked.value = true;
+        return StatusCellCheckbox.running;
+      } else if (cellActiveInSequence == -1) {
+        return StatusCellCheckbox.inactive;
+      } else {
+        return StatusCellCheckbox.running_in_another_sequence;
+      }
     } else {
-      return StatusCellCheckbox.active;
-    }*/
-
-    return StatusCellCheckbox.active;
+      if (!moduleActive) {
+        return StatusCellCheckbox.inactive;
+      } else if (cellActiveInSequence == -1) {
+        return StatusCellCheckbox.active;
+      } else if (cellActiveInSequence != sequenceNumber) {
+        return StatusCellCheckbox.running_in_another_sequence;
+      } else {
+        checked.value = true;
+        return StatusCellCheckbox.active;
+      }
+    }
   }
 
   Color? getBoxDecorationColor() {
@@ -145,6 +145,7 @@ class TestCellsCheckboxWidget extends HookWidget {
       case StatusCellCheckbox.active:
         return Colors.grey.shade800;
       case StatusCellCheckbox.inactive:
+      case StatusCellCheckbox.running_in_another_sequence:
         return Colors.grey.shade900;
       default:
         return Colors.grey.shade800;
@@ -159,6 +160,8 @@ class TestCellsCheckboxWidget extends HookWidget {
         return Colors.white;
       case StatusCellCheckbox.inactive:
         return Colors.black;
+      case StatusCellCheckbox.running_in_another_sequence:
+        return Colors.blue.shade900;
       default:
         return Colors.white;
     }
@@ -167,11 +170,11 @@ class TestCellsCheckboxWidget extends HookWidget {
   bool getModeCheckable() {
     switch (getMode()) {
       case StatusCellCheckbox.running:
+      case StatusCellCheckbox.inactive:
+      case StatusCellCheckbox.running_in_another_sequence:
         return false;
       case StatusCellCheckbox.active:
         return true;
-      case StatusCellCheckbox.inactive:
-        return false;
       default:
         return false;
     }
@@ -203,7 +206,6 @@ class TestCellsCheckboxWidget extends HookWidget {
         onChanged: !getModeCheckable()
             ? null
             : (newValue) {
-                print("value changed? $newValue");
                 c_api.setCellSequenceStarted(moduleNumber, cellNumber,
                     sequenceNumber, newValue ?? false);
                 checked.value = newValue ?? false;
