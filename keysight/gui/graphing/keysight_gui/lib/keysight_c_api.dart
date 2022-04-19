@@ -1,7 +1,6 @@
 library c_api;
 
 import 'dart:isolate';
-import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'dart:ffi' as ffi;
@@ -11,12 +10,11 @@ import 'package:path/path.dart';
 
 class KeysightCAPI extends ChangeNotifier {
   KeysightCAPI() {
-    print("created shadow client");
     print("resolved exec path1: ${Platform.resolvedExecutable}");
     keysightCAPI = this;
 
     File exeFile = File("${Platform.resolvedExecutable}");
-    String libPath = "${dirname(exeFile.path)}/$_LIBRARY_NAME";
+    String libPath = "${dirname(exeFile.path)}/$_libraryName";
 
     print("attempting to open library name: $libPath");
     final lib = ffi.DynamicLibrary.open(libPath);
@@ -30,46 +28,45 @@ class KeysightCAPI extends ChangeNotifier {
     }
 
     _createBackend = lib
-        .lookup<ffi.NativeFunction<CreateBackend_FFI>>("create_backend")
+        .lookup<ffi.NativeFunction<CreateBackendFFI>>("create_backend")
         .asFunction();
 
     startSaveSequence = lib
-        .lookup<ffi.NativeFunction<StartSaveSequence_FFI>>(
-            "start_save_sequence")
+        .lookup<ffi.NativeFunction<StartSaveSequenceFFI>>("start_save_sequence")
         .asFunction();
 
     addSaveSequenceStep = lib
-        .lookup<ffi.NativeFunction<AddSaveSequenceStep_FFI>>(
+        .lookup<ffi.NativeFunction<AddSaveSequenceStepFFI>>(
             "add_save_sequence_step")
         .asFunction();
 
     addSaveSequenceTest = lib
-        .lookup<ffi.NativeFunction<AddSaveSequenceTest_FFI>>(
+        .lookup<ffi.NativeFunction<AddSaveSequenceTestFFI>>(
             "add_save_sequence_test")
         .asFunction();
 
     finishSaveSequence = lib
-        .lookup<ffi.NativeFunction<Void_Function_FFI>>("finish_save_sequence")
+        .lookup<ffi.NativeFunction<VoidFunctionFFI>>("finish_save_sequence")
         .asFunction();
 
     _runService = lib
-        .lookup<ffi.NativeFunction<Void_Function_FFI>>("run_service")
+        .lookup<ffi.NativeFunction<VoidFunctionFFI>>("run_service")
         .asFunction();
 
     sequenceRemove = lib
-        .lookup<ffi.NativeFunction<SequenceRemove_FFI>>("sequence_remove")
+        .lookup<ffi.NativeFunction<SequenceRemoveFFI>>("sequence_remove")
         .asFunction();
 
     ReceivePort loadSequencesPort = ReceivePort()
       ..listen((data) {
-        print("seq received $data ${data}");
+        print("seq received $data");
       });
 
     int loadSequencesNativePort = loadSequencesPort.sendPort.nativePort;
 
     ReceivePort finishLoadSequencesPort = ReceivePort()
       ..listen((data) {
-        print("finished seq received $data ${data}");
+        print("finished seq received $data");
       });
 
     int finishLoadSequencesNativePort =
@@ -90,40 +87,50 @@ class KeysightCAPI extends ChangeNotifier {
     int loadTestsNativePort = loadTestsPort.sendPort.nativePort;
 
     loadAllSequences = lib
-        .lookup<ffi.NativeFunction<Void_Function_FFI>>("load_all_sequences")
+        .lookup<ffi.NativeFunction<VoidFunctionFFI>>("load_all_sequences")
         .asFunction();
 
     _createBackend(1, loadSequencesNativePort, finishLoadSequencesNativePort,
         loadStepsNativePort, loadTestsNativePort);
     _runService();
-
-    //cellsSelected[0][0] = 0;
   }
 
-  final List<bool> sequencesStarted = [
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-  ];
+  final List<bool> sequencesStarted = List.generate(8, (index) => false);
 
   final List<List<int>> cellsSelected =
       List.generate(8, (index) => List<int>.filled(32, -1));
 
-  final List<bool> cardsActive = [
-    true,
-    true,
-    true,
-    false,
-    false,
-    false,
-    false,
-    false,
-  ];
+  final List<bool> cardsActive = List.generate(8, (index) {
+    if (index < 3) {
+      return true;
+    } else {
+      return false;
+    }
+  });
+
+  final List<List<String>> cellNames = List.generate(
+      8,
+      (i) => List.generate(32, (k) {
+            String moduleNumber = (i + 1).toString();
+            String betweenNumber = "0";
+            if ((k + 1) < 10) {
+              betweenNumber = "00";
+            }
+            String endNumber = (k + 1).toString();
+
+            return moduleNumber + betweenNumber + endNumber;
+          }));
+
+  final List<List<double>> voltageValues =
+      List.generate(8, (i) => List.generate(32, (k) => 0.0));
+
+  final List<List<double>> currentValues =
+      List.generate(8, (i) => List.generate(32, (k) => 0.0));
+
+  final List<List<double>> capacityAmpHrs =
+      List.generate(8, (i) => List.generate(32, (k) => 0.0));
+  final List<List<double>> capacityWattHrs =
+      List.generate(8, (i) => List.generate(32, (k) => 0.0));
 
   void setSequenceStarted(int index, bool value) {
     if (index < sequencesStarted.length) {
@@ -134,80 +141,72 @@ class KeysightCAPI extends ChangeNotifier {
 
   void setCellSequenceStarted(
       int module, int index, int sequenceNumber, bool value) {
-    print("set cell seq called $module, $index $sequenceNumber $value");
     if (module < cellsSelected.length) {
-      print("module was correct length");
       if (index < cellsSelected.elementAt(module).length) {
-        print("cell was correct length");
-        print(
-            "val: $value c: ${cellsSelected[module][index]} seq: $sequenceNumber");
         if (value && cellsSelected[module][index] == -1) {
-          print(
-              "value was true and module $module cell $index seq $sequenceNumber");
           cellsSelected[module][index] = sequenceNumber;
           notifyListeners();
         } else if (!value && cellsSelected[module][index] == sequenceNumber) {
-          print(
-              "value was false and module $module cell $index seq $sequenceNumber");
-
           cellsSelected[module][index] = -1;
           notifyListeners();
         }
-      } else
+      } else {
         assert(false);
-    } else
+      }
+    } else {
       assert(false);
+    }
   }
 
-  late StartSaveSequence_C startSaveSequence;
-  late AddSaveSequenceStep_C addSaveSequenceStep;
-  late AddSaveSequenceTest_C addSaveSequenceTest;
-  late Void_Function_C finishSaveSequence;
-  late CreateBackend_C _createBackend;
-  late Void_Function_C _runService;
-  late SequenceRemove_C sequenceRemove;
-  late Void_Function_C loadAllSequences;
+  late StartSaveSequenceC startSaveSequence;
+  late AddSaveSequenceStepC addSaveSequenceStep;
+  late AddSaveSequenceTestC addSaveSequenceTest;
+  late VoidFunctionC finishSaveSequence;
+  late CreateBackendC _createBackend;
+  late VoidFunctionC _runService;
+  late SequenceRemoveC sequenceRemove;
+  late VoidFunctionC loadAllSequences;
 
-  static const String _LIBRARY_NAME = 'lib/libkeysight_backend.so';
+  static const String _libraryName = 'lib/libkeysight_backend.so';
 }
 
 KeysightCAPI? keysightCAPI;
 
 //FFI signature types
-typedef Void_Function_FFI = ffi.Void Function();
-typedef Void_Function_C = void Function();
+typedef VoidFunctionFFI = ffi.Void Function();
+typedef VoidFunctionC = void Function();
 
 //create backend
-typedef CreateBackend_FFI = ffi.Void Function(
+typedef CreateBackendFFI = ffi.Void Function(
     ffi.Uint8 usingDart,
     ffi.Int64 seqPort,
     ffi.Int64 seqFinPort,
     ffi.Int64 stepsPort,
     ffi.Int64 testsPort);
-typedef CreateBackend_C = void Function(
+typedef CreateBackendC = void Function(
     int usingDart, int seqPort, int seqFinPort, int stepsPort, int testsPort);
 
 //start save sequence
-typedef StartSaveSequence_FFI = ffi.Void Function(ffi.Pointer<Utf8> name,
-    ffi.Pointer<Utf8> serial_number, ffi.Pointer<Utf8> comments);
-typedef StartSaveSequence_C = void Function(ffi.Pointer<Utf8> name,
-    ffi.Pointer<Utf8> serial_number, ffi.Pointer<Utf8> comments);
+typedef StartSaveSequenceFFI = ffi.Void Function(ffi.Pointer<Utf8> name,
+    ffi.Pointer<Utf8> serialNumber, ffi.Pointer<Utf8> comments);
+typedef StartSaveSequenceC = void Function(ffi.Pointer<Utf8> name,
+    ffi.Pointer<Utf8> serialNumber, ffi.Pointer<Utf8> comments);
 
 //add save sequence step
-typedef AddSaveSequenceStep_FFI = ffi.Void Function(
+typedef AddSaveSequenceStepFFI = ffi.Void Function(
     ffi.Int32 mode, ffi.Int32 seconds, ffi.Double current, ffi.Double voltage);
-typedef AddSaveSequenceStep_C = void Function(
+typedef AddSaveSequenceStepC = void Function(
     int mode, int seconds, double current, double voltage);
 
 //add save sequence test
-typedef AddSaveSequenceTest_FFI = ffi.Void Function(
+typedef AddSaveSequenceTestFFI = ffi.Void Function(
     ffi.Int32 testType,
     ffi.Int32 testAction,
     ffi.Double value,
     ffi.Int32 timeType,
     ffi.Int32 timeLimit);
-typedef AddSaveSequenceTest_C = void Function(
+typedef AddSaveSequenceTestC = void Function(
     int testType, int testAction, double value, int timeType, int timeLimit);
 
-typedef SequenceRemove_FFI = ffi.Void Function(ffi.Pointer<Utf8> name);
-typedef SequenceRemove_C = void Function(ffi.Pointer<Utf8> name);
+typedef SequenceRemoveFFI = ffi.Void Function(ffi.Pointer<Utf8> name);
+typedef SequenceRemoveC = void Function(ffi.Pointer<Utf8> name);

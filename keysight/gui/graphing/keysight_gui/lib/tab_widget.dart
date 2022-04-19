@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:keysight_gui/screens/instrument_connection/instrument_widget.dart';
-import 'package:keysight_gui/screens/profile_sequence/profile_sequence_widget.dart';
 
 class TabWidget extends HookWidget {
   const TabWidget(
@@ -34,7 +32,7 @@ class TabWidget extends HookWidget {
             tabs: List.generate(
               tabs.length,
               (index) => Padding(
-                padding: EdgeInsets.all(8.0),
+                padding: const EdgeInsets.all(8.0),
                 child: tabs.elementAt(index),
               ),
             ),
@@ -56,7 +54,7 @@ class TabWidget extends HookWidget {
                         blurRadius: 5,
                         spreadRadius: 4,
                         color: Colors.black.withOpacity(0.8),
-                        offset: Offset(0, 5),
+                        offset: const Offset(0, 5),
                       )
                     ],
             ),

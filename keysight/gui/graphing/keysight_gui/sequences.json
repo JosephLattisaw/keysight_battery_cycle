@@ -7,24 +7,7 @@
         },
         "joe": {
             "serial_number": "",
-            "comments": "",
-            "steps": {
-                "0": {
-                    "mode": "0",
-                    "seconds": "1",
-                    "current": "0.10000000000000001",
-                    "voltage": "2",
-                    "tests": {
-                        "0": {
-                            "test_type": "0",
-                            "test_action": "0",
-                            "value": "2",
-                            "time_type": "0",
-                            "time_limit": "20"
-                        }
-                    }
-                }
-            }
+            "comments": ""
         }
     }
 }

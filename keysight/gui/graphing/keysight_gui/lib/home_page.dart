@@ -38,8 +38,8 @@ class HomePage extends HookWidget {
                   padding: const EdgeInsets.only(top: 8.0, right: 8.0),
                   child: ElevatedButton(
                     onPressed: () {},
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
+                    child: const Padding(
+                      padding: EdgeInsets.all(8.0),
                       child: Text("Emergency Shutoff"),
                     ),
                     style: ElevatedButton.styleFrom(
@@ -50,9 +50,9 @@ class HomePage extends HookWidget {
               ),
               Expanded(
                 child: Padding(
-                  padding: EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.all(8.0),
                   child: TabWidget(
-                    tabs: [
+                    tabs: const [
                       Text("Instrument Connection"),
                       Text("Profile Sequence"),
                       Text("Measurements"),
