@@ -21,8 +21,8 @@ class TestTabbedWidget extends HookWidget {
         (KeysightCAPI k) => k.sequencesStarted.elementAt(sequenceNumber));
     final c_api = Provider.of<KeysightCAPI>(context, listen: false);
 
-    checkCount =
-        useState(List<List<bool>>.filled(8, List<bool>.filled(32, false)));
+    checkCount = useState(
+        List<List<bool>>.generate(8, (index) => List<bool>.filled(32, false)));
 
     return Padding(
       padding: const EdgeInsets.only(top: 8),
