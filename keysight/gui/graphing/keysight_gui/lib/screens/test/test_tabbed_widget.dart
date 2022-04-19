@@ -76,12 +76,12 @@ class TestTabbedWidget extends HookWidget {
                     TestSequenceCellsTab(
                         canStartSequence: ((value, count) {
                           Future.delayed(Duration.zero, () async {
-                            print("can start ${canStartSequence.value} $value");
                             canStartSequence.value = value;
                             checkCount.value = count;
                           });
                         }),
-                        sequenceStarted: sequenceStarted),
+                        sequenceStarted: sequenceStarted,
+                        sequenceNumber: sequenceNumber),
                     TestSequenceMeasurementsTab(
                       sequenceNumber: sequenceNumber,
                     ),

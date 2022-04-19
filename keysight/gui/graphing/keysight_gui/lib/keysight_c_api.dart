@@ -96,6 +96,8 @@ class KeysightCAPI extends ChangeNotifier {
     _createBackend(1, loadSequencesNativePort, finishLoadSequencesNativePort,
         loadStepsNativePort, loadTestsNativePort);
     _runService();
+
+    //cellsSelected[0][0] = 0;
   }
 
   final List<bool> sequencesStarted = [
@@ -108,18 +110,19 @@ class KeysightCAPI extends ChangeNotifier {
     false,
     false,
   ];
+
   final List<List<int>> cellsSelected =
-      List<List<int>>.filled(8, List<int>.filled(32, -1));
+      List.generate(8, (index) => List<int>.filled(32, -1));
 
   final List<bool> cardsActive = [
     true,
     true,
     true,
-    false,
-    false,
-    false,
-    false,
-    false,
+    true,
+    true,
+    true,
+    true,
+    true,
   ];
 
   void setSequenceStarted(int index, bool value) {
@@ -127,6 +130,38 @@ class KeysightCAPI extends ChangeNotifier {
       sequencesStarted[index] = value;
       notifyListeners();
     }
+  }
+
+  void setCellSequenceStarted(
+      int module, int index, int sequenceNumber, bool value) {
+    print("set cell seq called $module, $index $sequenceNumber $value");
+    if (module < cellsSelected.length) {
+      print("module was correct length");
+      if (index < cellsSelected.elementAt(module).length) {
+        print("cell was correct length");
+        print(
+            "val: $value c: ${cellsSelected[module][index]} seq: $sequenceNumber");
+        if (value && cellsSelected[module][index] == -1) {
+          print("$cellsSelected");
+          print("${cellsSelected[module]}");
+          print("${cellsSelected[module][index]}");
+          print(
+              "value was true and module $module cell $index seq $sequenceNumber");
+          cellsSelected[module][index] = sequenceNumber;
+          print("$cellsSelected");
+          notifyListeners();
+        } else if (!value && cellsSelected[module][index] == sequenceNumber) {
+          print(
+              "value was false and module $module cell $index seq $sequenceNumber");
+
+          cellsSelected[module][index] = -1;
+          print("$cellsSelected");
+          notifyListeners();
+        }
+      } else
+        assert(false);
+    } else
+      assert(false);
   }
 
   late StartSaveSequence_C startSaveSequence;

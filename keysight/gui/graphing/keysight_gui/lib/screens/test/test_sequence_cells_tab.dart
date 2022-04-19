@@ -5,13 +5,17 @@ import 'package:keysight_gui/keysight_c_api.dart';
 
 class TestSequenceCellsTab extends HookWidget {
   TestSequenceCellsTab(
-      {Key? key, required this.canStartSequence, required this.sequenceStarted})
+      {Key? key,
+      required this.canStartSequence,
+      required this.sequenceStarted,
+      required this.sequenceNumber})
       : super(key: key);
 
   final void Function(bool value, List<List<bool>> cells) canStartSequence;
 
   late ValueNotifier<List<List<bool>>> checkCount;
   final bool sequenceStarted;
+  final int sequenceNumber;
 
   bool isOneBoxChecked() {
     for (var i in checkCount.value) {
@@ -27,6 +31,7 @@ class TestSequenceCellsTab extends HookWidget {
   Widget build(BuildContext context) {
     final cardsActive = context.select((KeysightCAPI k) => k.cardsActive);
     final cellsSelected = context.select((KeysightCAPI k) => k.cellsSelected);
+    final c_api = Provider.of<KeysightCAPI>(context, listen: false);
 
     checkCount =
         useState(List<List<bool>>.filled(8, List<bool>.filled(32, false)));
@@ -47,12 +52,14 @@ class TestSequenceCellsTab extends HookWidget {
                           moduleActive: cardsActive.elementAt(l_idx),
                           sequenceStarted: sequenceStarted,
                           cellActiveInSequence:
-                              cellsSelected.elementAt(l_idx).elementAt(c_idx) ==
-                                  l_idx,
+                              cellsSelected.elementAt(l_idx).elementAt(c_idx),
+                          sequenceNumber: sequenceNumber,
                           onChanged: (bool value) {
                             checkCount.value[l_idx][c_idx] = value;
                             canStartSequence(
                                 isOneBoxChecked(), checkCount.value);
+                            //c_api.setCellSequenceStarted(
+                            //  l_idx, c_idx, sequenceNumber, value);
                           },
                         ),
                       ),
@@ -77,14 +84,17 @@ class TestCellsCheckboxWidget extends HookWidget {
     required this.sequenceStarted,
     required this.cellActiveInSequence,
     required this.onChanged,
+    required this.sequenceNumber,
   }) : super(key: key);
 
   final int cellNumber;
   final int moduleNumber;
   final bool moduleActive;
   final bool sequenceStarted;
-  final bool cellActiveInSequence;
+  final int cellActiveInSequence;
+  final int sequenceNumber;
   late ValueNotifier<bool> checked;
+  late KeysightCAPI c_api;
 
   final void Function(bool value) onChanged;
 
@@ -110,14 +120,23 @@ class TestCellsCheckboxWidget extends HookWidget {
     //0 = inactive
     //1 = active
     //2 = running already
+    if (sequenceNumber == 0) {
+      //print(
+      //  "seq $sequenceNumber mod $moduleNumber, cell $cellNumber active $cellActiveInSequence");
+      //print(
+      //  "${c_api.cellsSelected.elementAt(moduleNumber).elementAt(cellNumber)}");
+    }
 
-    if (cellActiveInSequence) {
+    /*if (sequenceStarted && cellActiveInSequence == sequenceNumber) {
       return StatusCellCheckbox.running; //can't select this but it's checked
     } else if (!moduleActive || sequenceStarted) {
+      checked.value = false;
       return StatusCellCheckbox.inactive; //module is not active
     } else {
       return StatusCellCheckbox.active;
-    }
+    }*/
+
+    return StatusCellCheckbox.active;
   }
 
   Color? getBoxDecorationColor() {
@@ -148,16 +167,12 @@ class TestCellsCheckboxWidget extends HookWidget {
   bool getModeCheckable() {
     switch (getMode()) {
       case StatusCellCheckbox.running:
-        checkedChange(false);
         return false;
       case StatusCellCheckbox.active:
-        checkedChange(true);
         return true;
       case StatusCellCheckbox.inactive:
-        checkedChange(false);
         return false;
       default:
-        checkedChange(false);
         return false;
     }
   }
@@ -173,6 +188,8 @@ class TestCellsCheckboxWidget extends HookWidget {
   Widget build(BuildContext context) {
     checked = useState(false);
 
+    c_api = Provider.of<KeysightCAPI>(context, listen: false);
+
     return Container(
       decoration: BoxDecoration(
         color: getBoxDecorationColor(),
@@ -186,6 +203,9 @@ class TestCellsCheckboxWidget extends HookWidget {
         onChanged: !getModeCheckable()
             ? null
             : (newValue) {
+                print("value changed? $newValue");
+                c_api.setCellSequenceStarted(moduleNumber, cellNumber,
+                    sequenceNumber, newValue ?? false);
                 checked.value = newValue ?? false;
                 onChanged(newValue ?? false);
               },
