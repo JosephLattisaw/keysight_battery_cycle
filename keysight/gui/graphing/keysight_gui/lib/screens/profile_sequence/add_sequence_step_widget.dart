@@ -32,8 +32,8 @@ class AddSequenceStepWidget extends HookWidget {
           children: <Widget>[
             Container(
               color: Colors.blue,
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
+              child: const Padding(
+                padding: EdgeInsets.all(16.0),
                 child: Text(
                   'Add a Step to a Profile Sequence',
                   textAlign: TextAlign.left,
@@ -70,8 +70,8 @@ class AddSequenceStepWidget extends HookWidget {
                               color: Colors.black.withOpacity(0.5),
                               spreadRadius: 1,
                               blurRadius: 7,
-                              offset:
-                                  Offset(0, 3), // changes position of shadow
+                              offset: const Offset(
+                                  0, 3), // changes position of shadow
                             ),
                           ],
                           borderRadius: BorderRadius.circular(10),
@@ -83,14 +83,14 @@ class AddSequenceStepWidget extends HookWidget {
                               padding: const EdgeInsets.all(10.0),
                               child: Column(
                                 children: [
-                                  Text(
+                                  const Text(
                                     "Select a Mode From the Dropdown to Decide What Action Will Be Taken During This Step",
                                     style: TextStyle(
                                         color: Colors.white,
                                         fontSize: 16,
                                         fontStyle: FontStyle.italic),
                                   ),
-                                  SizedBox(
+                                  const SizedBox(
                                     height: 8,
                                   ),
                                   IntrinsicWidth(
@@ -110,13 +110,13 @@ class AddSequenceStepWidget extends HookWidget {
                                       dropdownColor: Colors.blueAccent,
                                       decoration: InputDecoration(
                                         enabledBorder: OutlineInputBorder(
-                                          borderSide: BorderSide(
+                                          borderSide: const BorderSide(
                                               color: Colors.black, width: 1.4),
                                           borderRadius:
                                               BorderRadius.circular(5),
                                         ),
                                         border: OutlineInputBorder(
-                                          borderSide: BorderSide(
+                                          borderSide: const BorderSide(
                                               color: Colors.blue, width: 2),
                                           borderRadius:
                                               BorderRadius.circular(20),
@@ -124,13 +124,13 @@ class AddSequenceStepWidget extends HookWidget {
                                         filled: true,
                                         fillColor: Colors.blueAccent,
                                       ),
-                                      icon: Icon(
+                                      icon: const Icon(
                                         Icons.arrow_drop_down,
                                         color: Colors.black,
                                       ),
                                     ),
                                   ),
-                                  SizedBox(
+                                  const SizedBox(
                                     height: 8,
                                   ),
                                   Text(
@@ -166,8 +166,8 @@ class AddSequenceStepWidget extends HookWidget {
                               color: Colors.black.withOpacity(0.5),
                               spreadRadius: 1,
                               blurRadius: 7,
-                              offset:
-                                  Offset(0, 3), // changes position of shadow
+                              offset: const Offset(
+                                  0, 3), // changes position of shadow
                             ),
                           ],
                           borderRadius: BorderRadius.circular(10),
@@ -179,14 +179,14 @@ class AddSequenceStepWidget extends HookWidget {
                               padding: const EdgeInsets.all(10.0),
                               child: Column(
                                 children: [
-                                  Text(
+                                  const Text(
                                     "Specify the Duration. (The Maximum Allowable Step Time in Seconds)",
                                     style: TextStyle(
                                         color: Colors.white,
                                         fontSize: 16,
                                         fontStyle: FontStyle.italic),
                                   ),
-                                  SizedBox(
+                                  const SizedBox(
                                     height: 8,
                                   ),
                                   IntrinsicWidth(
@@ -199,15 +199,15 @@ class AddSequenceStepWidget extends HookWidget {
                                       onChanged: (value) {
                                         durationSeconds.value = value.toInt();
                                       },
-                                      incrementIcon: Icon(
+                                      incrementIcon: const Icon(
                                         Icons.add,
                                         color: Colors.black,
                                       ),
-                                      decrementIcon: Icon(
+                                      decrementIcon: const Icon(
                                         Icons.remove,
                                         color: Colors.black,
                                       ),
-                                      decoration: InputDecoration(
+                                      decoration: const InputDecoration(
                                         enabledBorder: OutlineInputBorder(
                                           borderSide: BorderSide(
                                               color: Colors.black, width: 1.4),
@@ -224,7 +224,7 @@ class AddSequenceStepWidget extends HookWidget {
                                       textAlign: TextAlign.center,
                                     ),
                                   ),
-                                  SizedBox(
+                                  const SizedBox(
                                     height: 8,
                                   ),
                                   Text(
@@ -241,227 +241,221 @@ class AddSequenceStepWidget extends HookWidget {
                         ),
                       ),
                     ),
-                    Container(
-                      child: IntrinsicHeight(
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Padding(
-                                padding: const EdgeInsets.only(
-                                    left: 16, top: 8, right: 4),
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: Colors.grey.shade800,
-                                    border: Border.all(
-                                      width: 2.0,
-                                      style: BorderStyle.solid,
-                                      color: Colors.grey.shade800,
-                                    ),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withOpacity(0.5),
-                                        spreadRadius: 1,
-                                        blurRadius: 7,
-                                        offset: Offset(
-                                            0, 3), // changes position of shadow
-                                      ),
-                                    ],
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(10.0),
-                                    child: Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Text(
-                                          "Specify the Current Limit for the Step <CC> (Amps)",
-                                          style: TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 16,
-                                              fontStyle: FontStyle.italic),
-                                        ),
-                                        SizedBox(
-                                          height: 8,
-                                        ),
-                                        IntrinsicWidth(
-                                          child: SpinBox(
-                                            value: currentLimit.value,
-                                            min: 0.01,
-                                            max: 6.25,
-                                            step: 0.1,
-                                            decimals: 2,
-                                            onChanged: (value) {
-                                              currentLimit.value = value;
-                                            },
-                                            incrementIcon: Icon(
-                                              Icons.add,
-                                              color: Colors.black,
-                                            ),
-                                            decrementIcon: Icon(
-                                              Icons.remove,
-                                              color: Colors.black,
-                                            ),
-                                            decoration: InputDecoration(
-                                              enabledBorder: OutlineInputBorder(
-                                                borderSide: BorderSide(
-                                                    color: Colors.black,
-                                                    width: 1.4),
-                                              ),
-                                              border: OutlineInputBorder(),
-                                              hintStyle: TextStyle(
-                                                color: Colors.black,
-                                                fontStyle: FontStyle.italic,
-                                              ),
-                                              hintText: "Centered Text",
-                                              filled: true,
-                                              fillColor: Colors.blue,
-                                            ),
-                                            textAlign: TextAlign.center,
-                                          ),
-                                        ),
-                                        SizedBox(
-                                          height: 8,
-                                        ),
-                                        Text(
-                                          "In charge mode, this refers to the current source limit.\n In discharge mode, this refers to the current sink limit.",
-                                          style: TextStyle(
-                                            color: Colors.grey.shade400,
-                                            fontStyle: FontStyle.italic,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              child: Padding(
-                                padding: const EdgeInsets.only(
-                                  right: 16.0,
-                                  top: 8.0,
-                                  left: 4,
-                                ),
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: Colors.grey.shade800,
-                                    border: Border.all(
-                                      width: 2.0,
-                                      style: BorderStyle.solid,
-                                      color: Colors.grey.shade800,
-                                    ),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withOpacity(0.5),
-                                        spreadRadius: 1,
-                                        blurRadius: 7,
-                                        offset: Offset(
-                                            0, 3), // changes position of shadow
-                                      ),
-                                    ],
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(10.0),
-                                    child: Column(
-                                      children: [
-                                        Text(
-                                          "Specify the Voltage Limit for the Step <CV> (Volts)",
-                                          style: TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 16,
-                                              fontStyle: FontStyle.italic),
-                                        ),
-                                        SizedBox(
-                                          height: 8,
-                                        ),
-                                        IntrinsicWidth(
-                                          child: SpinBox(
-                                            value: voltageLimit.value,
-                                            min: 2.0,
-                                            max: 4.5,
-                                            decimals: 2,
-                                            step: 0.1,
-                                            onChanged: (value) {
-                                              voltageLimit.value = value;
-                                            },
-                                            incrementIcon: Icon(
-                                              Icons.add,
-                                              color: Colors.black,
-                                            ),
-                                            decrementIcon: Icon(
-                                              Icons.remove,
-                                              color: Colors.black,
-                                            ),
-                                            decoration: InputDecoration(
-                                              enabledBorder: OutlineInputBorder(
-                                                borderSide: BorderSide(
-                                                    color: Colors.black,
-                                                    width: 1.4),
-                                              ),
-                                              border: OutlineInputBorder(),
-                                              hintStyle: TextStyle(
-                                                color: Colors.black,
-                                                fontStyle: FontStyle.italic,
-                                              ),
-                                              hintText: "Centered Text",
-                                              filled: true,
-                                              fillColor: Colors.blue,
-                                            ),
-                                            textAlign: TextAlign.center,
-                                          ),
-                                        ),
-                                        SizedBox(
-                                          height: 8,
-                                        ),
-                                        Text(
-                                          "The channel will limit the voltage to this value.",
-                                          style: TextStyle(
-                                            color: Colors.grey.shade400,
-                                            fontStyle: FontStyle.italic,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    SizedBox(
-                      height: 24,
-                    ),
-                    Container(
+                    IntrinsicHeight(
                       child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          ElevatedButton(
-                            onPressed: () {
-                              onSave(modeSelection.value, durationSeconds.value,
-                                  currentLimit.value, voltageLimit.value);
-                              Navigator.of(context).maybePop();
-                            },
-                            child: Text("Save"),
-                            style:
-                                ElevatedButton.styleFrom(primary: Colors.green),
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.only(
+                                  left: 16, top: 8, right: 4),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.grey.shade800,
+                                  border: Border.all(
+                                    width: 2.0,
+                                    style: BorderStyle.solid,
+                                    color: Colors.grey.shade800,
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.5),
+                                      spreadRadius: 1,
+                                      blurRadius: 7,
+                                      offset: const Offset(
+                                          0, 3), // changes position of shadow
+                                    ),
+                                  ],
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(10.0),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      const Text(
+                                        "Specify the Current Limit for the Step <CC> (Amps)",
+                                        style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 16,
+                                            fontStyle: FontStyle.italic),
+                                      ),
+                                      const SizedBox(
+                                        height: 8,
+                                      ),
+                                      IntrinsicWidth(
+                                        child: SpinBox(
+                                          value: currentLimit.value,
+                                          min: 0.01,
+                                          max: 6.25,
+                                          step: 0.1,
+                                          decimals: 2,
+                                          onChanged: (value) {
+                                            currentLimit.value = value;
+                                          },
+                                          incrementIcon: const Icon(
+                                            Icons.add,
+                                            color: Colors.black,
+                                          ),
+                                          decrementIcon: const Icon(
+                                            Icons.remove,
+                                            color: Colors.black,
+                                          ),
+                                          decoration: const InputDecoration(
+                                            enabledBorder: OutlineInputBorder(
+                                              borderSide: BorderSide(
+                                                  color: Colors.black,
+                                                  width: 1.4),
+                                            ),
+                                            border: OutlineInputBorder(),
+                                            hintStyle: TextStyle(
+                                              color: Colors.black,
+                                              fontStyle: FontStyle.italic,
+                                            ),
+                                            hintText: "Centered Text",
+                                            filled: true,
+                                            fillColor: Colors.blue,
+                                          ),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      ),
+                                      const SizedBox(
+                                        height: 8,
+                                      ),
+                                      Text(
+                                        "In charge mode, this refers to the current source limit.\n In discharge mode, this refers to the current sink limit.",
+                                        style: TextStyle(
+                                          color: Colors.grey.shade400,
+                                          fontStyle: FontStyle.italic,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
                           ),
-                          SizedBox(
-                            width: 8,
-                          ),
-                          ElevatedButton(
-                            onPressed: () {
-                              Navigator.of(context).maybePop();
-                            },
-                            child: Text("Cancel"),
-                            style:
-                                ElevatedButton.styleFrom(primary: Colors.red),
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.only(
+                                right: 16.0,
+                                top: 8.0,
+                                left: 4,
+                              ),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.grey.shade800,
+                                  border: Border.all(
+                                    width: 2.0,
+                                    style: BorderStyle.solid,
+                                    color: Colors.grey.shade800,
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.5),
+                                      spreadRadius: 1,
+                                      blurRadius: 7,
+                                      offset: const Offset(
+                                          0, 3), // changes position of shadow
+                                    ),
+                                  ],
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(10.0),
+                                  child: Column(
+                                    children: [
+                                      const Text(
+                                        "Specify the Voltage Limit for the Step <CV> (Volts)",
+                                        style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 16,
+                                            fontStyle: FontStyle.italic),
+                                      ),
+                                      const SizedBox(
+                                        height: 8,
+                                      ),
+                                      IntrinsicWidth(
+                                        child: SpinBox(
+                                          value: voltageLimit.value,
+                                          min: 2.0,
+                                          max: 4.5,
+                                          decimals: 2,
+                                          step: 0.1,
+                                          onChanged: (value) {
+                                            voltageLimit.value = value;
+                                          },
+                                          incrementIcon: const Icon(
+                                            Icons.add,
+                                            color: Colors.black,
+                                          ),
+                                          decrementIcon: const Icon(
+                                            Icons.remove,
+                                            color: Colors.black,
+                                          ),
+                                          decoration: const InputDecoration(
+                                            enabledBorder: OutlineInputBorder(
+                                              borderSide: BorderSide(
+                                                  color: Colors.black,
+                                                  width: 1.4),
+                                            ),
+                                            border: OutlineInputBorder(),
+                                            hintStyle: TextStyle(
+                                              color: Colors.black,
+                                              fontStyle: FontStyle.italic,
+                                            ),
+                                            hintText: "Centered Text",
+                                            filled: true,
+                                            fillColor: Colors.blue,
+                                          ),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      ),
+                                      const SizedBox(
+                                        height: 8,
+                                      ),
+                                      Text(
+                                        "The channel will limit the voltage to this value.",
+                                        style: TextStyle(
+                                          color: Colors.grey.shade400,
+                                          fontStyle: FontStyle.italic,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
                           ),
                         ],
                       ),
+                    ),
+                    const SizedBox(
+                      height: 24,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        ElevatedButton(
+                          onPressed: () {
+                            onSave(modeSelection.value, durationSeconds.value,
+                                currentLimit.value, voltageLimit.value);
+                            Navigator.of(context).maybePop();
+                          },
+                          child: const Text("Save"),
+                          style:
+                              ElevatedButton.styleFrom(primary: Colors.green),
+                        ),
+                        const SizedBox(
+                          width: 8,
+                        ),
+                        ElevatedButton(
+                          onPressed: () {
+                            Navigator.of(context).maybePop();
+                          },
+                          child: const Text("Cancel"),
+                          style: ElevatedButton.styleFrom(primary: Colors.red),
+                        ),
+                      ],
                     ),
                   ],
                 ),

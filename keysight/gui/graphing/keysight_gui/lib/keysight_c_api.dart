@@ -13,7 +13,7 @@ class KeysightCAPI extends ChangeNotifier {
     print("resolved exec path1: ${Platform.resolvedExecutable}");
     keysightCAPI = this;
 
-    File exeFile = File("${Platform.resolvedExecutable}");
+    File exeFile = File(Platform.resolvedExecutable);
     String libPath = "${dirname(exeFile.path)}/$_libraryName";
 
     print("attempting to open library name: $libPath");

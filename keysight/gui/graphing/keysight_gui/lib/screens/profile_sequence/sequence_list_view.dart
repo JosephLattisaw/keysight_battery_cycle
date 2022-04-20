@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:keysight_gui/screens/profile_sequence/sequence_list_item.dart';
 
 class SequenceListView extends StatelessWidget {
-  SequenceListView(
+  const SequenceListView(
       {Key? key,
       required this.selectedSequence,
       required this.selectedIndex,
@@ -27,8 +27,8 @@ class SequenceListView extends StatelessWidget {
           Container(
             color: Colors.black,
             width: double.infinity,
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
+            child: const Padding(
+              padding: EdgeInsets.all(8.0),
               child: Text(
                 "Profiles",
                 style: TextStyle(color: Colors.white),

@@ -4,16 +4,10 @@ import 'package:provider/provider.dart';
 import 'package:keysight_gui/keysight_c_api.dart';
 
 class MeasurementTableWidget extends HookWidget {
-  MeasurementTableWidget({Key? key, this.sequenceNumber = -1})
+  const MeasurementTableWidget({Key? key, this.sequenceNumber = -1})
       : super(key: key);
 
   final int sequenceNumber;
-
-  late ValueNotifier<int> tableSize;
-
-  void setTableSize(int size) {
-    if (tableSize.value != size) tableSize.value = size;
-  }
 
   int getModuleIndex(int index) {
     return index ~/ 32;
@@ -32,7 +26,11 @@ class MeasurementTableWidget extends HookWidget {
     final capacityWattHrs =
         context.select((KeysightCAPI k) => k.capacityWattHrs);
 
-    tableSize = useState(0);
+    final tableSize = useState(0);
+
+    void setTableSize(int size) {
+      if (tableSize.value != size) tableSize.value = size;
+    }
 
     if (sequenceNumber == -1) {
       setTableSize(32 * 8);
@@ -43,7 +41,7 @@ class MeasurementTableWidget extends HookWidget {
       child: DataTable(
         headingRowColor:
             MaterialStateColor.resolveWith((states) => Colors.blue.shade900),
-        columns: [
+        columns: const [
           DataColumn(
             label: Text(
               'Cell Number',
@@ -90,7 +88,7 @@ class MeasurementTableWidget extends HookWidget {
                       .elementAt(getModuleIndex(index))
                       .elementAt(getCellIndex(index))
                       .toString(),
-                  style: TextStyle(color: Colors.white),
+                  style: const TextStyle(color: Colors.white),
                 ),
               ),
               DataCell(
@@ -99,7 +97,7 @@ class MeasurementTableWidget extends HookWidget {
                       .elementAt(getModuleIndex(index))
                       .elementAt(getCellIndex(index))
                       .toString(),
-                  style: TextStyle(color: Colors.white),
+                  style: const TextStyle(color: Colors.white),
                 ),
               ),
               DataCell(
@@ -108,7 +106,7 @@ class MeasurementTableWidget extends HookWidget {
                       .elementAt(getModuleIndex(index))
                       .elementAt(getCellIndex(index))
                       .toString(),
-                  style: TextStyle(color: Colors.white),
+                  style: const TextStyle(color: Colors.white),
                 ),
               ),
               DataCell(
@@ -117,7 +115,7 @@ class MeasurementTableWidget extends HookWidget {
                       .elementAt(getModuleIndex(index))
                       .elementAt(getCellIndex(index))
                       .toString(),
-                  style: TextStyle(color: Colors.white),
+                  style: const TextStyle(color: Colors.white),
                 ),
               ),
               DataCell(
@@ -126,7 +124,7 @@ class MeasurementTableWidget extends HookWidget {
                       .elementAt(getModuleIndex(index))
                       .elementAt(getCellIndex(index))
                       .toString(),
-                  style: TextStyle(color: Colors.white),
+                  style: const TextStyle(color: Colors.white),
                 ),
               ),
             ],

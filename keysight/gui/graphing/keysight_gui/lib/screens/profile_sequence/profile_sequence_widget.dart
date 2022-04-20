@@ -1,4 +1,4 @@
-import 'package:ffi/src/utf8.dart';
+import 'package:ffi/ffi.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:keysight_gui/screens/profile_sequence/add_sequence_step_widget.dart';
@@ -11,216 +11,200 @@ import 'package:keysight_gui/keysight_c_api.dart';
 import 'package:provider/provider.dart';
 
 class ProfileSequenceWidget extends HookWidget {
-  late ValueNotifier<List<String>> sequenceList;
-  late ValueNotifier<List<bool>> sequenceSaveList;
-  late ValueNotifier<List<String>> sequenceTextList;
-  late ValueNotifier<List<String>> cellTextList;
-  late ValueNotifier<List<String>> commentsTextList;
-
-  late ValueNotifier<int> selectedSequence;
-
-  late ValueNotifier<List<Widget>> sequenceWidgets;
-
-  late PageController pageController = PageController();
-
-  late KeysightCAPI backend;
-
-  int totalPageCount = 1; //we start with 1 page
-
-  void addNewSequence() {
-    sequenceList.value = List.from(sequenceList.value)..add("New Profile");
-    sequenceSaveList.value = List.from(sequenceSaveList.value)..add(false);
-    sequenceTextList.value = List.from(sequenceTextList.value)..add("");
-    cellTextList.value = List.from(cellTextList.value)..add("");
-    commentsTextList.value = List.from(commentsTextList.value)..add("");
-
-    print("add new sequence called ${sequenceList.value.length}");
-    sequenceWidgets.value.add(SequenceBuilderKeepAliveClient(
-      key: UniqueKey(),
-      pageIndex: totalPageCount,
-      currentIndex: sequenceList.value.length - 1,
-    ));
-
-    totalPageCount++;
-    setSequenceIndex(sequenceList.value.length - 1);
-  }
-
-  void deleteSequence(int index) {
-    print("deleting sequence $index");
-    int length = sequenceList.value.length;
-    sequenceList.value = List.from(sequenceList.value)..removeAt(index);
-    sequenceSaveList.value = List.from(sequenceSaveList.value)..removeAt(index);
-    sequenceTextList.value = List.from(sequenceTextList.value)..removeAt(index);
-    cellTextList.value = List.from(cellTextList.value)..removeAt(index);
-    commentsTextList.value = List.from(commentsTextList.value)..removeAt(index);
-
-    SequenceBuilderKeepAliveClient sw = sequenceWidgets.value.elementAt(index)
-        as SequenceBuilderKeepAliveClient;
-    backend.sequenceRemove(sw.sequenceTextController.text.toNativeUtf8());
-    sw.keepAliveUpdate();
-    sequenceWidgets.value = List.from(sequenceWidgets.value)..removeAt(index);
-
-    //just goto last index if we're deleting last index
-    if (index == (length - 1)) {
-      setSequenceIndex(sequenceList.value.length - 1);
-    } else
-      setSequenceIndex(index);
-
-    //never want the list to be completey empty
-    if (sequenceList.value.isEmpty) addNewSequence();
-  }
-
-  void saveSequence(int index) {
-    SequenceBuilderKeepAliveClient sw = sequenceWidgets.value.elementAt(index)
-        as SequenceBuilderKeepAliveClient;
-    if (sw.sequenceTextController.text.isEmpty) {
-      sw.setSequenceTextError(true);
-      return;
-    } else if (sw.sequenceTextError) {
-      sw.setSequenceTextError(false);
-    }
-
-    //we made it to a save
-    sequenceSaveList.value = List.from(sequenceSaveList.value)..[index] = true;
-    sequenceList.value = List.from(sequenceList.value)
-      ..[index] = sw.sequenceTextController.text;
-    sequenceTextList.value = List.from(sequenceTextList.value)
-      ..[index] = sw.sequenceTextController.text;
-    cellTextList.value = List.from(cellTextList.value)
-      ..[index] = sw.cellTextController.text;
-    commentsTextList.value = List.from(commentsTextList.value)
-      ..[index] = sw.commentsTextController.text;
-
-    backend.startSaveSequence(
-        sw.sequenceTextController.text.toNativeUtf8(),
-        sw.cellTextController.text.toNativeUtf8(),
-        sw.commentsTextController.text.toNativeUtf8());
-
-    for (int i = 0; i < sw.table.length; i++) {
-      List<dynamic> step = sw.table.elementAt(i);
-      backend.addSaveSequenceStep(step.elementAt(0), step.elementAt(1),
-          step.elementAt(2), step.elementAt(3));
-
-      List<dynamic> tests = step.elementAt(4);
-      for (int k = 0; k < tests.length; k++) {
-        List<dynamic> t = tests.elementAt(k);
-        backend.addSaveSequenceTest(t.elementAt(0), t.elementAt(1),
-            t.elementAt(2), t.elementAt(3), t.elementAt(4));
-      }
-    }
-
-    backend.finishSaveSequence();
-  }
-
-  void setSequenceIndex(int index) {
-    selectedSequence.value = index;
-    pageController.jumpToPage(index);
-  }
+  const ProfileSequenceWidget({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    sequenceList = useState(<String>["New Profile"]);
-    selectedSequence = useState<int>(sequenceList.value.length - 1);
-    sequenceTextList = useState(<String>[""]);
-    cellTextList = useState(<String>[""]);
-    commentsTextList = useState(<String>[""]);
+    final sequenceList = useState(<String>["New Profile"]);
+    final selectedSequence = useState<int>(sequenceList.value.length - 1);
+    final sequenceTextList = useState(<String>[""]);
+    final cellTextList = useState(<String>[""]);
+    final commentsTextList = useState(<String>[""]);
 
-    sequenceSaveList = useState(<bool>[false]);
+    final sequenceSaveList = useState(<bool>[false]);
+    final totalPageCount = useState(-1);
 
-    sequenceWidgets = useState(<Widget>[
+    final sequenceWidgets = useState(<Widget>[
       SequenceBuilderKeepAliveClient(
         key: UniqueKey(),
-        pageIndex: totalPageCount - 1,
+        pageIndex: totalPageCount.value - 1,
         currentIndex: 0,
       )
     ]);
 
-    backend = Provider.of<KeysightCAPI>(context, listen: false);
+    final backend = Provider.of<KeysightCAPI>(context, listen: false);
+    final pageController = usePageController(initialPage: 0, keepPage: false);
 
     useMemoized(() {
       backend.loadAllSequences();
-      pageController = PageController(initialPage: 0, keepPage: false);
     });
 
-    return Container(
-      child: Row(
-        children: [
-          Expanded(
-            flex: 1,
-            child: Padding(
-              padding:
-                  const EdgeInsets.only(left: 12.0, top: 12.0, bottom: 12.0),
-              child: Column(
-                children: [
-                  Text(
-                    "Save, Create or Delete Profile Sequences:",
-                    style: TextStyle(
-                      color: Colors.grey,
-                      fontStyle: FontStyle.italic,
-                    ),
+    void setSequenceIndex(int index) {
+      selectedSequence.value = index;
+      pageController.jumpToPage(index);
+    }
+
+    void addNewSequence() {
+      sequenceList.value = List.from(sequenceList.value)..add("New Profile");
+      sequenceSaveList.value = List.from(sequenceSaveList.value)..add(false);
+      sequenceTextList.value = List.from(sequenceTextList.value)..add("");
+      cellTextList.value = List.from(cellTextList.value)..add("");
+      commentsTextList.value = List.from(commentsTextList.value)..add("");
+
+      sequenceWidgets.value.add(SequenceBuilderKeepAliveClient(
+        key: UniqueKey(),
+        pageIndex: totalPageCount.value,
+        currentIndex: sequenceList.value.length - 1,
+      ));
+
+      totalPageCount.value++;
+      setSequenceIndex(sequenceList.value.length - 1);
+    }
+
+    void deleteSequence(int index) {
+      int length = sequenceList.value.length;
+      sequenceList.value = List.from(sequenceList.value)..removeAt(index);
+      sequenceSaveList.value = List.from(sequenceSaveList.value)
+        ..removeAt(index);
+      sequenceTextList.value = List.from(sequenceTextList.value)
+        ..removeAt(index);
+      cellTextList.value = List.from(cellTextList.value)..removeAt(index);
+      commentsTextList.value = List.from(commentsTextList.value)
+        ..removeAt(index);
+
+      SequenceBuilderKeepAliveClient sw = sequenceWidgets.value.elementAt(index)
+          as SequenceBuilderKeepAliveClient;
+      backend.sequenceRemove(sw.sequenceTextController.text.toNativeUtf8());
+      sw.keepAliveUpdate();
+      sequenceWidgets.value = List.from(sequenceWidgets.value)..removeAt(index);
+
+      //just goto last index if we're deleting last index
+      if (index == (length - 1)) {
+        setSequenceIndex(sequenceList.value.length - 1);
+      } else {
+        setSequenceIndex(index);
+      }
+
+      //never want the list to be completey empty
+      if (sequenceList.value.isEmpty) addNewSequence();
+    }
+
+    void saveSequence(int index) {
+      SequenceBuilderKeepAliveClient sw = sequenceWidgets.value.elementAt(index)
+          as SequenceBuilderKeepAliveClient;
+      if (sw.sequenceTextController.text.isEmpty) {
+        sw.setSequenceTextError(true);
+        return;
+      } else if (sw.sequenceTextError) {
+        sw.setSequenceTextError(false);
+      }
+
+      //we made it to a save
+      sequenceSaveList.value = List.from(sequenceSaveList.value)
+        ..[index] = true;
+      sequenceList.value = List.from(sequenceList.value)
+        ..[index] = sw.sequenceTextController.text;
+      sequenceTextList.value = List.from(sequenceTextList.value)
+        ..[index] = sw.sequenceTextController.text;
+      cellTextList.value = List.from(cellTextList.value)
+        ..[index] = sw.cellTextController.text;
+      commentsTextList.value = List.from(commentsTextList.value)
+        ..[index] = sw.commentsTextController.text;
+
+      backend.startSaveSequence(
+          sw.sequenceTextController.text.toNativeUtf8(),
+          sw.cellTextController.text.toNativeUtf8(),
+          sw.commentsTextController.text.toNativeUtf8());
+
+      for (int i = 0; i < sw.table.length; i++) {
+        List<dynamic> step = sw.table.elementAt(i);
+        backend.addSaveSequenceStep(step.elementAt(0), step.elementAt(1),
+            step.elementAt(2), step.elementAt(3));
+
+        List<dynamic> tests = step.elementAt(4);
+        for (int k = 0; k < tests.length; k++) {
+          List<dynamic> t = tests.elementAt(k);
+          backend.addSaveSequenceTest(t.elementAt(0), t.elementAt(1),
+              t.elementAt(2), t.elementAt(3), t.elementAt(4));
+        }
+      }
+
+      backend.finishSaveSequence();
+    }
+
+    return Row(
+      children: [
+        Expanded(
+          flex: 1,
+          child: Padding(
+            padding: const EdgeInsets.only(left: 12.0, top: 12.0, bottom: 12.0),
+            child: Column(
+              children: [
+                const Text(
+                  "Save, Create or Delete Profile Sequences:",
+                  style: TextStyle(
+                    color: Colors.grey,
+                    fontStyle: FontStyle.italic,
                   ),
-                  Container(
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          ElevatedButton(
-                            onPressed: () =>
-                                saveSequence(selectedSequence.value),
-                            child: Text(
-                              "Save",
-                            ),
-                            style: ElevatedButton.styleFrom(
-                              primary: Colors.green,
-                            ),
-                          ),
-                          SizedBox(width: 8),
-                          ElevatedButton(
-                            onPressed: () => addNewSequence(),
-                            child: Text("New"),
-                          ),
-                          SizedBox(width: 8),
-                          ElevatedButton(
-                            onPressed: !sequenceSaveList.value
-                                    .elementAt(selectedSequence.value)
-                                ? null
-                                : () => deleteSequence(selectedSequence.value),
-                            style: ElevatedButton.styleFrom(
-                              primary: Colors.red,
-                              onSurface: Colors.grey,
-                            ),
-                            child: Text("Delete"),
-                          ),
-                        ],
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () => saveSequence(selectedSequence.value),
+                        child: const Text(
+                          "Save",
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          primary: Colors.green,
+                        ),
                       ),
-                    ),
+                      const SizedBox(width: 8),
+                      ElevatedButton(
+                        onPressed: () => addNewSequence(),
+                        child: const Text("New"),
+                      ),
+                      const SizedBox(width: 8),
+                      ElevatedButton(
+                        onPressed: !sequenceSaveList.value
+                                .elementAt(selectedSequence.value)
+                            ? null
+                            : () => deleteSequence(selectedSequence.value),
+                        style: ElevatedButton.styleFrom(
+                          primary: Colors.red,
+                          onSurface: Colors.grey,
+                        ),
+                        child: const Text("Delete"),
+                      ),
+                    ],
                   ),
-                  SizedBox(
-                    height: 8,
+                ),
+                const SizedBox(
+                  height: 8,
+                ),
+                Expanded(
+                  child: SequenceListView(
+                    selectedSequence: (value) => setSequenceIndex(value),
+                    selectedIndex: selectedSequence.value,
+                    sequenceList: sequenceList.value,
+                    sequenceItalic: sequenceSaveList.value,
                   ),
-                  Expanded(
-                    child: SequenceListView(
-                      selectedSequence: (value) => setSequenceIndex(value),
-                      selectedIndex: selectedSequence.value,
-                      sequenceList: sequenceList.value,
-                      sequenceItalic: sequenceSaveList.value,
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
-          Expanded(
-            flex: 3,
-            child: PageView(
-              children: sequenceWidgets.value,
-              controller: pageController,
-              onPageChanged: (int index) {},
-            ),
-          )
-        ],
-      ),
+        ),
+        Expanded(
+          flex: 3,
+          child: PageView(
+            children: sequenceWidgets.value,
+            controller: pageController,
+            onPageChanged: (int index) {},
+          ),
+        )
+      ],
     );
   }
 }
@@ -230,29 +214,29 @@ class SequenceBuilderKeepAliveClient extends StatefulWidget {
       {Key? key, required this.pageIndex, required this.currentIndex})
       : super(key: key);
 
-  int pageIndex;
-  int currentIndex;
+  final int pageIndex;
+  final int currentIndex;
 
   final TextEditingController sequenceTextController = TextEditingController();
   final TextEditingController cellTextController = TextEditingController();
   final TextEditingController commentsTextController = TextEditingController();
-  late _SequenceBuilderKeepAliveClientState client;
+  late final _SequenceBuilderKeepAliveClientState client;
 
   void setSequenceTextError(bool flag) {
-    sequenceTextError = flag;
+    client.sequenceTextError = flag;
     client.refresh();
   }
 
+  bool get sequenceTextError => client.sequenceTextError;
+
   void keepAliveUpdate() {
-    wantKeepAlive = false;
+    client.wantKeepAlive_ = false;
     client.keepAliveUpdate();
   }
 
-  bool sequenceTextError = false;
+  bool get wantKeepAlive => client.wantKeepAlive_;
 
-  bool wantKeepAlive = true;
-
-  List<List<dynamic>> table = <List<dynamic>>[];
+  List<List<dynamic>> get table => client.table;
 
   @override
   _SequenceBuilderKeepAliveClientState createState() {
@@ -265,6 +249,9 @@ class _SequenceBuilderKeepAliveClientState
     extends State<SequenceBuilderKeepAliveClient>
     with AutomaticKeepAliveClientMixin<SequenceBuilderKeepAliveClient> {
   int dataTableSelectedIndex = -1;
+  bool sequenceTextError = false;
+  bool wantKeepAlive_ = true;
+  List<List<dynamic>> table = <List<dynamic>>[];
 
   void refresh() {
     setState(() {});
@@ -272,7 +259,7 @@ class _SequenceBuilderKeepAliveClientState
 
   void addTableStep(List<dynamic> step) {
     setState(() {
-      widget.table.add(step);
+      table.add(step);
     });
   }
 
@@ -281,7 +268,7 @@ class _SequenceBuilderKeepAliveClientState
       List<int> indexes = List.filled(2, 0, growable: true);
       indexes = getTableIndexes(dataTableSelectedIndex);
 
-      widget.table.elementAt(indexes.elementAt(0)).elementAt(4).add(test);
+      table.elementAt(indexes.elementAt(0)).elementAt(4).add(test);
     });
   }
 
@@ -293,7 +280,7 @@ class _SequenceBuilderKeepAliveClientState
     int totalIndex = 0;
     bool nestedBreak = false;
 
-    for (var element in widget.table) {
+    for (var element in table) {
       secondIndex = -1;
 
       if (totalIndex == index) {
@@ -349,7 +336,7 @@ class _SequenceBuilderKeepAliveClientState
       result = false;
     } else if (mapping.elementAt(1) >= 0) {
       result = false;
-    } else if (mapping.elementAt(0) < widget.table.length - 1) {
+    } else if (mapping.elementAt(0) < table.length - 1) {
       result = true;
     } else {
       result = false;
@@ -363,9 +350,9 @@ class _SequenceBuilderKeepAliveClientState
       List<int> mapping = getTableIndexes(dataTableSelectedIndex);
 
       if (mapping.elementAt(1) < 0) {
-        dynamic removedItem = widget.table.elementAt(mapping.elementAt(0));
-        widget.table.removeAt(mapping.elementAt(0));
-        widget.table.insert(mapping.elementAt(0) - 1, removedItem);
+        dynamic removedItem = table.elementAt(mapping.elementAt(0));
+        table.removeAt(mapping.elementAt(0));
+        table.insert(mapping.elementAt(0) - 1, removedItem);
       }
     });
   }
@@ -375,10 +362,10 @@ class _SequenceBuilderKeepAliveClientState
       List<int> mapping = getTableIndexes(dataTableSelectedIndex);
 
       if (mapping.elementAt(1) < 0) {
-        widget.table = List.from(widget.table);
-        dynamic removedItem = widget.table.elementAt(mapping.elementAt(0));
-        widget.table.removeAt(mapping.elementAt(0));
-        widget.table.insert(mapping.elementAt(0) + 1, removedItem);
+        table = List.from(table);
+        dynamic removedItem = table.elementAt(mapping.elementAt(0));
+        table.removeAt(mapping.elementAt(0));
+        table.insert(mapping.elementAt(0) + 1, removedItem);
       }
     });
   }
@@ -388,12 +375,12 @@ class _SequenceBuilderKeepAliveClientState
       List<int> mapping = getTableIndexes(dataTableSelectedIndex);
 
       if (mapping.elementAt(1) >= 0) {
-        widget.table = List.from(widget.table)
+        table = List.from(table)
           ..elementAt(mapping.elementAt(0))
               .elementAt(4)
               .removeAt(mapping.elementAt(1));
       } else {
-        widget.table = List.from(widget.table)..removeAt(mapping.elementAt(0));
+        table = List.from(table)..removeAt(mapping.elementAt(0));
       }
     });
   }
@@ -415,15 +402,15 @@ class _SequenceBuilderKeepAliveClientState
                   child: TextField(
                     controller: widget.sequenceTextController,
                     decoration: InputDecoration(
-                      enabledBorder: OutlineInputBorder(
+                      enabledBorder: const OutlineInputBorder(
                         borderSide: BorderSide(color: Colors.white),
                       ),
-                      border: OutlineInputBorder(),
+                      border: const OutlineInputBorder(),
                       hintText: "Enter Name of Profile Sequence",
                       hintStyle: TextStyle(
                           color: Colors.grey.shade500,
                           fontStyle: FontStyle.italic),
-                      errorText: widget.sequenceTextError
+                      errorText: sequenceTextError
                           ? "A Name of a Sequence Must be Given"
                           : null,
                       filled: true,
@@ -432,12 +419,12 @@ class _SequenceBuilderKeepAliveClientState
                     inputFormatters: [
                       FilteringTextInputFormatter.allow(RegExp("[0-9a-zA-Z_ ]"))
                     ],
-                    style: TextStyle(color: Colors.white),
+                    style: const TextStyle(color: Colors.white),
                   ),
                 ),
               ],
             ),
-            SizedBox(
+            const SizedBox(
               height: 12,
             ),
             Row(
@@ -447,10 +434,10 @@ class _SequenceBuilderKeepAliveClientState
                   child: TextField(
                     controller: widget.cellTextController,
                     decoration: InputDecoration(
-                      enabledBorder: OutlineInputBorder(
+                      enabledBorder: const OutlineInputBorder(
                         borderSide: BorderSide(color: Colors.white),
                       ),
-                      border: OutlineInputBorder(),
+                      border: const OutlineInputBorder(),
                       hintText: "Enter Serial Number of Cell",
                       hintStyle: TextStyle(
                           color: Colors.grey.shade500,
@@ -458,41 +445,41 @@ class _SequenceBuilderKeepAliveClientState
                       filled: true,
                       fillColor: Colors.grey.shade800,
                     ),
-                    style: TextStyle(color: Colors.white),
+                    style: const TextStyle(color: Colors.white),
                   ),
                 ),
               ],
             ),
-            SizedBox(
+            const SizedBox(
               height: 12,
             ),
             TextField(
               controller: widget.commentsTextController,
               decoration: InputDecoration(
-                enabledBorder: OutlineInputBorder(
+                enabledBorder: const OutlineInputBorder(
                   borderSide: BorderSide(color: Colors.white),
                 ),
-                border: OutlineInputBorder(),
+                border: const OutlineInputBorder(),
                 hintText: "Include any additional comments here.",
                 hintStyle: TextStyle(
                     color: Colors.grey.shade500, fontStyle: FontStyle.italic),
                 filled: true,
                 fillColor: Colors.grey.shade800,
               ),
-              style: TextStyle(color: Colors.white),
+              style: const TextStyle(color: Colors.white),
             ),
-            SizedBox(
+            const SizedBox(
               height: 12,
             ),
             SequenceStepTable(
-              table: widget.table,
+              table: table,
               onIndexChanged: (p0) {
                 setState(() {
                   dataTableSelectedIndex = p0;
                 });
               },
             ),
-            SizedBox(
+            const SizedBox(
               height: 12,
             ),
             Row(
@@ -512,9 +499,9 @@ class _SequenceBuilderKeepAliveClientState
                           <dynamic>[]
                         ]),
                       )),
-                  child: Text("Add Step"),
+                  child: const Text("Add Step"),
                 ),
-                SizedBox(
+                const SizedBox(
                   width: 4,
                 ),
                 ElevatedButton(
@@ -533,22 +520,22 @@ class _SequenceBuilderKeepAliveClientState
                               ]);
                             },
                           )),
-                  child: Text("Add Test"),
+                  child: const Text("Add Test"),
                   style: ElevatedButton.styleFrom(
                     onSurface: Colors.grey,
                   ),
                 ),
-                SizedBox(
+                const SizedBox(
                   width: 4,
                 ),
                 ElevatedButton(
                   onPressed: null,
-                  child: Text("Edit"),
+                  child: const Text("Edit"),
                   style: ElevatedButton.styleFrom(
                     onSurface: Colors.grey,
                   ),
                 ),
-                SizedBox(
+                const SizedBox(
                   width: 32,
                 ),
                 ElevatedButton(
@@ -557,12 +544,12 @@ class _SequenceBuilderKeepAliveClientState
                       : () {
                           moveUp();
                         },
-                  child: Text("Move Up"),
+                  child: const Text("Move Up"),
                   style: ElevatedButton.styleFrom(
                     onSurface: Colors.grey,
                   ),
                 ),
-                SizedBox(
+                const SizedBox(
                   width: 4,
                 ),
                 ElevatedButton(
@@ -571,12 +558,12 @@ class _SequenceBuilderKeepAliveClientState
                       : () {
                           moveDown();
                         },
-                  child: Text("Move Down"),
+                  child: const Text("Move Down"),
                   style: ElevatedButton.styleFrom(
                     onSurface: Colors.grey,
                   ),
                 ),
-                SizedBox(
+                const SizedBox(
                   width: 32,
                 ),
                 ElevatedButton(
@@ -585,7 +572,7 @@ class _SequenceBuilderKeepAliveClientState
                       : () {
                           deleteStep();
                         },
-                  child: Text("Delete Step"),
+                  child: const Text("Delete Step"),
                   style: ElevatedButton.styleFrom(
                     primary: Colors.red,
                     onSurface: Colors.grey,
@@ -597,9 +584,8 @@ class _SequenceBuilderKeepAliveClientState
         ),
       ),
     );
-    ;
   }
 
   @override
-  bool get wantKeepAlive => widget.wantKeepAlive;
+  bool get wantKeepAlive => wantKeepAlive_;
 }

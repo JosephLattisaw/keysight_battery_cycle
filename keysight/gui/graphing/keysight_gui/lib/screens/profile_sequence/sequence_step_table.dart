@@ -152,8 +152,9 @@ class SequenceStepTable extends HookWidget {
       if (testType >= 0 && testType <= 1) {
         double voltage = map.elementAt(2);
         return voltage.toString() + "V";
-      } else
+      } else {
         return "";
+      }
     } else {
       dynamic element = table.elementAt(mapping.elementAt(0)).elementAt(3);
       return element.toString() + "V";
@@ -174,8 +175,9 @@ class SequenceStepTable extends HookWidget {
       if (testType >= 2 && testType <= 3) {
         double voltage = map.elementAt(2);
         return voltage.toString() + "A";
-      } else
+      } else {
         return "";
+      }
     } else {
       dynamic element = table.elementAt(mapping.elementAt(0)).elementAt(2);
       return element.toString() + "A";
@@ -195,8 +197,9 @@ class SequenceStepTable extends HookWidget {
       if (testType > 3) {
         double value = map.elementAt(2);
         return value.toString();
-      } else
+      } else {
         return "";
+      }
     } else {
       return "";
     }
@@ -210,7 +213,6 @@ class SequenceStepTable extends HookWidget {
           .elementAt(mapping.elementAt(0))
           .elementAt(4)
           .elementAt(mapping.elementAt(1));
-      int testType = map.elementAt(0);
       int value = map.elementAt(4);
       return value.toString() + "s";
     } else {
@@ -248,7 +250,7 @@ class SequenceStepTable extends HookWidget {
           headingRowColor:
               MaterialStateColor.resolveWith((states) => Colors.blue.shade900),
           showCheckboxColumn: false,
-          columns: [
+          columns: const [
             DataColumn(
               label: Text(
                 'Function',
@@ -320,49 +322,49 @@ class SequenceStepTable extends HookWidget {
                 DataCell(
                   Text(
                     getFunctionType(index),
-                    style: TextStyle(color: Colors.white),
+                    style: const TextStyle(color: Colors.white),
                   ),
                 ),
                 DataCell(
                   Text(
                     getStepNumber(index),
-                    style: TextStyle(color: Colors.white),
+                    style: const TextStyle(color: Colors.white),
                   ),
                 ),
                 DataCell(
                   Text(
                     getActionType(index),
-                    style: TextStyle(color: Colors.white),
+                    style: const TextStyle(color: Colors.white),
                   ),
                 ),
                 DataCell(
                   Text(
                     getVoltageString(index),
-                    style: TextStyle(color: Colors.white),
+                    style: const TextStyle(color: Colors.white),
                   ),
                 ),
                 DataCell(
                   Text(
                     getCurrentString(index),
-                    style: TextStyle(color: Colors.white),
+                    style: const TextStyle(color: Colors.white),
                   ),
                 ),
                 DataCell(
                   Text(
                     getOtherString(index),
-                    style: TextStyle(color: Colors.white),
+                    style: const TextStyle(color: Colors.white),
                   ),
                 ),
                 DataCell(
                   Text(
                     getTimeString(index),
-                    style: TextStyle(color: Colors.white),
+                    style: const TextStyle(color: Colors.white),
                   ),
                 ),
                 DataCell(
                   Text(
                     getTestString(index),
-                    style: TextStyle(color: Colors.white),
+                    style: const TextStyle(color: Colors.white),
                   ),
                 ),
               ],

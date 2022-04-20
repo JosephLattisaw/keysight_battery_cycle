@@ -55,16 +55,16 @@ class HomePage extends HookWidget {
                     tabs: const [
                       Text("Instrument Connection"),
                       Text("Profile Sequence"),
-                      Text("Measurements"),
+                      Text("All Measurements"),
                       Text("Test"),
                     ],
                     tabWidgets: [
-                      InstrumentWidget(),
-                      ProfileSequenceWidget(),
+                      const InstrumentWidget(),
+                      const ProfileSequenceWidget(),
                       MeasurementWidget(
                         key: UniqueKey(),
                       ),
-                      TestWidget(),
+                      const TestWidget(),
                     ],
                   ),
                 ),

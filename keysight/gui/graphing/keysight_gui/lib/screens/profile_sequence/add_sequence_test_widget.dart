@@ -44,8 +44,8 @@ class AddSequenceTestWidget extends HookWidget {
           children: <Widget>[
             Container(
               color: Colors.blue,
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
+              child: const Padding(
+                padding: EdgeInsets.all(16.0),
                 child: Text(
                   'Add a Test to a Profile Sequence Step',
                   textAlign: TextAlign.left,
@@ -82,8 +82,8 @@ class AddSequenceTestWidget extends HookWidget {
                               color: Colors.black.withOpacity(0.5),
                               spreadRadius: 1,
                               blurRadius: 7,
-                              offset:
-                                  Offset(0, 3), // changes position of shadow
+                              offset: const Offset(
+                                  0, 3), // changes position of shadow
                             ),
                           ],
                           borderRadius: BorderRadius.circular(10),
@@ -95,14 +95,14 @@ class AddSequenceTestWidget extends HookWidget {
                               padding: const EdgeInsets.all(10.0),
                               child: Column(
                                 children: [
-                                  Text(
+                                  const Text(
                                     "Select a Test From the Dropdown to Decide What Test Will Be Preformed During This Step",
                                     style: TextStyle(
                                         color: Colors.white,
                                         fontSize: 16,
                                         fontStyle: FontStyle.italic),
                                   ),
-                                  SizedBox(
+                                  const SizedBox(
                                     height: 8,
                                   ),
                                   IntrinsicWidth(
@@ -123,13 +123,13 @@ class AddSequenceTestWidget extends HookWidget {
                                       dropdownColor: Colors.blueAccent,
                                       decoration: InputDecoration(
                                         enabledBorder: OutlineInputBorder(
-                                          borderSide: BorderSide(
+                                          borderSide: const BorderSide(
                                               color: Colors.black, width: 1.4),
                                           borderRadius:
                                               BorderRadius.circular(5),
                                         ),
                                         border: OutlineInputBorder(
-                                          borderSide: BorderSide(
+                                          borderSide: const BorderSide(
                                               color: Colors.blue, width: 2),
                                           borderRadius:
                                               BorderRadius.circular(20),
@@ -137,13 +137,13 @@ class AddSequenceTestWidget extends HookWidget {
                                         filled: true,
                                         fillColor: Colors.blueAccent,
                                       ),
-                                      icon: Icon(
+                                      icon: const Icon(
                                         Icons.arrow_drop_down,
                                         color: Colors.black,
                                       ),
                                     ),
                                   ),
-                                  SizedBox(
+                                  const SizedBox(
                                     height: 8,
                                   ),
                                   Text(
@@ -162,434 +162,422 @@ class AddSequenceTestWidget extends HookWidget {
                         ),
                       ),
                     ),
-                    Container(
-                      child: IntrinsicHeight(
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Padding(
-                                padding: const EdgeInsets.only(
-                                    left: 16, top: 8, right: 4),
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: Colors.grey.shade800,
-                                    border: Border.all(
-                                      width: 2.0,
-                                      style: BorderStyle.solid,
-                                      color: Colors.grey.shade800,
-                                    ),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withOpacity(0.5),
-                                        spreadRadius: 1,
-                                        blurRadius: 7,
-                                        offset: Offset(
-                                            0, 3), // changes position of shadow
-                                      ),
-                                    ],
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(10.0),
-                                    child: Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Text(
-                                          "Specify the Test Action",
-                                          style: TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 16,
-                                              fontStyle: FontStyle.italic),
-                                        ),
-                                        SizedBox(
-                                          height: 8,
-                                        ),
-                                        IntrinsicWidth(
-                                          child: DropdownButtonFormField(
-                                            items: List.generate(
-                                              testActionDescriptions.length,
-                                              (index) => DropdownMenuItem(
-                                                child: Text(
-                                                    testActionDescriptions
-                                                        .elementAt(index)
-                                                        .elementAt(0)),
-                                                value: index,
-                                              ),
-                                            ),
-                                            value: testAction.value,
-                                            onChanged: (int? value) {
-                                              testAction.value = value ?? 0;
-                                            },
-                                            dropdownColor: Colors.blueAccent,
-                                            decoration: InputDecoration(
-                                              enabledBorder: OutlineInputBorder(
-                                                borderSide: BorderSide(
-                                                    color: Colors.black,
-                                                    width: 1.4),
-                                                borderRadius:
-                                                    BorderRadius.circular(5),
-                                              ),
-                                              border: OutlineInputBorder(
-                                                borderSide: BorderSide(
-                                                    color: Colors.blue,
-                                                    width: 2),
-                                                borderRadius:
-                                                    BorderRadius.circular(20),
-                                              ),
-                                              filled: true,
-                                              fillColor: Colors.blueAccent,
-                                            ),
-                                            icon: Icon(
-                                              Icons.arrow_drop_down,
-                                              color: Colors.black,
-                                            ),
-                                          ),
-                                        ),
-                                        SizedBox(
-                                          height: 8,
-                                        ),
-                                        Text(
-                                          testActionDescriptions
-                                              .elementAt(testAction.value)
-                                              .elementAt(1),
-                                          style: TextStyle(
-                                            color: Colors.grey.shade400,
-                                            fontStyle: FontStyle.italic,
-                                          ),
-                                          textAlign: TextAlign.center,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              child: Padding(
-                                padding: const EdgeInsets.only(
-                                  right: 16.0,
-                                  top: 8.0,
-                                  left: 4,
-                                ),
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: Colors.grey.shade800,
-                                    border: Border.all(
-                                      width: 2.0,
-                                      style: BorderStyle.solid,
-                                      color: Colors.grey.shade800,
-                                    ),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withOpacity(0.5),
-                                        spreadRadius: 1,
-                                        blurRadius: 7,
-                                        offset: Offset(
-                                            0, 3), // changes position of shadow
-                                      ),
-                                    ],
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(10.0),
-                                    child: Column(
-                                      children: [
-                                        Text(
-                                          "Specify the Value of the Test Type Above",
-                                          style: TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 16,
-                                              fontStyle: FontStyle.italic),
-                                        ),
-                                        SizedBox(
-                                          height: 8,
-                                        ),
-                                        IntrinsicWidth(
-                                          child: SpinBox(
-                                            value: value.value,
-                                            min: 2.0,
-                                            max: 4.5,
-                                            decimals: 2,
-                                            step: 0.1,
-                                            onChanged: (v) {
-                                              value.value = v;
-                                            },
-                                            incrementIcon: Icon(
-                                              Icons.add,
-                                              color: Colors.black,
-                                            ),
-                                            decrementIcon: Icon(
-                                              Icons.remove,
-                                              color: Colors.black,
-                                            ),
-                                            decoration: InputDecoration(
-                                              enabledBorder: OutlineInputBorder(
-                                                borderSide: BorderSide(
-                                                    color: Colors.black,
-                                                    width: 1.4),
-                                              ),
-                                              border: OutlineInputBorder(),
-                                              hintStyle: TextStyle(
-                                                color: Colors.black,
-                                                fontStyle: FontStyle.italic,
-                                              ),
-                                              hintText: "Centered Text",
-                                              filled: true,
-                                              fillColor: Colors.blue,
-                                            ),
-                                            textAlign: TextAlign.center,
-                                          ),
-                                        ),
-                                        SizedBox(
-                                          height: 8,
-                                        ),
-                                        Text(
-                                          "All values are in whole units.",
-                                          style: TextStyle(
-                                            color: Colors.grey.shade400,
-                                            fontStyle: FontStyle.italic,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    Container(
-                      child: IntrinsicHeight(
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Padding(
-                                padding: const EdgeInsets.only(
-                                    left: 16, top: 8, right: 4),
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: Colors.grey.shade800,
-                                    border: Border.all(
-                                      width: 2.0,
-                                      style: BorderStyle.solid,
-                                      color: Colors.grey.shade800,
-                                    ),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withOpacity(0.5),
-                                        spreadRadius: 1,
-                                        blurRadius: 7,
-                                        offset: Offset(
-                                            0, 3), // changes position of shadow
-                                      ),
-                                    ],
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(10.0),
-                                    child: Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Text(
-                                          "Specify a Time Type",
-                                          style: TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 16,
-                                              fontStyle: FontStyle.italic),
-                                        ),
-                                        SizedBox(
-                                          height: 8,
-                                        ),
-                                        IntrinsicWidth(
-                                          child: DropdownButtonFormField(
-                                            items: List.generate(
-                                              timeTypeDescription.length,
-                                              (index) => DropdownMenuItem(
-                                                child: Text(timeTypeDescription
-                                                    .elementAt(index)
-                                                    .elementAt(0)),
-                                                value: index,
-                                              ),
-                                            ),
-                                            value: timeType.value,
-                                            onChanged: (int? value) {
-                                              timeType.value = value ?? 0;
-                                            },
-                                            dropdownColor: Colors.blueAccent,
-                                            decoration: InputDecoration(
-                                              enabledBorder: OutlineInputBorder(
-                                                borderSide: BorderSide(
-                                                    color: Colors.black,
-                                                    width: 1.4),
-                                                borderRadius:
-                                                    BorderRadius.circular(5),
-                                              ),
-                                              border: OutlineInputBorder(
-                                                borderSide: BorderSide(
-                                                    color: Colors.blue,
-                                                    width: 2),
-                                                borderRadius:
-                                                    BorderRadius.circular(20),
-                                              ),
-                                              filled: true,
-                                              fillColor: Colors.blueAccent,
-                                            ),
-                                            icon: Icon(
-                                              Icons.arrow_drop_down,
-                                              color: Colors.black,
-                                            ),
-                                          ),
-                                        ),
-                                        SizedBox(
-                                          height: 8,
-                                        ),
-                                        Text(
-                                          timeTypeDescription
-                                              .elementAt(timeType.value)
-                                              .elementAt(1),
-                                          style: TextStyle(
-                                            color: Colors.grey.shade400,
-                                            fontStyle: FontStyle.italic,
-                                          ),
-                                          textAlign: TextAlign.center,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              child: Padding(
-                                padding: const EdgeInsets.only(
-                                  right: 16.0,
-                                  top: 8.0,
-                                  left: 4,
-                                ),
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: Colors.grey.shade800,
-                                    border: Border.all(
-                                      width: 2.0,
-                                      style: BorderStyle.solid,
-                                      color: Colors.grey.shade800,
-                                    ),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withOpacity(0.5),
-                                        spreadRadius: 1,
-                                        blurRadius: 7,
-                                        offset: Offset(
-                                            0, 3), // changes position of shadow
-                                      ),
-                                    ],
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(10.0),
-                                    child: Column(
-                                      children: [
-                                        Text(
-                                          "Specify a Time Limit for the Step (seconds)",
-                                          style: TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 16,
-                                              fontStyle: FontStyle.italic),
-                                        ),
-                                        SizedBox(
-                                          height: 8,
-                                        ),
-                                        IntrinsicWidth(
-                                          child: SpinBox(
-                                            value: timeLimit.value.toDouble(),
-                                            min: 20,
-                                            max: 2147483647,
-                                            decimals: 0,
-                                            step: 1,
-                                            onChanged: (value) {
-                                              timeLimit.value = value.toInt();
-                                            },
-                                            incrementIcon: Icon(
-                                              Icons.add,
-                                              color: Colors.black,
-                                            ),
-                                            decrementIcon: Icon(
-                                              Icons.remove,
-                                              color: Colors.black,
-                                            ),
-                                            decoration: InputDecoration(
-                                              enabledBorder: OutlineInputBorder(
-                                                borderSide: BorderSide(
-                                                    color: Colors.black,
-                                                    width: 1.4),
-                                              ),
-                                              border: OutlineInputBorder(),
-                                              hintStyle: TextStyle(
-                                                color: Colors.black,
-                                                fontStyle: FontStyle.italic,
-                                              ),
-                                              hintText: "Centered Text",
-                                              filled: true,
-                                              fillColor: Colors.blue,
-                                            ),
-                                            textAlign: TextAlign.center,
-                                          ),
-                                        ),
-                                        SizedBox(
-                                          height: 8,
-                                        ),
-                                        Text(
-                                          "A minimum of 20 seconds is required for the step to\ncomplete the initial setup procedure.",
-                                          style: TextStyle(
-                                            color: Colors.grey.shade400,
-                                            fontStyle: FontStyle.italic,
-                                          ),
-                                          textAlign: TextAlign.center,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    SizedBox(
-                      height: 24,
-                    ),
-                    Container(
+                    IntrinsicHeight(
                       child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          ElevatedButton(
-                            onPressed: () {
-                              onSave(testType.value, testAction.value,
-                                  value.value, timeType.value, timeLimit.value);
-                              Navigator.of(context).maybePop();
-                            },
-                            child: Text("Save"),
-                            style:
-                                ElevatedButton.styleFrom(primary: Colors.green),
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.only(
+                                  left: 16, top: 8, right: 4),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.grey.shade800,
+                                  border: Border.all(
+                                    width: 2.0,
+                                    style: BorderStyle.solid,
+                                    color: Colors.grey.shade800,
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.5),
+                                      spreadRadius: 1,
+                                      blurRadius: 7,
+                                      offset: const Offset(
+                                          0, 3), // changes position of shadow
+                                    ),
+                                  ],
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(10.0),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      const Text(
+                                        "Specify the Test Action",
+                                        style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 16,
+                                            fontStyle: FontStyle.italic),
+                                      ),
+                                      const SizedBox(
+                                        height: 8,
+                                      ),
+                                      IntrinsicWidth(
+                                        child: DropdownButtonFormField(
+                                          items: List.generate(
+                                            testActionDescriptions.length,
+                                            (index) => DropdownMenuItem(
+                                              child: Text(testActionDescriptions
+                                                  .elementAt(index)
+                                                  .elementAt(0)),
+                                              value: index,
+                                            ),
+                                          ),
+                                          value: testAction.value,
+                                          onChanged: (int? value) {
+                                            testAction.value = value ?? 0;
+                                          },
+                                          dropdownColor: Colors.blueAccent,
+                                          decoration: InputDecoration(
+                                            enabledBorder: OutlineInputBorder(
+                                              borderSide: const BorderSide(
+                                                  color: Colors.black,
+                                                  width: 1.4),
+                                              borderRadius:
+                                                  BorderRadius.circular(5),
+                                            ),
+                                            border: OutlineInputBorder(
+                                              borderSide: const BorderSide(
+                                                  color: Colors.blue, width: 2),
+                                              borderRadius:
+                                                  BorderRadius.circular(20),
+                                            ),
+                                            filled: true,
+                                            fillColor: Colors.blueAccent,
+                                          ),
+                                          icon: const Icon(
+                                            Icons.arrow_drop_down,
+                                            color: Colors.black,
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(
+                                        height: 8,
+                                      ),
+                                      Text(
+                                        testActionDescriptions
+                                            .elementAt(testAction.value)
+                                            .elementAt(1),
+                                        style: TextStyle(
+                                          color: Colors.grey.shade400,
+                                          fontStyle: FontStyle.italic,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
                           ),
-                          SizedBox(
-                            width: 8,
-                          ),
-                          ElevatedButton(
-                            onPressed: () {
-                              Navigator.of(context).maybePop();
-                            },
-                            child: Text("Cancel"),
-                            style:
-                                ElevatedButton.styleFrom(primary: Colors.red),
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.only(
+                                right: 16.0,
+                                top: 8.0,
+                                left: 4,
+                              ),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.grey.shade800,
+                                  border: Border.all(
+                                    width: 2.0,
+                                    style: BorderStyle.solid,
+                                    color: Colors.grey.shade800,
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.5),
+                                      spreadRadius: 1,
+                                      blurRadius: 7,
+                                      offset: const Offset(
+                                          0, 3), // changes position of shadow
+                                    ),
+                                  ],
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(10.0),
+                                  child: Column(
+                                    children: [
+                                      const Text(
+                                        "Specify the Value of the Test Type Above",
+                                        style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 16,
+                                            fontStyle: FontStyle.italic),
+                                      ),
+                                      const SizedBox(
+                                        height: 8,
+                                      ),
+                                      IntrinsicWidth(
+                                        child: SpinBox(
+                                          value: value.value,
+                                          min: 2.0,
+                                          max: 4.5,
+                                          decimals: 2,
+                                          step: 0.1,
+                                          onChanged: (v) {
+                                            value.value = v;
+                                          },
+                                          incrementIcon: const Icon(
+                                            Icons.add,
+                                            color: Colors.black,
+                                          ),
+                                          decrementIcon: const Icon(
+                                            Icons.remove,
+                                            color: Colors.black,
+                                          ),
+                                          decoration: const InputDecoration(
+                                            enabledBorder: OutlineInputBorder(
+                                              borderSide: BorderSide(
+                                                  color: Colors.black,
+                                                  width: 1.4),
+                                            ),
+                                            border: OutlineInputBorder(),
+                                            hintStyle: TextStyle(
+                                              color: Colors.black,
+                                              fontStyle: FontStyle.italic,
+                                            ),
+                                            hintText: "Centered Text",
+                                            filled: true,
+                                            fillColor: Colors.blue,
+                                          ),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      ),
+                                      const SizedBox(
+                                        height: 8,
+                                      ),
+                                      Text(
+                                        "All values are in whole units.",
+                                        style: TextStyle(
+                                          color: Colors.grey.shade400,
+                                          fontStyle: FontStyle.italic,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
                           ),
                         ],
                       ),
+                    ),
+                    IntrinsicHeight(
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.only(
+                                  left: 16, top: 8, right: 4),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.grey.shade800,
+                                  border: Border.all(
+                                    width: 2.0,
+                                    style: BorderStyle.solid,
+                                    color: Colors.grey.shade800,
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.5),
+                                      spreadRadius: 1,
+                                      blurRadius: 7,
+                                      offset: const Offset(
+                                          0, 3), // changes position of shadow
+                                    ),
+                                  ],
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(10.0),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      const Text(
+                                        "Specify a Time Type",
+                                        style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 16,
+                                            fontStyle: FontStyle.italic),
+                                      ),
+                                      const SizedBox(
+                                        height: 8,
+                                      ),
+                                      IntrinsicWidth(
+                                        child: DropdownButtonFormField(
+                                          items: List.generate(
+                                            timeTypeDescription.length,
+                                            (index) => DropdownMenuItem(
+                                              child: Text(timeTypeDescription
+                                                  .elementAt(index)
+                                                  .elementAt(0)),
+                                              value: index,
+                                            ),
+                                          ),
+                                          value: timeType.value,
+                                          onChanged: (int? value) {
+                                            timeType.value = value ?? 0;
+                                          },
+                                          dropdownColor: Colors.blueAccent,
+                                          decoration: InputDecoration(
+                                            enabledBorder: OutlineInputBorder(
+                                              borderSide: const BorderSide(
+                                                  color: Colors.black,
+                                                  width: 1.4),
+                                              borderRadius:
+                                                  BorderRadius.circular(5),
+                                            ),
+                                            border: OutlineInputBorder(
+                                              borderSide: const BorderSide(
+                                                  color: Colors.blue, width: 2),
+                                              borderRadius:
+                                                  BorderRadius.circular(20),
+                                            ),
+                                            filled: true,
+                                            fillColor: Colors.blueAccent,
+                                          ),
+                                          icon: const Icon(
+                                            Icons.arrow_drop_down,
+                                            color: Colors.black,
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(
+                                        height: 8,
+                                      ),
+                                      Text(
+                                        timeTypeDescription
+                                            .elementAt(timeType.value)
+                                            .elementAt(1),
+                                        style: TextStyle(
+                                          color: Colors.grey.shade400,
+                                          fontStyle: FontStyle.italic,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.only(
+                                right: 16.0,
+                                top: 8.0,
+                                left: 4,
+                              ),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.grey.shade800,
+                                  border: Border.all(
+                                    width: 2.0,
+                                    style: BorderStyle.solid,
+                                    color: Colors.grey.shade800,
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.5),
+                                      spreadRadius: 1,
+                                      blurRadius: 7,
+                                      offset: const Offset(
+                                          0, 3), // changes position of shadow
+                                    ),
+                                  ],
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(10.0),
+                                  child: Column(
+                                    children: [
+                                      const Text(
+                                        "Specify a Time Limit for the Step (seconds)",
+                                        style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 16,
+                                            fontStyle: FontStyle.italic),
+                                      ),
+                                      const SizedBox(
+                                        height: 8,
+                                      ),
+                                      IntrinsicWidth(
+                                        child: SpinBox(
+                                          value: timeLimit.value.toDouble(),
+                                          min: 20,
+                                          max: 2147483647,
+                                          decimals: 0,
+                                          step: 1,
+                                          onChanged: (value) {
+                                            timeLimit.value = value.toInt();
+                                          },
+                                          incrementIcon: const Icon(
+                                            Icons.add,
+                                            color: Colors.black,
+                                          ),
+                                          decrementIcon: const Icon(
+                                            Icons.remove,
+                                            color: Colors.black,
+                                          ),
+                                          decoration: const InputDecoration(
+                                            enabledBorder: OutlineInputBorder(
+                                              borderSide: BorderSide(
+                                                  color: Colors.black,
+                                                  width: 1.4),
+                                            ),
+                                            border: OutlineInputBorder(),
+                                            hintStyle: TextStyle(
+                                              color: Colors.black,
+                                              fontStyle: FontStyle.italic,
+                                            ),
+                                            hintText: "Centered Text",
+                                            filled: true,
+                                            fillColor: Colors.blue,
+                                          ),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      ),
+                                      const SizedBox(
+                                        height: 8,
+                                      ),
+                                      Text(
+                                        "A minimum of 20 seconds is required for the step to\ncomplete the initial setup procedure.",
+                                        style: TextStyle(
+                                          color: Colors.grey.shade400,
+                                          fontStyle: FontStyle.italic,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 24,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        ElevatedButton(
+                          onPressed: () {
+                            onSave(testType.value, testAction.value,
+                                value.value, timeType.value, timeLimit.value);
+                            Navigator.of(context).maybePop();
+                          },
+                          child: const Text("Save"),
+                          style:
+                              ElevatedButton.styleFrom(primary: Colors.green),
+                        ),
+                        const SizedBox(
+                          width: 8,
+                        ),
+                        ElevatedButton(
+                          onPressed: () {
+                            Navigator.of(context).maybePop();
+                          },
+                          child: const Text("Cancel"),
+                          style: ElevatedButton.styleFrom(primary: Colors.red),
+                        ),
+                      ],
                     ),
                   ],
                 ),
