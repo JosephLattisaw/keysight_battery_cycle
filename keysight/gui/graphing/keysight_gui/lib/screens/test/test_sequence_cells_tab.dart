@@ -33,6 +33,15 @@ class TestSequenceCellsTab extends HookWidget {
       return false;
     }
 
+    bool isCellSelectedButNotHere(int module, int cell, int sequenceNumber) {
+      int value = cellsSelected.elementAt(module).elementAt(cell);
+      if (value != sequenceNumber && value != -1) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+
     return ListView.builder(
         controller: ScrollController(),
         itemCount: 32,
@@ -43,19 +52,25 @@ class TestSequenceCellsTab extends HookWidget {
                 (lIdx) => Expanded(
                       child: Padding(
                         padding: const EdgeInsets.all(1.0),
-                        child: TestCellsCheckboxWidget(
-                          cellNumber: cIdx,
-                          moduleNumber: lIdx,
-                          moduleActive: cardsActive.elementAt(lIdx),
-                          sequenceStarted: sequenceStarted,
-                          cellActiveInSequence:
-                              cellsSelected.elementAt(lIdx).elementAt(cIdx),
-                          sequenceNumber: sequenceNumber,
-                          onChanged: (bool value) {
-                            checkCount.value[lIdx][cIdx] = value;
-                            canStartSequence(
-                                isOneBoxChecked(), checkCount.value);
-                          },
+                        child: Tooltip(
+                          message: isCellSelectedButNotHere(
+                                  lIdx, cIdx, sequenceNumber)
+                              ? "Active on Test ${cellsSelected.elementAt(lIdx).elementAt(cIdx) + 1}"
+                              : "",
+                          child: TestCellsCheckboxWidget(
+                            cellNumber: cIdx,
+                            moduleNumber: lIdx,
+                            moduleActive: cardsActive.elementAt(lIdx),
+                            sequenceStarted: sequenceStarted,
+                            cellActiveInSequence:
+                                cellsSelected.elementAt(lIdx).elementAt(cIdx),
+                            sequenceNumber: sequenceNumber,
+                            onChanged: (bool value) {
+                              checkCount.value[lIdx][cIdx] = value;
+                              canStartSequence(
+                                  isOneBoxChecked(), checkCount.value);
+                            },
+                          ),
                         ),
                       ),
                     )),
