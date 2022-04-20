@@ -113,14 +113,13 @@ class TestCellsCheckboxWidget extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final checked = useState(false);
+    final checked = useState(cellActiveInSequence == sequenceNumber);
 
     final cApi = Provider.of<KeysightCAPI>(context, listen: false);
 
     StatusCellCheckbox getMode() {
       if (sequenceStarted) {
         if (cellActiveInSequence == sequenceNumber) {
-          checked.value = true;
           return StatusCellCheckbox.running;
         } else if (cellActiveInSequence == -1) {
           return StatusCellCheckbox.inactive;
@@ -135,7 +134,6 @@ class TestCellsCheckboxWidget extends HookWidget {
         } else if (cellActiveInSequence != sequenceNumber) {
           return StatusCellCheckbox.runningInAnotherSequence;
         } else {
-          checked.value = true;
           return StatusCellCheckbox.active;
         }
       }
@@ -182,13 +180,6 @@ class TestCellsCheckboxWidget extends HookWidget {
       }
     }
 
-    void checkedChange(bool flag) {
-      if (checked.value != flag) {
-        checked.value = flag;
-        onChanged(flag);
-      }
-    }
-
     return Container(
       decoration: BoxDecoration(
         color: getBoxDecorationColor(),
@@ -204,8 +195,8 @@ class TestCellsCheckboxWidget extends HookWidget {
             : (newValue) {
                 cApi.setCellSequenceStarted(moduleNumber, cellNumber,
                     sequenceNumber, newValue ?? false);
-                checked.value = newValue ?? false;
                 onChanged(newValue ?? false);
+                checked.value = newValue ?? false;
               },
         controlAffinity:
             ListTileControlAffinity.leading, //  <-- leading Checkbox
