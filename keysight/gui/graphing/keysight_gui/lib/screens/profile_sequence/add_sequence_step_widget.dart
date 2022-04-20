@@ -130,9 +130,7 @@ class AddSequenceStepWidget extends HookWidget {
                                       ),
                                     ),
                                   ),
-                                  const SizedBox(
-                                    height: 8,
-                                  ),
+                                  const SizedBox(height: 8),
                                   Text(
                                     "This specifies whether the channel is sinking current, sourcing current, or resting.",
                                     style: TextStyle(
@@ -186,9 +184,7 @@ class AddSequenceStepWidget extends HookWidget {
                                         fontSize: 16,
                                         fontStyle: FontStyle.italic),
                                   ),
-                                  const SizedBox(
-                                    height: 8,
-                                  ),
+                                  const SizedBox(height: 8),
                                   IntrinsicWidth(
                                     child: SpinBox(
                                       value: durationSeconds.value.toDouble(),
@@ -210,7 +206,9 @@ class AddSequenceStepWidget extends HookWidget {
                                       decoration: const InputDecoration(
                                         enabledBorder: OutlineInputBorder(
                                           borderSide: BorderSide(
-                                              color: Colors.black, width: 1.4),
+                                            color: Colors.black,
+                                            width: 1.4,
+                                          ),
                                         ),
                                         border: OutlineInputBorder(),
                                         hintStyle: TextStyle(
@@ -224,9 +222,7 @@ class AddSequenceStepWidget extends HookWidget {
                                       textAlign: TextAlign.center,
                                     ),
                                   ),
-                                  const SizedBox(
-                                    height: 8,
-                                  ),
+                                  const SizedBox(height: 8),
                                   Text(
                                     "Note: that the step can terminate earlier than the duration due to a test condition being met.",
                                     style: TextStyle(
@@ -247,7 +243,10 @@ class AddSequenceStepWidget extends HookWidget {
                           Expanded(
                             child: Padding(
                               padding: const EdgeInsets.only(
-                                  left: 16, top: 8, right: 4),
+                                left: 16,
+                                top: 8,
+                                right: 4,
+                              ),
                               child: Container(
                                 decoration: BoxDecoration(
                                   color: Colors.grey.shade800,
@@ -258,12 +257,12 @@ class AddSequenceStepWidget extends HookWidget {
                                   ),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.black.withOpacity(0.5),
-                                      spreadRadius: 1,
-                                      blurRadius: 7,
-                                      offset: const Offset(
-                                          0, 3), // changes position of shadow
-                                    ),
+                                        color: Colors.black.withOpacity(0.5),
+                                        spreadRadius: 1,
+                                        blurRadius: 7,
+                                        offset: const Offset(
+                                            0, 3) // changes position of shadow
+                                        ),
                                   ],
                                   borderRadius: BorderRadius.circular(10),
                                 ),
@@ -279,9 +278,7 @@ class AddSequenceStepWidget extends HookWidget {
                                             fontSize: 16,
                                             fontStyle: FontStyle.italic),
                                       ),
-                                      const SizedBox(
-                                        height: 8,
-                                      ),
+                                      const SizedBox(height: 8),
                                       IntrinsicWidth(
                                         child: SpinBox(
                                           value: currentLimit.value,
@@ -318,9 +315,7 @@ class AddSequenceStepWidget extends HookWidget {
                                           textAlign: TextAlign.center,
                                         ),
                                       ),
-                                      const SizedBox(
-                                        height: 8,
-                                      ),
+                                      const SizedBox(height: 8),
                                       Text(
                                         "In charge mode, this refers to the current source limit.\n In discharge mode, this refers to the current sink limit.",
                                         style: TextStyle(
@@ -371,9 +366,7 @@ class AddSequenceStepWidget extends HookWidget {
                                             fontSize: 16,
                                             fontStyle: FontStyle.italic),
                                       ),
-                                      const SizedBox(
-                                        height: 8,
-                                      ),
+                                      const SizedBox(height: 8),
                                       IntrinsicWidth(
                                         child: SpinBox(
                                           value: voltageLimit.value,
@@ -410,9 +403,7 @@ class AddSequenceStepWidget extends HookWidget {
                                           textAlign: TextAlign.center,
                                         ),
                                       ),
-                                      const SizedBox(
-                                        height: 8,
-                                      ),
+                                      const SizedBox(height: 8),
                                       Text(
                                         "The channel will limit the voltage to this value.",
                                         style: TextStyle(
@@ -429,9 +420,7 @@ class AddSequenceStepWidget extends HookWidget {
                         ],
                       ),
                     ),
-                    const SizedBox(
-                      height: 24,
-                    ),
+                    const SizedBox(height: 24),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -445,9 +434,7 @@ class AddSequenceStepWidget extends HookWidget {
                           style:
                               ElevatedButton.styleFrom(primary: Colors.green),
                         ),
-                        const SizedBox(
-                          width: 8,
-                        ),
+                        const SizedBox(width: 8),
                         ElevatedButton(
                           onPressed: () {
                             Navigator.of(context).maybePop();

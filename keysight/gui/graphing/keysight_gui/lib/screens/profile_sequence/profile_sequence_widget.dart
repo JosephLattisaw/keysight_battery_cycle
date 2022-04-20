@@ -424,9 +424,7 @@ class _SequenceBuilderKeepAliveClientState
                 ),
               ],
             ),
-            const SizedBox(
-              height: 12,
-            ),
+            const SizedBox(height: 12),
             Row(
               children: [
                 Expanded(
@@ -450,9 +448,7 @@ class _SequenceBuilderKeepAliveClientState
                 ),
               ],
             ),
-            const SizedBox(
-              height: 12,
-            ),
+            const SizedBox(height: 12),
             TextField(
               controller: widget.commentsTextController,
               decoration: InputDecoration(
@@ -468,9 +464,7 @@ class _SequenceBuilderKeepAliveClientState
               ),
               style: const TextStyle(color: Colors.white),
             ),
-            const SizedBox(
-              height: 12,
-            ),
+            const SizedBox(height: 12),
             SequenceStepTable(
               table: table,
               onIndexChanged: (p0) {
@@ -479,9 +473,7 @@ class _SequenceBuilderKeepAliveClientState
                 });
               },
             ),
-            const SizedBox(
-              height: 12,
-            ),
+            const SizedBox(height: 12),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -501,9 +493,7 @@ class _SequenceBuilderKeepAliveClientState
                       )),
                   child: const Text("Add Step"),
                 ),
-                const SizedBox(
-                  width: 4,
-                ),
+                const SizedBox(width: 4),
                 ElevatedButton(
                   onPressed: (dataTableSelectedIndex == -1)
                       ? null
@@ -525,9 +515,7 @@ class _SequenceBuilderKeepAliveClientState
                     onSurface: Colors.grey,
                   ),
                 ),
-                const SizedBox(
-                  width: 4,
-                ),
+                const SizedBox(width: 4),
                 ElevatedButton(
                   onPressed: null,
                   child: const Text("Edit"),
@@ -535,9 +523,7 @@ class _SequenceBuilderKeepAliveClientState
                     onSurface: Colors.grey,
                   ),
                 ),
-                const SizedBox(
-                  width: 32,
-                ),
+                const SizedBox(width: 32),
                 ElevatedButton(
                   onPressed: !moveUpPossible()
                       ? null
@@ -549,9 +535,7 @@ class _SequenceBuilderKeepAliveClientState
                     onSurface: Colors.grey,
                   ),
                 ),
-                const SizedBox(
-                  width: 4,
-                ),
+                const SizedBox(width: 4),
                 ElevatedButton(
                   onPressed: !moveDownPossible()
                       ? null
@@ -563,9 +547,7 @@ class _SequenceBuilderKeepAliveClientState
                     onSurface: Colors.grey,
                   ),
                 ),
-                const SizedBox(
-                  width: 32,
-                ),
+                const SizedBox(width: 32),
                 ElevatedButton(
                   onPressed: (dataTableSelectedIndex == -1)
                       ? null

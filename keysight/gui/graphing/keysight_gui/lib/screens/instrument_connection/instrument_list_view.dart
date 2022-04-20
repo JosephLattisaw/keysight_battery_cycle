@@ -25,9 +25,7 @@ class InstrumentListView extends StatelessWidget {
                 child: Text("Connect"),
               ),
               onPressed: () {},
-              style: ElevatedButton.styleFrom(
-                primary: Colors.green,
-              ),
+              style: ElevatedButton.styleFrom(primary: Colors.green),
             ),
           ),
         ),
@@ -36,9 +34,7 @@ class InstrumentListView extends StatelessWidget {
           child: ListTile(
             title: const Text(
               "Keysight DAQ970A Data Acquisition System",
-              style: TextStyle(
-                color: Colors.white,
-              ),
+              style: TextStyle(color: Colors.white),
             ),
             leading: Image.asset(
               'assets/DAQ970A.png',
@@ -51,9 +47,7 @@ class InstrumentListView extends StatelessWidget {
                 child: Text("Connect"),
               ),
               onPressed: () {},
-              style: ElevatedButton.styleFrom(
-                primary: Colors.green,
-              ),
+              style: ElevatedButton.styleFrom(primary: Colors.green),
             ),
           ),
         ),

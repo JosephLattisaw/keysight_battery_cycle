@@ -102,9 +102,7 @@ class AddSequenceTestWidget extends HookWidget {
                                         fontSize: 16,
                                         fontStyle: FontStyle.italic),
                                   ),
-                                  const SizedBox(
-                                    height: 8,
-                                  ),
+                                  const SizedBox(height: 8),
                                   IntrinsicWidth(
                                     child: DropdownButtonFormField(
                                       items: List.generate(
@@ -168,7 +166,10 @@ class AddSequenceTestWidget extends HookWidget {
                           Expanded(
                             child: Padding(
                               padding: const EdgeInsets.only(
-                                  left: 16, top: 8, right: 4),
+                                left: 16,
+                                top: 8,
+                                right: 4,
+                              ),
                               child: Container(
                                 decoration: BoxDecoration(
                                   color: Colors.grey.shade800,
@@ -200,9 +201,7 @@ class AddSequenceTestWidget extends HookWidget {
                                             fontSize: 16,
                                             fontStyle: FontStyle.italic),
                                       ),
-                                      const SizedBox(
-                                        height: 8,
-                                      ),
+                                      const SizedBox(height: 8),
                                       IntrinsicWidth(
                                         child: DropdownButtonFormField(
                                           items: List.generate(
@@ -242,9 +241,7 @@ class AddSequenceTestWidget extends HookWidget {
                                           ),
                                         ),
                                       ),
-                                      const SizedBox(
-                                        height: 8,
-                                      ),
+                                      const SizedBox(height: 8),
                                       Text(
                                         testActionDescriptions
                                             .elementAt(testAction.value)
@@ -298,9 +295,7 @@ class AddSequenceTestWidget extends HookWidget {
                                             fontSize: 16,
                                             fontStyle: FontStyle.italic),
                                       ),
-                                      const SizedBox(
-                                        height: 8,
-                                      ),
+                                      const SizedBox(height: 8),
                                       IntrinsicWidth(
                                         child: SpinBox(
                                           value: value.value,
@@ -337,9 +332,7 @@ class AddSequenceTestWidget extends HookWidget {
                                           textAlign: TextAlign.center,
                                         ),
                                       ),
-                                      const SizedBox(
-                                        height: 8,
-                                      ),
+                                      const SizedBox(height: 8),
                                       Text(
                                         "All values are in whole units.",
                                         style: TextStyle(
@@ -394,9 +387,7 @@ class AddSequenceTestWidget extends HookWidget {
                                             fontSize: 16,
                                             fontStyle: FontStyle.italic),
                                       ),
-                                      const SizedBox(
-                                        height: 8,
-                                      ),
+                                      const SizedBox(height: 8),
                                       IntrinsicWidth(
                                         child: DropdownButtonFormField(
                                           items: List.generate(
@@ -436,9 +427,7 @@ class AddSequenceTestWidget extends HookWidget {
                                           ),
                                         ),
                                       ),
-                                      const SizedBox(
-                                        height: 8,
-                                      ),
+                                      const SizedBox(height: 8),
                                       Text(
                                         timeTypeDescription
                                             .elementAt(timeType.value)
@@ -531,9 +520,7 @@ class AddSequenceTestWidget extends HookWidget {
                                           textAlign: TextAlign.center,
                                         ),
                                       ),
-                                      const SizedBox(
-                                        height: 8,
-                                      ),
+                                      const SizedBox(height: 8),
                                       Text(
                                         "A minimum of 20 seconds is required for the step to\ncomplete the initial setup procedure.",
                                         style: TextStyle(
@@ -551,9 +538,7 @@ class AddSequenceTestWidget extends HookWidget {
                         ],
                       ),
                     ),
-                    const SizedBox(
-                      height: 24,
-                    ),
+                    const SizedBox(height: 24),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -567,9 +552,7 @@ class AddSequenceTestWidget extends HookWidget {
                           style:
                               ElevatedButton.styleFrom(primary: Colors.green),
                         ),
-                        const SizedBox(
-                          width: 8,
-                        ),
+                        const SizedBox(width: 8),
                         ElevatedButton(
                           onPressed: () {
                             Navigator.of(context).maybePop();

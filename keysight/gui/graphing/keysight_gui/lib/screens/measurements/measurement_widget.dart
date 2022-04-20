@@ -73,12 +73,8 @@ class MeasurementWidget extends HookWidget {
               ),
             ),
           ),
-          const SizedBox(
-            width: 12,
-          ),
-          const Expanded(
-            child: MeasurementTableWidget(),
-          ),
+          const SizedBox(width: 12),
+          const Expanded(child: MeasurementTableWidget()),
         ],
       ),
     );
