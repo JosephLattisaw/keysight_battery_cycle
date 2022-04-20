@@ -9,16 +9,9 @@ class MeasurementTableWidget extends HookWidget {
 
   final int sequenceNumber;
 
-  int getModuleIndex(int index) {
-    return index ~/ 32;
-  }
-
-  int getCellIndex(int index) {
-    return index % 32;
-  }
-
   @override
   Widget build(BuildContext context) {
+    final cApi = Provider.of<KeysightCAPI>(context, listen: false);
     final cellNames = context.select((KeysightCAPI k) => k.cellNames);
     final voltageValues = context.select((KeysightCAPI k) => k.voltageValues);
     final currentValues = context.select((KeysightCAPI k) => k.currentValues);
@@ -27,13 +20,33 @@ class MeasurementTableWidget extends HookWidget {
         context.select((KeysightCAPI k) => k.capacityWattHrs);
 
     final tableSize = useState(0);
+    final cellIndexing = useState(<List<int>>[]);
 
     void setTableSize(int size) {
       if (tableSize.value != size) tableSize.value = size;
     }
 
+    int getModuleIndex(int index) {
+      if (sequenceNumber == -1)
+        return index ~/ 32;
+      else {
+        return cellIndexing.value.elementAt(index).elementAt(0);
+      }
+    }
+
+    int getCellIndex(int index) {
+      if (sequenceNumber == -1)
+        return index % 32;
+      else {
+        return cellIndexing.value.elementAt(index).elementAt(1);
+      }
+    }
+
     if (sequenceNumber == -1) {
       setTableSize(32 * 8);
+    } else {
+      cellIndexing.value = cApi.getCellsSelected(sequenceNumber);
+      setTableSize(cellIndexing.value.length);
     }
 
     return SingleChildScrollView(

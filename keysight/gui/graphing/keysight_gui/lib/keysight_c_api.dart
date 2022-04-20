@@ -158,6 +158,19 @@ class KeysightCAPI extends ChangeNotifier {
     }
   }
 
+  List<List<int>> getCellsSelected(int sequenceNumber) {
+    List<List<int>> cellsAndModules = [];
+    for (int i = 0; i < cellsSelected.length; i++) {
+      for (int k = 0; k < cellsSelected.elementAt(i).length; k++) {
+        if (cellsSelected.elementAt(i).elementAt(k) == sequenceNumber) {
+          cellsAndModules.add([i, k]);
+        }
+      }
+    }
+
+    return cellsAndModules;
+  }
+
   late StartSaveSequenceC startSaveSequence;
   late AddSaveSequenceStepC addSaveSequenceStep;
   late AddSaveSequenceTestC addSaveSequenceTest;
