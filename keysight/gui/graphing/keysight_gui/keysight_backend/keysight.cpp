@@ -14,67 +14,82 @@ extern ViSession session;
 
 using namespace keysight;
 
-Keysight::Keysight(boost::asio::io_service &io_service, ActiveCardsCallback ac_cb, CapAhrDataCallback cahr_cb, CapWhrDataCallback cawh_cb)
+Keysight::Keysight(boost::asio::io_service &io_service, ActiveCardsCallback ac_cb, CapAhrDataCallback cahr_cb, CapWhrDataCallback cawh_cb,
+                   ConnectionStatusCallback conn_cb)
     : io_service(io_service),
       cell_status_timer(io_service),
       active_cards_callback{ac_cb},
       cap_ahr_data_callback{cahr_cb},
-      cap_whr_data_callback{cawh_cb} {}
+      cap_whr_data_callback{cawh_cb},
+      connection_status_callback{conn_cb} {}
 
 Keysight::~Keysight() { disconnect(); }
 
 void Keysight::connect() {
-    // opening the Keysight BT2203A
-    if (open_resource_manager()) {
-        if (open_instrument()) {
-            if (enable_read_termination_character()) {
-                if (identification_query()) {
-                    LOG_OUT << "identified " << VISA_ADDRESS_BT2203A;
-                    if (detect_cards_at_boot()) {
-                        LOG_OUT << "successfully detected all cards at boot";
-                        if (define_cells_for_all_cards()) {
-                            LOG_OUT << "successfully set all cell names";
-                            start_polling_cell_status();
+    if (!connected) {
+        // opening the Keysight BT2203A
+        if (open_resource_manager()) {
+            if (open_instrument()) {
+                if (enable_read_termination_character()) {
+                    if (identification_query()) {
+                        LOG_OUT << "identified " << VISA_ADDRESS_BT2203A;
+                        if (detect_cards_at_boot()) {
+                            LOG_OUT << "successfully detected all cards at boot";
+                            if (define_cells_for_all_cards()) {
+                                LOG_OUT << "successfully set all cell names";
+                                update_connection_status(true);
+                                start_polling_cell_status();
+                            } else {
+                                LOG_ERR << "failed to set all active cells";
+                                disconnect();
+                            }
                         } else {
-                            LOG_ERR << "failed to set all active cells";
+                            LOG_ERR << "failed to determine the active cards";
                             disconnect();
                         }
                     } else {
-                        LOG_ERR << "failed to determine the active cards";
+                        LOG_ERR << "failed to find identify: " << VISA_ADDRESS_BT2203A;
                         disconnect();
                     }
                 } else {
-                    LOG_ERR << "failed to find identify: " << VISA_ADDRESS_BT2203A;
+                    LOG_ERR << "failed to enabled read termination character";
                     disconnect();
                 }
             } else {
-                LOG_ERR << "failed to enabled read termination character";
+                LOG_ERR << "failed to open instrument";
                 disconnect();
             }
         } else {
-            LOG_ERR << "failed to open instrument";
+            LOG_ERR << "failed to open resoucrce manager";
             disconnect();
         }
-    } else {
-        LOG_ERR << "failed to open resoucrce manager";
-        disconnect();
-    }
+    } else
+        LOG_ERR << "already connected";
+}
+
+void Keysight::update_connection_status(bool flag) {
+    connected = flag;
+    connection_status_callback(connected);
 }
 
 void Keysight::disconnect() {
-    viUnlock(session);
-    viClose(session);
-    viClose(resource_manager);
+    if (connected) {
+        viUnlock(session);
+        viClose(session);
+        viClose(resource_manager);
 
-    keysight::resource_manager = 0;
-    keysight::session = 0;
+        keysight::resource_manager = 0;
+        keysight::session = 0;
 
-    active_cards.clear();
-    cell_names.clear();
-    cell_cap_ahr_data.clear();
-    cell_cap_whr_data.clear();
+        active_cards.clear();
+        cell_names.clear();
+        cell_cap_ahr_data.clear();
+        cell_cap_whr_data.clear();
 
-    cell_status_timer.cancel();
+        cell_status_timer.cancel();
+
+        update_connection_status(false);
+    }
 }
 
 bool Keysight::open_resource_manager() {
@@ -232,11 +247,11 @@ bool Keysight::detect_cards_at_boot() {
         return false;
 
     active_cards = result;
-    return true;
 #else
     active_cards = {true, true, true, false, false, false, false, false};
-    return true;
 #endif
+    active_cards_callback(active_cards);
+    return true;
 }
 
 bool Keysight::define_cells_for_all_cards() {
@@ -292,7 +307,7 @@ void Keysight::start_polling_cell_status() {
             LOG_ERR << "timer encountered error: " << error.message();
             disconnect();
         } else {
-            LOG_OUT << "getting cell status";
+            // LOG_OUT << "getting cell status";
             if (get_cell_status()) {
                 start_polling_cell_status();
             } else {

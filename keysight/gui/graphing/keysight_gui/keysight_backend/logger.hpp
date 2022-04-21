@@ -5,6 +5,7 @@
 #include <string>
 
 // TODO clean this up, multiple classes
+// TODO if possible make this thread safe
 class LogOut {
 public:
     LogOut(const std::string &class_name);

@@ -20,10 +20,10 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
 set(keysight_backend_SRC include/dart_api_dl.c keysight_backend.cpp backend.cpp sequence_parser.cpp logger.cpp common.cpp keysight.cpp)
 
 add_library(keysight_backend SHARED ${keysight_backend_SRC})
-target_link_libraries(keysight_backend ${VISA_LIBRARY} ${Boost_LIBRARIES} pthread)
+target_link_libraries(keysight_backend ${VISA_LIBRARY} ${Boost_LIBRARIES} pthread -lrt)
 
 add_executable(keysight_backend_test ${keysight_backend_SRC})
-target_link_libraries(keysight_backend_test ${VISA_LIBRARY} ${Boost_LIBRARIES} pthread)
+target_link_libraries(keysight_backend_test ${VISA_LIBRARY} ${Boost_LIBRARIES} pthread -lrt)
 
 install(TARGETS keysight_backend LIBRARY DESTINATION "${INSTALL_BUNDLE_LIB_DIR}")
 

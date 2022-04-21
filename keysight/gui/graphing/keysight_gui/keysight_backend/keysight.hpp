@@ -14,9 +14,10 @@ public:
     using ActiveCardsCallback = std::function<void(active_cards_type)>;
     using CapAhrDataCallback = std::function<void(cap_ahr_data_type)>;
     using CapWhrDataCallback = std::function<void(cap_whr_data_type)>;
+    using ConnectionStatusCallback = std::function<void(bool)>;
 
     Keysight(boost::asio::io_service &io_service, ActiveCardsCallback active_cards_callback, CapAhrDataCallback cap_ahr_data_callback,
-             CapWhrDataCallback cap_whr_data_callback);
+             CapWhrDataCallback cap_whr_data_callback, ConnectionStatusCallback connection_status_callback);
     ~Keysight();
 
     void connect();
@@ -45,6 +46,8 @@ private:
     // polling
     void start_polling_cell_status();
 
+    void update_connection_status(bool flag);
+
     // data
     active_cards_type active_cards;
     std::vector<std::string> cell_names;
@@ -58,8 +61,11 @@ private:
     ActiveCardsCallback active_cards_callback;
     CapAhrDataCallback cap_ahr_data_callback;
     CapWhrDataCallback cap_whr_data_callback;
+    ConnectionStatusCallback connection_status_callback;
 
     const std::string VISA_ADDRESS_BT2203A = "USB0::0x008D::0x3502::MY58000516::0::INSTR";  // usb address of battery cycler
+
+    bool connected = false;
 };
 
 #endif

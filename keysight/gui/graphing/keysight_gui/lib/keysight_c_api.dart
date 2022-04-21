@@ -57,6 +57,14 @@ class KeysightCAPI extends ChangeNotifier {
         .lookup<ffi.NativeFunction<SequenceRemoveFFI>>("sequence_remove")
         .asFunction();
 
+    connectKeysight = lib
+        .lookup<ffi.NativeFunction<VoidFunctionFFI>>("connect_keysight")
+        .asFunction();
+
+    disconnectKeysight = lib
+        .lookup<ffi.NativeFunction<VoidFunctionFFI>>("disconnect_keysight")
+        .asFunction();
+
     ReceivePort loadSequencesPort = ReceivePort()
       ..listen((data) {
         print("seq received $data");
@@ -86,12 +94,46 @@ class KeysightCAPI extends ChangeNotifier {
 
     int loadTestsNativePort = loadTestsPort.sendPort.nativePort;
 
+    ReceivePort activeCardsPort = ReceivePort()
+      ..listen((data) {
+        if (data.length == 8) {
+          cardsActive = List<bool>.from(List<int>.from(data)
+              .cast<int>()
+              .map((e) => e == 0 ? false : true));
+          notifyListeners();
+        }
+      });
+
+    int activeCardsNativePort = activeCardsPort.sendPort.nativePort;
+
+    ReceivePort keysightConnectionPort = ReceivePort()
+      ..listen((data) {
+        print("received keysight connection status $data");
+        keysightConnectionStatus = data;
+
+        //if we got disconnected reset state
+        if (!keysightConnectionStatus) {
+          cardsActive = List.from(cardsActiveDefault);
+        }
+
+        notifyListeners();
+      });
+
+    int keysightConnectionNativePort =
+        keysightConnectionPort.sendPort.nativePort;
+
     loadAllSequences = lib
         .lookup<ffi.NativeFunction<VoidFunctionFFI>>("load_all_sequences")
         .asFunction();
 
-    _createBackend(1, loadSequencesNativePort, finishLoadSequencesNativePort,
-        loadStepsNativePort, loadTestsNativePort);
+    _createBackend(
+        1,
+        loadSequencesNativePort,
+        finishLoadSequencesNativePort,
+        loadStepsNativePort,
+        loadTestsNativePort,
+        activeCardsNativePort,
+        keysightConnectionNativePort);
     _runService();
   }
 
@@ -100,13 +142,7 @@ class KeysightCAPI extends ChangeNotifier {
   final List<List<int>> cellsSelected =
       List.generate(8, (index) => List<int>.filled(32, -1));
 
-  final List<bool> cardsActive = List.generate(8, (index) {
-    if (index < 3) {
-      return true;
-    } else {
-      return false;
-    }
-  });
+  List<bool> cardsActive = List.from(cardsActiveDefault);
 
   final List<List<String>> cellNames = List.generate(
       8,
@@ -131,6 +167,8 @@ class KeysightCAPI extends ChangeNotifier {
       List.generate(8, (i) => List.generate(32, (k) => 0.0));
   final List<List<double>> capacityWattHrs =
       List.generate(8, (i) => List.generate(32, (k) => 0.0));
+
+  bool keysightConnectionStatus = false;
 
   void setSequenceStarted(int index, bool value) {
     if (index < sequencesStarted.length) {
@@ -179,6 +217,8 @@ class KeysightCAPI extends ChangeNotifier {
   late VoidFunctionC _runService;
   late SequenceRemoveC sequenceRemove;
   late VoidFunctionC loadAllSequences;
+  late VoidFunctionC connectKeysight;
+  late VoidFunctionC disconnectKeysight;
 
   static const String _libraryName = 'lib/libkeysight_backend.so';
 }
@@ -195,9 +235,18 @@ typedef CreateBackendFFI = ffi.Void Function(
     ffi.Int64 seqPort,
     ffi.Int64 seqFinPort,
     ffi.Int64 stepsPort,
-    ffi.Int64 testsPort);
+    ffi.Int64 testsPort,
+    ffi.Int64 activeCardsPort,
+    ffi.Int64 keysightConnectionPort);
+
 typedef CreateBackendC = void Function(
-    int usingDart, int seqPort, int seqFinPort, int stepsPort, int testsPort);
+    int usingDart,
+    int seqPort,
+    int seqFinPort,
+    int stepsPort,
+    int testsPort,
+    int activeCardsPort,
+    int keysightConnectionPort);
 
 //start save sequence
 typedef StartSaveSequenceFFI = ffi.Void Function(ffi.Pointer<Utf8> name,
@@ -223,3 +272,5 @@ typedef AddSaveSequenceTestC = void Function(
 
 typedef SequenceRemoveFFI = ffi.Void Function(ffi.Pointer<Utf8> name);
 typedef SequenceRemoveC = void Function(ffi.Pointer<Utf8> name);
+
+List<bool> cardsActiveDefault = List<bool>.filled(8, false);

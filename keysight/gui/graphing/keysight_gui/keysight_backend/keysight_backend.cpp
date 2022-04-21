@@ -104,12 +104,21 @@ void finish_save_sequence() {
 }
 
 void create_backend(bool using_dart = false, std::int64_t load_sequences_port = 0, std::int64_t fin_load_sequences_port = 0,
-                    std::int64_t load_steps_port = 0, std::int64_t load_tests_port = 0) {
+                    std::int64_t load_steps_port = 0, std::int64_t load_tests_port = 0, std::int64_t active_cards_port = 0,
+                    std::int64_t keysight_connection_port = 0) {
     if (!backend)
         backend = std::make_shared<Backend>(
             io_service,
-            [&](active_cards_type) {
+            [&, using_dart, active_cards_port](active_cards_type data) {
                 // active cells callback
+                LOG_OUT << "got the active cards callback " << static_cast<int>(using_dart);
+                if (using_dart) {
+                    if (data.size() == 8) {
+                        LOG_OUT << "posting data object: " << active_cards_port;
+                        post_data_object(active_cards_port, data);
+                    } else
+                        LOG_ERR << "received invalid active cards size";
+                }
             },
             [&](cap_ahr_data_type) {
                 // cap ahr data callback
@@ -118,13 +127,22 @@ void create_backend(bool using_dart = false, std::int64_t load_sequences_port = 
                 // cap whr data callback
             },
             [&, using_dart, load_sequences_port, fin_load_sequences_port](sequences_info_map_type sequences_info) {
-                for (auto const &[name, val] : sequences_info) {
-                    post_data_string(load_sequences_port, name);  // sending name
+                if (using_dart) {
+                    for (auto const &[name, val] : sequences_info) {
+                        post_data_string(load_sequences_port, name);  // sending name
 
-                    // sending info
-                    for (auto const &info : val) {
-                        post_data_string(load_sequences_port, info);
+                        // sending info
+                        for (auto const &info : val) {
+                            post_data_string(load_sequences_port, info);
+                        }
                     }
+                }
+            },
+            [&, using_dart, keysight_connection_port](bool status) {
+                // connection callback status
+                if (using_dart) {
+                    LOG_OUT << "received connection status callback";
+                    post_data_bool(keysight_connection_port, status);
                 }
             });
     else
@@ -153,6 +171,20 @@ void run_service() {
     });
     t.detach();
 }
+
+void connect_keysight() {
+    if (backend)
+        backend->connect_keysight();
+    else
+        print_backend_doesnt_exist_error();
+}
+
+void disconnect_keysight() {
+    if (backend)
+        backend->disconnect_keysight();
+    else
+        print_backend_doesnt_exist_error();
+}
 }
 
 int main(int argc, char **argv) {
@@ -171,8 +203,9 @@ int main(int argc, char **argv) {
             std::thread t([&io_service] {
                 Backend backend(
                     io_service,
-                    [&](active_cards_type) {
+                    [&](active_cards_type data) {
                         // active cells callback
+                        std::cout << "got the active cards callback " << data.size() << std::endl;
                     },
                     [&](cap_ahr_data_type) {
                         // cap ahr data callback
@@ -182,6 +215,9 @@ int main(int argc, char **argv) {
                     },
                     [&](sequences_info_map_type sequences_info) {
                         // sequences info data callback
+                    },
+                    [&](bool) {
+                        // connection callback status
                     });
                 io_service.run();
             });

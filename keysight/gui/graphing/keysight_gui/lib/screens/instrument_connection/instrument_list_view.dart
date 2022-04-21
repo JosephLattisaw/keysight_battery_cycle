@@ -1,10 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:keysight_gui/keysight_c_api.dart';
+import 'package:provider/provider.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 
-class InstrumentListView extends StatelessWidget {
+class InstrumentListView extends HookWidget {
   const InstrumentListView({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final backend = Provider.of<KeysightCAPI>(context, listen: false);
+    final keysightConnectionStatus =
+        context.select((KeysightCAPI k) => k.keysightConnectionStatus);
+
     return ListView(
       children: [
         Container(
@@ -20,12 +27,21 @@ class InstrumentListView extends StatelessWidget {
               width: 70,
             ),
             trailing: ElevatedButton(
-              child: const Padding(
-                padding: EdgeInsets.all(8.0),
-                child: Text("Connect"),
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child:
+                    Text(keysightConnectionStatus ? "Disconnect" : "Connect"),
               ),
-              onPressed: () {},
-              style: ElevatedButton.styleFrom(primary: Colors.green),
+              onPressed: () {
+                if (keysightConnectionStatus) {
+                  backend.disconnectKeysight();
+                } else {
+                  backend.connectKeysight();
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                  primary:
+                      keysightConnectionStatus ? Colors.red : Colors.green),
             ),
           ),
         ),

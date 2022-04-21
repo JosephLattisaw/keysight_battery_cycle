@@ -41,7 +41,7 @@ enum sequence_test_access_type {
     TIME_LIMIT = 4,
 };
 
-typedef std::vector<int> active_cards_type;
+typedef std::vector<std::uint8_t> active_cards_type;
 typedef std::map<int, std::vector<double>> cap_ahr_data_type;
 typedef std::map<int, std::vector<double>> cap_whr_data_type;
 
