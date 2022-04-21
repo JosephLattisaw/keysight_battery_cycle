@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:keysight_gui/keysight_c_api.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 
-class InstrumentListView extends HookWidget {
+class InstrumentListView extends StatelessWidget {
   const InstrumentListView({Key? key}) : super(key: key);
 
   @override

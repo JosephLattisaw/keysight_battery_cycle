@@ -119,6 +119,23 @@ class KeysightCAPI extends ChangeNotifier {
         notifyListeners();
       });
 
+    ReceivePort capAhrPort = ReceivePort()
+      ..listen((data) {
+        if (data.length == 33) {
+          int index = data.elementAt(0).toInt();
+
+          if (index < capacityAmpHrs.length) {
+            capacityAmpHrs = List.from(capacityAmpHrs);
+            List<double> dataList = List<double>.from(data)..removeAt(0);
+            capacityAmpHrs[index] = List<String>.from(
+                dataList.cast<double>().map((e) => e.toString()));
+          }
+          notifyListeners();
+        }
+      });
+
+    int capAhrNativePort = capAhrPort.sendPort.nativePort;
+
     int keysightConnectionNativePort =
         keysightConnectionPort.sendPort.nativePort;
 
@@ -133,7 +150,8 @@ class KeysightCAPI extends ChangeNotifier {
         loadStepsNativePort,
         loadTestsNativePort,
         activeCardsNativePort,
-        keysightConnectionNativePort);
+        keysightConnectionNativePort,
+        capAhrNativePort);
     _runService();
   }
 
@@ -157,16 +175,16 @@ class KeysightCAPI extends ChangeNotifier {
             return moduleNumber + betweenNumber + endNumber;
           }));
 
-  final List<List<double>> voltageValues =
-      List.generate(8, (i) => List.generate(32, (k) => 0.0));
+  final List<List<String>> voltageValues =
+      List.generate(8, (i) => List.generate(32, (k) => "NaN"));
 
-  final List<List<double>> currentValues =
-      List.generate(8, (i) => List.generate(32, (k) => 0.0));
+  final List<List<String>> currentValues =
+      List.generate(8, (i) => List.generate(32, (k) => "NaN"));
 
-  final List<List<double>> capacityAmpHrs =
-      List.generate(8, (i) => List.generate(32, (k) => 0.0));
-  final List<List<double>> capacityWattHrs =
-      List.generate(8, (i) => List.generate(32, (k) => 0.0));
+  List<List<String>> capacityAmpHrs =
+      List.generate(8, (i) => List.generate(32, (k) => "NaN"));
+  final List<List<String>> capacityWattHrs =
+      List.generate(8, (i) => List.generate(32, (k) => "NaN"));
 
   bool keysightConnectionStatus = false;
 
@@ -237,7 +255,8 @@ typedef CreateBackendFFI = ffi.Void Function(
     ffi.Int64 stepsPort,
     ffi.Int64 testsPort,
     ffi.Int64 activeCardsPort,
-    ffi.Int64 keysightConnectionPort);
+    ffi.Int64 keysightConnectionPort,
+    ffi.Int64 capAhrPort);
 
 typedef CreateBackendC = void Function(
     int usingDart,
@@ -246,7 +265,8 @@ typedef CreateBackendC = void Function(
     int stepsPort,
     int testsPort,
     int activeCardsPort,
-    int keysightConnectionPort);
+    int keysightConnectionPort,
+    int capAhrPort);
 
 //start save sequence
 typedef StartSaveSequenceFFI = ffi.Void Function(ffi.Pointer<Utf8> name,
