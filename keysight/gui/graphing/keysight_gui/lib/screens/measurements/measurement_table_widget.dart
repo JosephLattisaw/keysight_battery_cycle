@@ -85,6 +85,30 @@ class MeasurementTableWidget extends HookWidget {
               style: TextStyle(color: Colors.white),
             ),
           ),
+          DataColumn(
+            label: Text(
+              'State',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+          DataColumn(
+            label: Text(
+              'Status',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+          DataColumn(
+            label: Text(
+              'Seq',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+          DataColumn(
+            label: Text(
+              'Step',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
         ],
         rows: List<DataRow>.generate(
           tableSize.value,
@@ -137,6 +161,30 @@ class MeasurementTableWidget extends HookWidget {
                       .elementAt(getModuleIndex(index))
                       .elementAt(getCellIndex(index))
                       .toString(),
+                  style: const TextStyle(color: Colors.white),
+                ),
+              ),
+              DataCell(
+                Text(
+                  "RUNNING",
+                  style: const TextStyle(color: Colors.white),
+                ),
+              ),
+              DataCell(
+                Text(
+                  "ABORTED",
+                  style: const TextStyle(color: Colors.white),
+                ),
+              ),
+              DataCell(
+                Text(
+                  "8",
+                  style: const TextStyle(color: Colors.white),
+                ),
+              ),
+              DataCell(
+                Text(
+                  "256",
                   style: const TextStyle(color: Colors.white),
                 ),
               ),
