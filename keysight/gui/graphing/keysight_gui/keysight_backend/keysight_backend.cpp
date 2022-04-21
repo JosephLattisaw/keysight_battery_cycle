@@ -64,6 +64,11 @@ static void post_data_bool(std::int64_t port, bool value) {
 }
 }  // namespace
 
+namespace keysight {
+extern ViSession resource_manager;
+extern ViSession session;
+}  // namespace keysight
+
 extern "C" {
 DART_EXPORT intptr_t InitializeDartApi(void *data) { return Dart_InitializeApiDL(data); }
 
@@ -91,7 +96,6 @@ void add_save_sequence_test(int test_type, int test_action, double value, int ti
 
 void finish_save_sequence() {
     std::thread::id this_id = std::this_thread::get_id();
-    std::cout << "this thread: " << this_id << std::endl;
 
     if (backend) {
         backend->sequence_parser->finish_save_sequence();
@@ -102,17 +106,27 @@ void finish_save_sequence() {
 void create_backend(bool using_dart = false, std::int64_t load_sequences_port = 0, std::int64_t fin_load_sequences_port = 0,
                     std::int64_t load_steps_port = 0, std::int64_t load_tests_port = 0) {
     if (!backend)
-        backend = std::make_shared<Backend>(io_service,
-                                            [&, using_dart, load_sequences_port, fin_load_sequences_port](sequences_info_map_type sequences_info) {
-                                                for (auto const &[name, val] : sequences_info) {
-                                                    post_data_string(load_sequences_port, name);  // sending name
+        backend = std::make_shared<Backend>(
+            io_service,
+            [&](active_cards_type) {
+                // active cells callback
+            },
+            [&](cap_ahr_data_type) {
+                // cap ahr data callback
+            },
+            [&](cap_whr_data_type) {
+                // cap whr data callback
+            },
+            [&, using_dart, load_sequences_port, fin_load_sequences_port](sequences_info_map_type sequences_info) {
+                for (auto const &[name, val] : sequences_info) {
+                    post_data_string(load_sequences_port, name);  // sending name
 
-                                                    // sending info
-                                                    for (auto const &info : val) {
-                                                        post_data_string(load_sequences_port, info);
-                                                    }
-                                                }
-                                            });
+                    // sending info
+                    for (auto const &info : val) {
+                        post_data_string(load_sequences_port, info);
+                    }
+                }
+            });
     else
         print_backend_doesnt_exist_error();
 }
@@ -142,6 +156,57 @@ void run_service() {
 }
 
 int main(int argc, char **argv) {
-    io_service.run();
+    try {
+        // TODO might not need all this gibberish if locking works correctly
+        // boost::asio::io_service joe_service;
+        // Block all signals for background thread.
+        sigset_t new_mask;
+        sigfillset(&new_mask);
+        sigset_t old_mask;
+        pthread_sigmask(SIG_BLOCK, &new_mask, &old_mask);
+
+        boost::asio::io_service io_service;
+        boost::asio::executor_work_guard<boost::asio::io_context::executor_type> work_guard(io_service.get_executor());
+        {
+            std::thread t([&io_service] {
+                Backend backend(
+                    io_service,
+                    [&](active_cards_type) {
+                        // active cells callback
+                    },
+                    [&](cap_ahr_data_type) {
+                        // cap ahr data callback
+                    },
+                    [&](cap_whr_data_type) {
+                        // cap whr data callback
+                    },
+                    [&](sequences_info_map_type sequences_info) {
+                        // sequences info data callback
+                    });
+                io_service.run();
+            });
+            t.detach();
+        }
+
+        // Restore previous signals.
+        pthread_sigmask(SIG_SETMASK, &old_mask, 0);
+
+        sigset_t wait_mask;
+        sigemptyset(&wait_mask);
+        sigaddset(&wait_mask, SIGINT);
+        sigaddset(&wait_mask, SIGQUIT);
+        sigaddset(&wait_mask, SIGTERM);
+        pthread_sigmask(SIG_BLOCK, &wait_mask, 0);
+        int sig = 0;
+        sigwait(&wait_mask, &sig);
+
+        work_guard.reset();
+        viUnlock(keysight::session);
+        viClose(keysight::session);
+
+    } catch (std::exception &e) {
+        std::cerr << "exception: " << e.what() << std::endl;
+    }
+
     return 0;
 }
