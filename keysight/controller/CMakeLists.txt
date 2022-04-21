@@ -17,9 +17,7 @@ if(NOT VISA_LIBRARY)
     message(FATAL_ERROR "could not find visa library")
 endif()
 
-set(command_handler_src calibration_commands.cpp cell_commands.cpp digital_commands.cpp ieee488_common_commands.cpp 
-lxi_commands.cpp measure_commands.cpp output_commands.cpp root_commands.cpp sequence_commands.cpp status_commands.cpp
-system_commands.cpp)
+set(command_handler_src sequence_commands.cpp keysight.cpp)
 
 add_executable(keysight_controller main.cpp controller.cpp logger.cpp common.cpp ${command_handler_src})
 target_link_libraries(keysight_controller ${VISA_LIBRARY} ${Boost_LIBRARIES} pthread)

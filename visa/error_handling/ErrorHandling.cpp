@@ -11,6 +11,7 @@
 #include "stdafx.h"
 
 #include "visa.h"
+#include <iostream>
 
 void errorHandler(ViStatus status, ViSession sessionId)
 {
@@ -44,6 +45,7 @@ int main()
 
 	// Change this variable to the address of your instrument
 	ViRsrc VISA_ADDRESS = "USB0::0x008D::0x3502::MY58000516::0::INSTR";
+	//ViRsrc VISA_ADDRESS = "USB0::0x2A8D::0x5101::MY58001093::0::INSTR";
 
 	ViSession resourceManager;
 	ViSession session;
@@ -56,7 +58,7 @@ int main()
 	// To stimulate an error, the code will try to open a connection to an instrument at an invalid address...
 	
 	// First we'll provide an invalid address and see what error we get 
-	status = viOpen(resourceManager, "BAD ADDRESS", VI_NO_LOCK, 0, &session);
+	//status = viOpen(resourceManager, "BAD ADDRESS", VI_NO_LOCK, 0, &session);
 	
 	if (status < VI_SUCCESS)
 	{
@@ -72,10 +74,12 @@ int main()
 	// Stimulate another error by sending an invalid query and trying to read its response. 
 	// 
 	// Before running this part, don't forget to set your instrument address in the 'VISA_ADDRESS' variable at the top of this method
-	status = viOpen(resourceManager, VISA_ADDRESS, VI_NO_LOCK, 0, &session);
+	std::cout << "Im here right" << std::endl;
+	status = viOpen(resourceManager, VISA_ADDRESS, VI_NULL, 0, &session);
+	std::cout << "but im not here" << std::endl;
 	
 	// Misspell the *IDN? query as *IND?
-	status = viPrintf(session, "*IND?\n");
+	status = viPrintf(session, "*IDN?\n");
 	
 	if (status < VI_SUCCESS)
 	{
@@ -104,6 +108,8 @@ int main()
 			//sscanf_s(rawError, "%d, %100[^\n]", &errorCode, errorString, 100);
 			printf("Instrument error code: %d, instrument error message: %s\n", errorCode, errorString);
 		}*/
+	} else {
+	    std::cout << "idn: " << idnResponse << std::endl;
 	}
 
 	viClose(session);

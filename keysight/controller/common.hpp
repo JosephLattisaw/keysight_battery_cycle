@@ -6,7 +6,7 @@
 #include <string>
 
 namespace keysight {
-void verify_vi_status(const ViStatus &status, const std::string &message_success, const std::string &message_failure);
-}
+bool verify_vi_status(const ViSession &session, const ViStatus &status, const std::string &message_success, const std::string &message_failure);
+}  // namespace keysight
 
 #endif

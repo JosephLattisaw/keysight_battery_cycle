@@ -7,40 +7,38 @@
 #include <memory>
 #include <string>
 
-#include "cell_commands.hpp"
-#include "ieee488_common_commands.hpp"
+#include "keysight.hpp"
 #include "sequence_commands.hpp"
-#include "system_commands.hpp"
+#include "types.hpp"
 
 class Controller {
 public:
-    Controller(boost::asio::io_service &io_service);
+    using ActiveCardsCallback = std::function<void(active_cards_type)>;
+    using CapAhrDataCallback = std::function<void(cap_ahr_data_type)>;
+    using CapWhrDataCallback = std::function<void(cap_whr_data_type)>;
+    Controller(boost::asio::io_service &io_service, ActiveCardsCallback active_cards_callback, CapAhrDataCallback cap_ahr_data_callback,
+               CapWhrDataCallback cap_whr_data_callback);
     ~Controller();
 
+    void active_cards_request(active_cards_type active_cards);
+    void cap_ahr_data_request(cap_ahr_data_type data);
+    void cap_whr_data_request(cap_whr_data_type data);
+
 private:
-    // opening visa sessions
-    void open_instrument();
-    void open_resource_manager();
-
-    void enable_read_termination_character();
-
-    // void start_polling_cell_status();
+    // thread management
+    void keysight_thread_is_up();  // TODO this will get removed
+    void worker_thread();
 
     boost::asio::io_service &io_service;
 
-    int cell_status_poll_time_seconds = 1;
+    std::shared_ptr<Keysight> keysight;
+    boost::asio::io_service keysight_service;
+    std::thread keysight_thread;
 
-    // commands
-    std::shared_ptr<CellCommands> cell_commands;
-    std::shared_ptr<IEEE488CommonCommands> ieee488_common_commands;
-    std::shared_ptr<SequenceCommands> sequence_commands;
-    std::shared_ptr<SystemCommands> system_commands;
-
-    // session to instrument
-    ViSession resource_manager = 0;
-    ViSession session = 0;
-
-    const ViRsrc VISA_ADDRESS_BT2203A = "USB0::0x008D::0x3502::MY58000516::0::INSTR";  // usb address of battery cycler
+    // callbacks
+    ActiveCardsCallback active_cards_callback;
+    CapAhrDataCallback cap_ahr_data_callback;
+    CapWhrDataCallback cap_whr_data_callback;
 };
 
 #endif

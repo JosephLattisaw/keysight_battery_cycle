@@ -13,6 +13,7 @@ class Backend {
 
 public:
     Backend(boost::asio::io_service &io_service, LoadSequencesCallback load_sequences_callback);
+    ~Backend();
 
     std::shared_ptr<SequenceParser> sequence_parser;
 
