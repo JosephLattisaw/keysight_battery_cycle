@@ -128,7 +128,12 @@ class TestCellsCheckboxWidget extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
+    final oldChecked = useState(false);
     final checked = useState(cellActiveInSequence == sequenceNumber);
+
+    if (checked.value != oldChecked.value) {
+      onChanged(checked.value);
+    }
 
     final cApi = Provider.of<KeysightCAPI>(context, listen: false);
 
@@ -212,6 +217,7 @@ class TestCellsCheckboxWidget extends HookWidget {
                     sequenceNumber, newValue ?? false);
                 onChanged(newValue ?? false);
                 checked.value = newValue ?? false;
+                oldChecked.value = checked.value;
               },
         controlAffinity:
             ListTileControlAffinity.leading, //  <-- leading Checkbox
