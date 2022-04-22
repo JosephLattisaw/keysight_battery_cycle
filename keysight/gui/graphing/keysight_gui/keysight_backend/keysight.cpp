@@ -197,6 +197,25 @@ bool Keysight::identification_query() {
 #endif
 }
 
+std::vector<std::string> Keysight::comma_delimiter(std::string x) {
+    std::string s = x;
+    std::string delimiter = ",";
+    std::size_t pos = 0;
+    std::string token;
+
+    std::vector<std::string> result;
+
+    while ((pos = s.find(delimiter)) != std::string::npos) {
+        token = s.substr(0, pos);
+        result.push_back(token);
+        s.erase(0, pos + delimiter.length());
+    }
+
+    result.push_back(s);
+
+    return result;
+}
+
 bool Keysight::detect_cards_at_boot() {
     LOG_OUT << "sending the detect cards command";
 
@@ -218,20 +237,11 @@ bool Keysight::detect_cards_at_boot() {
             LOG_OUT << "cards detected: " << cards_detected;
 
             std::string s = std::string(cards_detected);
-            std::string delimiter = ",";
+            auto s_vec = comma_delimiter(s);
 
-            std::size_t pos = 0;
-            std::string token;
-
-            std::size_t expected_size = 7;
-
-            while ((pos = s.find(delimiter)) != std::string::npos) {
-                token = s.substr(0, pos);
-                result.push_back(static_cast<bool>(std::stoi(token)));
-                s.erase(0, pos + delimiter.length());
+            for (auto i : s_vec) {
+                result.push_back(std::stoi(i));
             }
-
-            result.push_back(std::stoi(s));
 
             if (result.size() == 1) {
                 // if result is same number across the board we need to initialize the entire vector
@@ -323,25 +333,76 @@ void Keysight::start_polling_cell_status() {
 }
 
 bool Keysight::get_cell_status() {
-    auto res = get_cap_ahr();
+    for (auto i = 0; i < active_cards.size(); i++) {
+        auto active = active_cards.at(i);
 
-    if (res) {
-        res = get_cap_whr();
-        if (res) {
-            res = get_cell_verbose();
-            if (res) return true;
+        if (active) {
+            auto res = get_cap_ahr(i);
+            if (!res) return false;
+
+            res = get_cap_whr(i);
+            if (!res) return false;
+
+            last_valid_verbose_response.clear();
+
+            res = get_cell_verbose(i);
+            if (!res) return false;
+
+            std::vector<std::uint16_t> sequences;
+            std::vector<std::uint16_t> steps;
+            std::vector<double> volts;
+            std::vector<double> current;
+            for (const auto &k : last_valid_verbose_response) {
+                if (k.size() == 10) {
+                    // TODO 0 = state
+                    // 1 = sequence id
+                    // 2 = step id
+                    // 3 = volts
+                    // 4 = amps
+                    // TODO 5 = cellStat
+                    // TODO 6 = testId
+                    // TODO 7 = testType
+                    // TODO 8 = expLim
+                    // TODO 9 = meadLim
+                    sequences.push_back(std::stoi(k.at(1)));
+                    steps.push_back(std::stoi(k.at(2)));
+                    volts.push_back(std::stod(k.at(3)));
+                    current.push_back(std::stod(k.at(4)));
+                } else {
+                    LOG_ERR << "invalid response size";
+                    return false;
+                }
+            }
+
+            cell_sequence_id_data[i] = sequences;
+            cell_step_id_data[i] = steps;
+            cell_voltage_data[i] = volts;
+            cell_current_data[i] = current;
         }
     }
 
-    return false;
+    port_double_callback(PortTypes::port_double_data_type::CAP_AHR, cell_cap_ahr_data);
+    port_double_callback(PortTypes::port_double_data_type::CAP_WHR, cell_cap_whr_data);
+    port_double_callback(PortTypes::port_double_data_type::VOLTAGE, cell_voltage_data);
+    port_double_callback(PortTypes::port_double_data_type::CURRENT, cell_current_data);
+    port_uint16_callback(PortTypes::port_uint16_data_type::SEQUENCE, cell_sequence_id_data);
+    port_uint16_callback(PortTypes::port_uint16_data_type::STEP, cell_step_id_data);
+
+    return true;
 }
 
-bool Keysight::get_cap_ahr() {
+bool Keysight::get_cap_ahr(int card_number) {
 #ifndef SOFTWARE_ONLY
     ViChar cap_ahr[65535];
 
-    // TODO this is hardcoded, don't do that
-    auto status = viPrintf(session, "MEAS:CELL:CAP:AHR? (@1001:3032)\n");
+    auto s1 = "MEAS:CELL:CAP:AHR? (@";
+    auto s2 = std::to_string(card_number + 1);
+    auto s3 = "001:";
+    auto s4 = s2;
+    auto s5 = "032)\n";
+    auto s = s1 + s2 + s3 + s4 + s5;
+
+    auto status = viPrintf(session, s.c_str());
     auto res =
         keysight::verify_vi_status(session, status, "retrieving capacity ahr", "There was a problem sending capacity ahr command, error code: ");
 
@@ -352,8 +413,15 @@ bool Keysight::get_cap_ahr() {
             status = viFlush(session, VI_READ_BUF);  // discards any read buf so next scan is fine
             res = keysight::verify_vi_status(session, status, "flusing keysight buffer", "There was a problem flushing the keysight buffer");
             if (res) {
-                // TODO
-                LOG_OUT << "got cap ahr status";
+                // LOG_OUT << "got cap ahr status: " << cap_ahr;
+                std::string s = std::string(cap_ahr);
+                auto s_vec = comma_delimiter(s);
+
+                std::vector<double> result;
+                for (auto i : s_vec) {
+                    result.push_back(std::stod(i));
+                }
+                cell_cap_ahr_data[card_number] = result;
             } else {
                 LOG_ERR << "error flushing buffer";
                 return false;
@@ -380,12 +448,20 @@ bool Keysight::get_cap_ahr() {
 #endif
 }
 
-bool Keysight::get_cap_whr() {
+bool Keysight::get_cap_whr(int card_number) {
 #ifndef SOFTWARE_ONLY
     ViChar cap_whr[65535];
 
     // TODO this is hardcoded, don't do that
-    auto status = viPrintf(session, "MEAS:CELL:CAP:WHR? (@1001:3032)\n");
+    auto s1 = "MEAS:CELL:CAP:WHR? (@";
+    auto s2 = std::to_string(card_number + 1);
+    auto s3 = "001:";
+    auto s4 = s2;
+    auto s5 = "032)\n";
+    auto s = s1 + s2 + s3 + s4 + s5;
+
+    // auto status = viPrintf(session, "MEAS:CELL:CAP:WHR? (@1001:3032)\n");
+    auto status = viPrintf(session, s.c_str());
     auto res =
         keysight::verify_vi_status(session, status, "retrieving capacity whr", "There was a problem sending capacity whr command, error code: ");
 
@@ -396,8 +472,15 @@ bool Keysight::get_cap_whr() {
             status = viFlush(session, VI_READ_BUF);  // discards any read buf so next scan is fine
             res = keysight::verify_vi_status(session, status, "flusing keysight buffer", "There was a problem flushing the keysight buffer");
             if (res) {
-                // TODO
-                LOG_OUT << "got cap whr status";
+                // LOG_OUT << "got cap whr status: " << cap_whr;
+                std::string s = std::string(cap_whr);
+                auto s_vec = comma_delimiter(s);
+
+                std::vector<double> result;
+                for (auto i : s_vec) {
+                    result.push_back(std::stod(i));
+                }
+                cell_cap_whr_data[card_number] = result;
             } else {
                 LOG_ERR << "error flushing buffer";
                 return false;
@@ -424,32 +507,41 @@ bool Keysight::get_cap_whr() {
 #endif
 }
 
-bool Keysight::get_cell_verbose() {
+bool Keysight::get_cell_verbose(int card_number) {
 #ifndef SOFTWARE_ONLY
-    for (auto i = 1; i < 4; i++) {
-        for (auto k = 1; k < 33; k++) {
-            std::string s1 = "STAT:CELL:VERB? ";
-            std::string s2 = std::to_string(i);
-            std::string s3 = (k < 10) ? "00" : "0";
-            std::string s4 = std::to_string(k);
-            std::string s5 = "\n";
-            std::string s = s1 + s2 + s3 + s4 + s5;
+    for (auto k = 1; k < 33; k++) {
+        std::string s1 = "STAT:CELL:VERB? ";
+        std::string s2 = std::to_string(card_number + 1);
+        std::string s3 = (k < 10) ? "00" : "0";
+        std::string s4 = std::to_string(k);
+        std::string s5 = "\n";
+        std::string s = s1 + s2 + s3 + s4 + s5;
 
-            ViChar verb[65535];
-            auto status = viPrintf(session, s.c_str());
-            auto res = keysight::verify_vi_status(session, status, "sending cell verbose", "There was a problem sending the cell verbose command");
+        // LOG_OUT << "sending: " << s;
 
+        ViChar verb[65535];
+        auto status = viPrintf(session, s.c_str());
+        auto res = keysight::verify_vi_status(session, status, "sending cell verbose", "There was a problem sending the cell verbose command");
+
+        if (res) {
+            status = viScanf(session, "%t", verb);
+            res = keysight::verify_vi_status(session, status, "getting cell verbose", "There was a problem reading the cell verbose response");
             if (res) {
-                status = viScanf(session, "%t", verb);
-                res = keysight::verify_vi_status(session, status, "getting cell verbose", "There was a problem reading the cell verbose response");
-                if (res) {
-                    status = viFlush(session, VI_READ_BUF);
-                    res = keysight::verify_vi_status(session, status, "flushing buffer", "There was a problem flushing the buffer");
-                    if (!res) return false;
-                } else
-                    return false;
+                status = viFlush(session, VI_READ_BUF);
+                res = keysight::verify_vi_status(session, status, "flushing buffer", "There was a problem flushing the buffer");
+                if (!res) return false;
             } else
                 return false;
+        } else
+            return false;
+
+        auto vec = comma_delimiter(verb);
+        if (vec.size() == 10) {
+            // LOG_OUT << "got cell verbose: " << verb;
+            last_valid_verbose_response.push_back(vec);
+        } else {
+            LOG_ERR << "received invalid verb response size: " << vec.size();
+            return false;
         }
     }
 

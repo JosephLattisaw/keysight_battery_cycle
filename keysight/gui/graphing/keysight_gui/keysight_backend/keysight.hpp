@@ -34,14 +34,16 @@ private:
     // status updates
     bool get_cell_status();
     // status telemetry
-    bool get_cap_ahr();
-    bool get_cap_whr();
-    bool get_cell_verbose();
+    bool get_cap_ahr(int card_number);
+    bool get_cap_whr(int card_number);
+    bool get_cell_verbose(int card_number);
 
     // polling
     void start_polling_cell_status();
 
     void update_connection_status(bool flag);
+
+    std::vector<std::string> comma_delimiter(std::string x);
 
     // data
     active_cards_type active_cards;
@@ -61,6 +63,8 @@ private:
     PortUint16Callback port_uint16_callback;
     ActiveCardsCallback active_cards_callback;
     ConnectionStatusCallback connection_status_callback;
+
+    std::vector<std::vector<std::string>> last_valid_verbose_response;
 
     const std::string VISA_ADDRESS_BT2203A = "USB0::0x008D::0x3502::MY58000516::0::INSTR";  // usb address of battery cycler
 
