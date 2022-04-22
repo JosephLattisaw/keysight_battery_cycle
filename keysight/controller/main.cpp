@@ -15,10 +15,24 @@ extern ViSession session;
 
 int main(int, char **) {
     try {
+    boost::asio::io_service io_service;
+    Controller controller(
+                    io_service,
+                    [&](active_cards_type) {
+                        // active cells callback
+                    },
+                    [&](cap_ahr_data_type) {
+                        // cap ahr data callback
+                    },
+                    [&](cap_whr_data_type) {
+                        // cap whr data callback
+                    });
+                    boost::asio::executor_work_guard<boost::asio::io_context::executor_type> work_guard(io_service.get_executor());
+                    io_service.run();
         // TODO might not need all this gibberish if locking works correctly
         // boost::asio::io_service joe_service;
         // Block all signals for background thread.
-        sigset_t new_mask;
+        /*sigset_t new_mask;
         sigfillset(&new_mask);
         sigset_t old_mask;
         pthread_sigmask(SIG_BLOCK, &new_mask, &old_mask);
@@ -56,8 +70,8 @@ int main(int, char **) {
         sigwait(&wait_mask, &sig);
 
         work_guard.reset();
-        viUnlock(keysight::session);
-        viClose(keysight::session);
+        //viUnlock(keysight::session);
+        //viClose(keysight::session);*/
 
     } catch (std::exception &e) {
         std::cerr << "exception: " << e.what() << std::endl;

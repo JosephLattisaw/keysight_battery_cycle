@@ -423,7 +423,7 @@ bool Keysight::get_cell_verbose() {
                 status = viScanf(session, "%t", verb);
                 res = keysight::verify_vi_status(session, status, "getting cell verbose", "There was a problem reading the cell verbose response");
                 if (res) {
-                    status = viFlush(session, 0x10);
+                    status = viFlush(session, VI_READ_BUF);
                     res = keysight::verify_vi_status(session, status, "flushing buffer", "There was a problem flushing the buffer");
                     if (!res) return false;
                 } else
