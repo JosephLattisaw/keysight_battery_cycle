@@ -201,7 +201,7 @@ bool Keysight::detect_cards_at_boot() {
     LOG_OUT << "sending the detect cards command";
 
 #ifndef SOFTWARE_ONLY
-    std::vector<int> result;
+    std::vector<std::uint8_t> result;
 
     auto status = viPrintf(session, "SYST:CARD:DET:BOOT? 0\n");  // sending the detect all cards command
     auto res =
@@ -236,11 +236,11 @@ bool Keysight::detect_cards_at_boot() {
             if (result.size() == 1) {
                 // if result is same number across the board we need to initialize the entire vector
                 bool val = result.at(0);
-                result = std::vector<int>(8, val);
+                result = std::vector<std::uint8_t>(8, val);
                 LOG_OUT << "all cards were same value: " << static_cast<int>(val);
             } else if (result.size() != 8) {
                 // if we get an invalid result size, just say all the cards are off to be safe
-                result = std::vector<int>(8, false);
+                result = std::vector<std::uint8_t>(8, false);
                 LOG_ERR << "cards returned an invalid size: " << result.size() << ", marking all cards off";
             } else {
                 LOG_OUT << "successfully detected all the cards";
@@ -443,7 +443,7 @@ bool Keysight::get_cell_verbose() {
                 status = viScanf(session, "%t", verb);
                 res = keysight::verify_vi_status(session, status, "getting cell verbose", "There was a problem reading the cell verbose response");
                 if (res) {
-                    status = viFlush(session, 0x10);
+                    status = viFlush(session, VI_READ_BUF);
                     res = keysight::verify_vi_status(session, status, "flushing buffer", "There was a problem flushing the buffer");
                     if (!res) return false;
                 } else
