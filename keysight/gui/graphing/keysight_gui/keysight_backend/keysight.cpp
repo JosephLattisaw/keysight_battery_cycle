@@ -14,14 +14,14 @@ extern ViSession session;
 
 using namespace keysight;
 
-Keysight::Keysight(boost::asio::io_service &io_service, ActiveCardsCallback ac_cb, CapAhrDataCallback cahr_cb, CapWhrDataCallback cawh_cb,
-                   ConnectionStatusCallback conn_cb)
+Keysight::Keysight(boost::asio::io_service &io_service, ActiveCardsCallback ac_cb, ConnectionStatusCallback conn_cb, PortDoubleCallback pd_cb,
+                   PortUint16Callback pu16_cb)
     : io_service(io_service),
       cell_status_timer(io_service),
       active_cards_callback{ac_cb},
-      cap_ahr_data_callback{cahr_cb},
-      cap_whr_data_callback{cawh_cb},
-      connection_status_callback{conn_cb} {}
+      connection_status_callback{conn_cb},
+      port_double_callback{pd_cb},
+      port_uint16_callback{pu16_cb} {}
 
 Keysight::~Keysight() { disconnect(); }
 
@@ -85,6 +85,10 @@ void Keysight::disconnect() {
         cell_names.clear();
         cell_cap_ahr_data.clear();
         cell_cap_whr_data.clear();
+        cell_voltage_data.clear();
+        cell_current_data.clear();
+        cell_sequence_id_data.clear();
+        cell_step_id_data.clear();
 
         cell_status_timer.cancel();
 
@@ -371,7 +375,7 @@ bool Keysight::get_cap_ahr() {
     cell_cap_ahr_data[0] = cell_cap_ahr;
     cell_cap_ahr_data[1] = cell_cap_ahr;
     cell_cap_ahr_data[2] = cell_cap_ahr;
-    cap_ahr_data_callback(cell_cap_ahr_data);
+    port_double_callback(PortTypes::port_double_data_type::CAP_AHR, cell_cap_ahr_data);
     return true;
 #endif
 }
@@ -409,13 +413,13 @@ bool Keysight::get_cap_whr() {
 
     return true;
 #else
-    std::vector<double> cell_cap_whr = {0.0,  1.0,  2.0,  3.0,  4.0,  5.0,  6.0,  7.0,  8.0,  9.0,  10.0, 11.0, 12.0, 13.0, 14.0, 15.0,
+    std::vector<double> cell_cap_whr = {34.0, 1.0,  42.0, 33.0, 44.0, 5.0,  6.0,  7.0,  8.0,  9.0,  10.0, 11.0, 12.0, 13.0, 14.0, 15.0,
                                         16.0, 17.0, 18.0, 19.0, 20.0, 21.0, 22.0, 23.0, 24.0, 25.0, 26.0, 27.0, 28.0, 29.0, 30.0, 31.1};
 
     cell_cap_whr_data[0] = cell_cap_whr;
     cell_cap_whr_data[1] = cell_cap_whr;
     cell_cap_whr_data[2] = cell_cap_whr;
-    cap_whr_data_callback(cell_cap_whr_data);
+    port_double_callback(PortTypes::port_double_data_type::CAP_WHR, cell_cap_whr_data);
     return true;
 #endif
 }
@@ -451,6 +455,34 @@ bool Keysight::get_cell_verbose() {
 
     return true;
 #else
+    std::vector<double> cell_voltage = {12.0, 1.0,  42.0, 33.0, 44.0, 5.0,  6.0,  7.0,  8.0,  9.0,  10.0, 11.0, 12.0, 13.0, 14.0, 15.0,
+                                        16.0, 17.0, 18.0, 19.0, 20.0, 21.0, 22.0, 23.0, 24.0, 25.0, 26.0, 27.0, 28.0, 29.0, 30.0, 31.1};
+    std::vector<double> cell_current = {12.0, 1.0,  42.0, 33.0, 44.0, 5.0,  6.0,  7.0,  8.0,  9.0,  10.0, 11.0, 12.0, 13.0, 14.0, 15.0,
+                                        16.0, 17.0, 18.0, 19.0, 20.0, 21.0, 22.0, 23.0, 24.0, 25.0, 26.0, 27.0, 28.0, 29.0, 30.0, 31.1};
+    std::vector<std::uint16_t> cell_sequence = {12, 1,  42, 33, 44, 5,  6,  7,  8,  9,  10, 11, 12, 13, 14, 15,
+                                                16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31};
+    std::vector<std::uint16_t> cell_step = {3,  2,  12, 33, 44, 5,  6,  7,  8,  9,  10, 11, 12, 13, 14, 15,
+                                            16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31};
+
+    cell_voltage_data[0] = cell_voltage;
+    cell_voltage_data[1] = cell_voltage;
+    cell_voltage_data[2] = cell_voltage;
+    port_double_callback(PortTypes::port_double_data_type::VOLTAGE, cell_voltage_data);
+
+    cell_current_data[0] = cell_current;
+    cell_current_data[1] = cell_current;
+    cell_current_data[2] = cell_current;
+    port_double_callback(PortTypes::port_double_data_type::CURRENT, cell_current_data);
+
+    cell_sequence_id_data[0] = cell_sequence;
+    cell_sequence_id_data[1] = cell_sequence;
+    cell_sequence_id_data[2] = cell_sequence;
+    port_uint16_callback(PortTypes::port_uint16_data_type::SEQUENCE, cell_sequence_id_data);
+
+    cell_step_id_data[0] = cell_step;
+    cell_step_id_data[1] = cell_step;
+    cell_step_id_data[2] = cell_step;
+    port_uint16_callback(PortTypes::port_uint16_data_type::STEP, cell_step_id_data);
     return true;
 #endif
 }

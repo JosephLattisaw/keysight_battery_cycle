@@ -18,6 +18,9 @@ class MeasurementTableWidget extends HookWidget {
     final capacityAmpHrs = context.select((KeysightCAPI k) => k.capacityAmpHrs);
     final capacityWattHrs =
         context.select((KeysightCAPI k) => k.capacityWattHrs);
+    final stepIds = context.select((KeysightCAPI k) => k.currentStepIds);
+    final sequenceIds =
+        context.select((KeysightCAPI k) => k.currentSequenceIds);
 
     final tableSize = useState(0);
     final cellIndexing = useState(<List<int>>[]);
@@ -123,8 +126,7 @@ class MeasurementTableWidget extends HookWidget {
 //                  'Data',
                   cellNames
                       .elementAt(getModuleIndex(index))
-                      .elementAt(getCellIndex(index))
-                      .toString(),
+                      .elementAt(getCellIndex(index)),
                   style: const TextStyle(color: Colors.white),
                 ),
               ),
@@ -132,8 +134,7 @@ class MeasurementTableWidget extends HookWidget {
                 Text(
                   voltageValues
                       .elementAt(getModuleIndex(index))
-                      .elementAt(getCellIndex(index))
-                      .toString(),
+                      .elementAt(getCellIndex(index)),
                   style: const TextStyle(color: Colors.white),
                 ),
               ),
@@ -141,8 +142,7 @@ class MeasurementTableWidget extends HookWidget {
                 Text(
                   currentValues
                       .elementAt(getModuleIndex(index))
-                      .elementAt(getCellIndex(index))
-                      .toString(),
+                      .elementAt(getCellIndex(index)),
                   style: const TextStyle(color: Colors.white),
                 ),
               ),
@@ -150,8 +150,7 @@ class MeasurementTableWidget extends HookWidget {
                 Text(
                   capacityAmpHrs
                       .elementAt(getModuleIndex(index))
-                      .elementAt(getCellIndex(index))
-                      .toString(),
+                      .elementAt(getCellIndex(index)),
                   style: const TextStyle(color: Colors.white),
                 ),
               ),
@@ -159,32 +158,35 @@ class MeasurementTableWidget extends HookWidget {
                 Text(
                   capacityWattHrs
                       .elementAt(getModuleIndex(index))
-                      .elementAt(getCellIndex(index))
-                      .toString(),
+                      .elementAt(getCellIndex(index)),
                   style: const TextStyle(color: Colors.white),
                 ),
               ),
               DataCell(
                 Text(
-                  "RUNNING",
+                  "N/A",
                   style: const TextStyle(color: Colors.white),
                 ),
               ),
               DataCell(
                 Text(
-                  "ABORTED",
+                  "N/A",
                   style: const TextStyle(color: Colors.white),
                 ),
               ),
               DataCell(
                 Text(
-                  "8",
+                  sequenceIds
+                      .elementAt(getModuleIndex(index))
+                      .elementAt(getCellIndex(index)),
                   style: const TextStyle(color: Colors.white),
                 ),
               ),
               DataCell(
                 Text(
-                  "256",
+                  stepIds
+                      .elementAt(getModuleIndex(index))
+                      .elementAt(getCellIndex(index)),
                   style: const TextStyle(color: Colors.white),
                 ),
               ),

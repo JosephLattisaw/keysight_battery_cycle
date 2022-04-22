@@ -42,6 +42,22 @@ static void post_data_object(std::int64_t port, std::vector<std::uint8_t> data) 
     Dart_PostCObject_DL(port, &dart_object);
 }
 
+static void post_data_object(std::int64_t port, std::vector<std::uint16_t> data) {
+    void *request_buffer = malloc(sizeof(std::uint16_t) * data.size());
+    const std::size_t request_length = data.size();
+    std::copy(data.begin(), data.end(), reinterpret_cast<std::uint16_t *>(request_buffer));
+
+    Dart_CObject dart_object;
+    dart_object.type = Dart_CObject_kExternalTypedData;
+    dart_object.value.as_external_typed_data.type = Dart_TypedData_kUint16;
+    dart_object.value.as_external_typed_data.length = request_length;
+    dart_object.value.as_external_typed_data.data = reinterpret_cast<std::uint8_t *>(request_buffer);
+    dart_object.value.as_external_typed_data.peer = request_buffer;
+    dart_object.value.as_external_typed_data.callback = FreeFinalizer;
+
+    Dart_PostCObject_DL(port, &dart_object);
+}
+
 static void post_data_object(std::int64_t port, std::vector<std::double_t> data) {
     void *request_buffer = malloc(sizeof(std::double_t) * data.size());
     const std::size_t request_length = data.size();
@@ -121,7 +137,8 @@ void finish_save_sequence() {
 
 void create_backend(bool using_dart = false, std::int64_t load_sequences_port = 0, std::int64_t fin_load_sequences_port = 0,
                     std::int64_t load_steps_port = 0, std::int64_t load_tests_port = 0, std::int64_t active_cards_port = 0,
-                    std::int64_t keysight_connection_port = 0, std::int64_t cap_ahr_port = 0) {
+                    std::int64_t keysight_connection_port = 0, std::int64_t keysight_double_port = 0, std::int64_t cell_state_port = 0,
+                    std::int64_t cell_status_port = 0, std::int64_t keysight_uint16_port = 0) {
     if (!backend)
         backend = std::make_shared<Backend>(
             io_service,
@@ -135,18 +152,6 @@ void create_backend(bool using_dart = false, std::int64_t load_sequences_port = 
                     } else
                         LOG_ERR << "received invalid active cards size";
                 }
-            },
-            [&, using_dart, cap_ahr_port](cap_ahr_data_type data) {
-                // cap ahr data callback
-                if (using_dart) {
-                    for (auto [key, val] : data) {
-                        val.insert(val.begin(), key);  // first number is row
-                        post_data_object(cap_ahr_port, val);
-                    }
-                }
-            },
-            [&](cap_whr_data_type) {
-                // cap whr data callback
             },
             [&, using_dart, load_sequences_port, fin_load_sequences_port](sequences_info_map_type sequences_info) {
                 if (using_dart) {
@@ -165,6 +170,24 @@ void create_backend(bool using_dart = false, std::int64_t load_sequences_port = 
                 if (using_dart) {
                     LOG_OUT << "received connection status callback";
                     post_data_bool(keysight_connection_port, status);
+                }
+            },
+            [&, using_dart, keysight_double_port](PortTypes::port_double_data_type data_type, map_double_data_type data) {
+                if (using_dart) {
+                    for (auto [key, val] : data) {
+                        val.insert(val.begin(), key);        // second number is row
+                        val.insert(val.begin(), data_type);  // first number is data type
+                        post_data_object(keysight_double_port, val);
+                    }
+                }
+            },
+            [&, using_dart, keysight_uint16_port](PortTypes::port_uint16_data_type data_type, map_uint16_data_type data) {
+                if (using_dart) {
+                    for (auto [key, val] : data) {
+                        val.insert(val.begin(), key);        // second number is row
+                        val.insert(val.begin(), data_type);  // first number is data type
+                        post_data_object(keysight_uint16_port, val);
+                    }
                 }
             });
     else
@@ -229,17 +252,17 @@ int main(int argc, char **argv) {
                         // active cells callback
                         std::cout << "got the active cards callback " << data.size() << std::endl;
                     },
-                    [&](cap_ahr_data_type) {
-                        // cap ahr data callback
-                    },
-                    [&](cap_whr_data_type) {
-                        // cap whr data callback
-                    },
                     [&](sequences_info_map_type sequences_info) {
                         // sequences info data callback
                     },
                     [&](bool) {
                         // connection callback status
+                    },
+                    [&](PortTypes::port_double_data_type data_type, map_double_data_type data) {
+
+                    },
+                    [&](PortTypes::port_uint16_data_type data_type, map_uint16_data_type data) {
+
                     });
                 io_service.run();
             });

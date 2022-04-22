@@ -3,14 +3,14 @@
 #include <iostream>
 #include <memory>
 
-Backend::Backend(boost::asio::io_service &io_service, ActiveCardsCallback ac_cb, CapAhrDataCallback cahr_cb, CapWhrDataCallback cawh_cb,
-                 LoadSequencesCallback ls_cb, ConnectionStatusCallback conn_cb)
+Backend::Backend(boost::asio::io_service &io_service, ActiveCardsCallback ac_cb, LoadSequencesCallback ls_cb, ConnectionStatusCallback conn_cb,
+                 PortDoubleCallback pd_cb, PortUint16Callback pu16_cb)
     : io_service(io_service),
       active_cards_callback{ac_cb},
-      cap_ahr_data_callback{cahr_cb},
-      cap_whr_data_callback{cawh_cb},
       load_sequences_callback{ls_cb},
-      connection_status_callback{conn_cb} {
+      connection_status_callback{conn_cb},
+      port_double_callback{pd_cb},
+      port_uint16_callback{pu16_cb} {
     sequence_parser = std::make_shared<SequenceParser>([&](sequences_info_map_type sequence_info) { load_sequences_callback(sequence_info); });
 
     // starting thread to start keysight stuff
@@ -29,17 +29,16 @@ void Backend::worker_thread() {
             // active cells callback
             io_service.post(std::bind(&Backend::active_cards_request, this, active_cards));
         },
-        [&](cap_ahr_data_type data) {
-            // cap ahr data callback
-            io_service.post(std::bind(&Backend::cap_ahr_data_request, this, data));
-        },
-        [&](cap_whr_data_type data) {
-            // cap whr data callback
-            io_service.post(std::bind(&Backend::cap_whr_data_request, this, data));
-        },
         [&](bool status) {
             // connection status
             io_service.post(std::bind(&Backend::connection_status_request, this, status));
+        },
+        [&](PortTypes::port_double_data_type data_type, map_double_data_type data) {
+            // double data type
+            io_service.post(std::bind(&Backend::port_double_data_request, this, data_type, data));
+        },
+        [&](PortTypes::port_uint16_data_type data_type, map_uint16_data_type data) {
+            io_service.post(std::bind(&Backend::port_uint16_data_request, this, data_type, data));
         });
 
     io_service.post(std::bind(&Backend::keysight_thread_is_up, this));
@@ -52,11 +51,15 @@ void Backend::worker_thread() {
 
 void Backend::active_cards_request(active_cards_type active_cards) { active_cards_callback(active_cards); }
 
-void Backend::cap_ahr_data_request(cap_ahr_data_type cap_ahr_data) { cap_ahr_data_callback(cap_ahr_data); }
-
-void Backend::cap_whr_data_request(cap_whr_data_type data) { cap_whr_data_callback(data); }
-
 void Backend::connection_status_request(bool status) { connection_status_callback(status); }
+
+void Backend::port_double_data_request(PortTypes::port_double_data_type data_type, map_double_data_type data) {
+    port_double_callback(data_type, data);
+}
+
+void Backend::port_uint16_data_request(PortTypes::port_uint16_data_type data_type, map_uint16_data_type data) {
+    port_uint16_callback(data_type, data);
+}
 
 // TODO this should have some sort of conditional variable to wait for thread instead of this post thing
 void Backend::keysight_thread_is_up() {  // ysight_service.post(std::bind(&Keysight::connect, keysight));

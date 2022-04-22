@@ -21,6 +21,7 @@ typedef std::map<std::string, sequence_info_type> sequences_info_map_type;
 typedef std::map<std::string, sequence_step_vector> seqeunces_steps_map_type;
 typedef std::map<std::string, sequence_test_map> sequences_tests_map_type;
 
+namespace SequenceTypes {
 enum sequence_info_access_type {
     SERIAL_NUMBER = 0,
     COMMENTS = 1,
@@ -40,9 +41,38 @@ enum sequence_test_access_type {
     TIME_TYPE = 3,
     TIME_LIMIT = 4,
 };
+}  // namespace SequenceTypes
 
 typedef std::vector<std::uint8_t> active_cards_type;
-typedef std::map<int, std::vector<double>> cap_ahr_data_type;
-typedef std::map<int, std::vector<double>> cap_whr_data_type;
+typedef std::map<int, std::vector<double>> map_double_data_type;
+typedef std::map<int, std::vector<std::string>> state_data_type;
+typedef std::map<int, std::vector<std::string>> status_data_type;
+typedef std::map<int, std::vector<std::uint16_t>> map_uint16_data_type;
+
+namespace PortTypes {
+enum port_double_data_type {
+    CAP_AHR = 0,
+    CAP_WHR = 1,
+    VOLTAGE = 2,
+    CURRENT = 3,
+};
+
+enum port_string_data_type {
+    STATE,
+    STATUS,
+};
+
+enum port_uint16_data_type {
+    SEQUENCE = 0,
+    STEP = 1,
+};
+}  // namespace PortTypes
+
+using ActiveCardsCallback = std::function<void(active_cards_type)>;
+using ConnectionStatusCallback = std::function<void(bool)>;
+using LoadSequencesCallback = std::function<void(sequences_info_map_type)>;
+
+using PortDoubleCallback = std::function<void(PortTypes::port_double_data_type, map_double_data_type)>;
+using PortUint16Callback = std::function<void(PortTypes::port_uint16_data_type, map_uint16_data_type)>;
 
 #endif

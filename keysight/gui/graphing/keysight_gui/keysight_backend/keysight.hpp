@@ -11,13 +11,8 @@
 
 class Keysight {
 public:
-    using ActiveCardsCallback = std::function<void(active_cards_type)>;
-    using CapAhrDataCallback = std::function<void(cap_ahr_data_type)>;
-    using CapWhrDataCallback = std::function<void(cap_whr_data_type)>;
-    using ConnectionStatusCallback = std::function<void(bool)>;
-
-    Keysight(boost::asio::io_service &io_service, ActiveCardsCallback active_cards_callback, CapAhrDataCallback cap_ahr_data_callback,
-             CapWhrDataCallback cap_whr_data_callback, ConnectionStatusCallback connection_status_callback);
+    Keysight(boost::asio::io_service &io_service, ActiveCardsCallback active_cards_callback, ConnectionStatusCallback connection_status_callback,
+             PortDoubleCallback port_double_callback, PortUint16Callback port_uint16_callback);
     ~Keysight();
 
     void connect();
@@ -51,16 +46,20 @@ private:
     // data
     active_cards_type active_cards;
     std::vector<std::string> cell_names;
-    cap_ahr_data_type cell_cap_ahr_data;
-    cap_whr_data_type cell_cap_whr_data;
+    map_double_data_type cell_cap_ahr_data;
+    map_double_data_type cell_cap_whr_data;
+    map_double_data_type cell_voltage_data;
+    map_double_data_type cell_current_data;
+    map_uint16_data_type cell_sequence_id_data;
+    map_uint16_data_type cell_step_id_data;
 
     boost::asio::io_service &io_service;
     boost::asio::steady_timer cell_status_timer;
 
     // callbacks
+    PortDoubleCallback port_double_callback;
+    PortUint16Callback port_uint16_callback;
     ActiveCardsCallback active_cards_callback;
-    CapAhrDataCallback cap_ahr_data_callback;
-    CapWhrDataCallback cap_whr_data_callback;
     ConnectionStatusCallback connection_status_callback;
 
     const std::string VISA_ADDRESS_BT2203A = "USB0::0x008D::0x3502::MY58000516::0::INSTR";  // usb address of battery cycler

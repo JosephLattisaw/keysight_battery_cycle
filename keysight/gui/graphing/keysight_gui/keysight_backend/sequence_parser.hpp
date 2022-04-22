@@ -10,8 +10,6 @@
 #include "types.hpp"
 
 class SequenceParser {
-    using LoadSequencesCallback = std::function<void(sequences_info_map_type)>;
-
 public:
     SequenceParser(LoadSequencesCallback load_sequences_callback);
 
