@@ -35,19 +35,24 @@ class ProfileSequenceWidget extends HookWidget {
     final backend = Provider.of<KeysightCAPI>(context, listen: false);
     final pageController = usePageController(initialPage: 0, keepPage: false);
 
-    useMemoized(() {});
-
     void setSequenceIndex(int index) {
       selectedSequence.value = index;
       pageController.jumpToPage(index);
     }
 
-    void addNewSequence() {
-      sequenceList.value = List.from(sequenceList.value)..add("New Profile");
-      sequenceSaveList.value = List.from(sequenceSaveList.value)..add(false);
-      sequenceTextList.value = List.from(sequenceTextList.value)..add("");
-      cellTextList.value = List.from(cellTextList.value)..add("");
-      commentsTextList.value = List.from(commentsTextList.value)..add("");
+    void addNewSequence(
+        {String name = "New Profile",
+        bool saved = false,
+        String sequenceText = "",
+        String cellText = "",
+        String commentsText = ""}) {
+      sequenceList.value = List.from(sequenceList.value)..add(name);
+      sequenceSaveList.value = List.from(sequenceSaveList.value)..add(saved);
+      sequenceTextList.value = List.from(sequenceTextList.value)
+        ..add(sequenceText);
+      cellTextList.value = List.from(cellTextList.value)..add(cellText);
+      commentsTextList.value = List.from(commentsTextList.value)
+        ..add(commentsText);
 
       sequenceWidgets.value.add(SequenceBuilderKeepAliveClient(
         key: UniqueKey(),
@@ -59,7 +64,7 @@ class ProfileSequenceWidget extends HookWidget {
       setSequenceIndex(sequenceList.value.length - 1);
     }
 
-    void deleteSequence(int index) {
+    void deleteSequence(int index, {bool addNew = true}) {
       int length = sequenceList.value.length;
       sequenceList.value = List.from(sequenceList.value)..removeAt(index);
       sequenceSaveList.value = List.from(sequenceSaveList.value)
@@ -86,7 +91,7 @@ class ProfileSequenceWidget extends HookWidget {
       }
 
       //never want the list to be completey empty
-      if (sequenceList.value.isEmpty) addNewSequence();
+      if (sequenceList.value.isEmpty && addNew) addNewSequence();
     }
 
     void saveSequence(int index) {
@@ -135,6 +140,51 @@ class ProfileSequenceWidget extends HookWidget {
 
       backend.finishSaveSequence();
     }
+
+    useMemoized(() {
+      print("how often does this shit get called");
+      Future.delayed(Duration.zero, () async {
+        final loadedSequences = backend.getLoadedSequences;
+        print("found ${loadedSequences.length} $loadedSequences");
+        for (int i = 0; i < loadedSequences.length; i++) {
+          final List<dynamic> info = loadedSequences.elementAt(i);
+          final String name = info.elementAt(0);
+          final String serial = info.elementAt(1);
+          final String comments = info.elementAt(2);
+          final List<dynamic> steps = info.elementAt(3);
+
+          addNewSequence(
+              name: name,
+              saved: true,
+              sequenceText: name,
+              cellText: serial,
+              commentsText: comments);
+
+          //i+1 because presumably there will be a default blank one
+          //that we'll delete later
+          SequenceBuilderKeepAliveClient sw = sequenceWidgets.value
+              .elementAt(i + 1) as SequenceBuilderKeepAliveClient;
+
+          sw.sequenceTextController.text = name;
+          sw.cellTextController.text = serial;
+          sw.commentsTextController.text = comments;
+
+          print("loaded $loadedSequences");
+          for (int k = 0; k < steps.length; k++) {
+            List<dynamic> step = steps.elementAt(k);
+            print("steps: $k $step");
+            final mode = step.elementAt(0);
+            final seconds = step.elementAt(1);
+            final current = step.elementAt(2);
+            final voltage = step.elementAt(3);
+
+            sw.addTableStep([mode, seconds, current, voltage, []]);
+          }
+        }
+
+        if (loadedSequences.length > 0) deleteSequence(0);
+      });
+    });
 
     return Row(
       children: [
@@ -225,6 +275,7 @@ class SequenceBuilderKeepAliveClient extends StatefulWidget {
   final TextEditingController cellTextController = TextEditingController();
   final TextEditingController commentsTextController = TextEditingController();
   late final _SequenceBuilderKeepAliveClientState client;
+  List<List<dynamic>> table = <List<dynamic>>[];
 
   void setSequenceTextError(bool flag) {
     client.sequenceTextError = flag;
@@ -238,9 +289,14 @@ class SequenceBuilderKeepAliveClient extends StatefulWidget {
     client.keepAliveUpdate();
   }
 
+  //this doesn't do anything if the state hasn't been called yet
+  void addTableStep(List<dynamic> step) {
+    table.add(step);
+  }
+
   bool get wantKeepAlive => client.wantKeepAlive_;
 
-  List<List<dynamic>> get table => client.table;
+  //List<List<dynamic>> get table => client.table;
 
   @override
   _SequenceBuilderKeepAliveClientState createState() {
@@ -255,7 +311,6 @@ class _SequenceBuilderKeepAliveClientState
   int dataTableSelectedIndex = -1;
   bool sequenceTextError = false;
   bool wantKeepAlive_ = true;
-  List<List<dynamic>> table = <List<dynamic>>[];
 
   void refresh() {
     setState(() {});
@@ -263,7 +318,7 @@ class _SequenceBuilderKeepAliveClientState
 
   void addTableStep(List<dynamic> step) {
     setState(() {
-      table.add(step);
+      widget.table.add(step);
     });
   }
 
@@ -272,7 +327,7 @@ class _SequenceBuilderKeepAliveClientState
       List<int> indexes = List.filled(2, 0, growable: true);
       indexes = getTableIndexes(dataTableSelectedIndex);
 
-      table.elementAt(indexes.elementAt(0)).elementAt(4).add(test);
+      widget.table.elementAt(indexes.elementAt(0)).elementAt(4).add(test);
     });
   }
 
@@ -284,7 +339,7 @@ class _SequenceBuilderKeepAliveClientState
     int totalIndex = 0;
     bool nestedBreak = false;
 
-    for (var element in table) {
+    for (var element in widget.table) {
       secondIndex = -1;
 
       if (totalIndex == index) {
@@ -340,7 +395,7 @@ class _SequenceBuilderKeepAliveClientState
       result = false;
     } else if (mapping.elementAt(1) >= 0) {
       result = false;
-    } else if (mapping.elementAt(0) < table.length - 1) {
+    } else if (mapping.elementAt(0) < widget.table.length - 1) {
       result = true;
     } else {
       result = false;
@@ -354,9 +409,9 @@ class _SequenceBuilderKeepAliveClientState
       List<int> mapping = getTableIndexes(dataTableSelectedIndex);
 
       if (mapping.elementAt(1) < 0) {
-        dynamic removedItem = table.elementAt(mapping.elementAt(0));
-        table.removeAt(mapping.elementAt(0));
-        table.insert(mapping.elementAt(0) - 1, removedItem);
+        dynamic removedItem = widget.table.elementAt(mapping.elementAt(0));
+        widget.table.removeAt(mapping.elementAt(0));
+        widget.table.insert(mapping.elementAt(0) - 1, removedItem);
       }
     });
   }
@@ -366,10 +421,10 @@ class _SequenceBuilderKeepAliveClientState
       List<int> mapping = getTableIndexes(dataTableSelectedIndex);
 
       if (mapping.elementAt(1) < 0) {
-        table = List.from(table);
-        dynamic removedItem = table.elementAt(mapping.elementAt(0));
-        table.removeAt(mapping.elementAt(0));
-        table.insert(mapping.elementAt(0) + 1, removedItem);
+        widget.table = List.from(widget.table);
+        dynamic removedItem = widget.table.elementAt(mapping.elementAt(0));
+        widget.table.removeAt(mapping.elementAt(0));
+        widget.table.insert(mapping.elementAt(0) + 1, removedItem);
       }
     });
   }
@@ -379,12 +434,12 @@ class _SequenceBuilderKeepAliveClientState
       List<int> mapping = getTableIndexes(dataTableSelectedIndex);
 
       if (mapping.elementAt(1) >= 0) {
-        table = List.from(table)
+        widget.table = List.from(widget.table)
           ..elementAt(mapping.elementAt(0))
               .elementAt(4)
               .removeAt(mapping.elementAt(1));
       } else {
-        table = List.from(table)..removeAt(mapping.elementAt(0));
+        widget.table = List.from(widget.table)..removeAt(mapping.elementAt(0));
       }
     });
   }
@@ -470,7 +525,7 @@ class _SequenceBuilderKeepAliveClientState
             ),
             const SizedBox(height: 12),
             SequenceStepTable(
-              table: table,
+              table: widget.table,
               onIndexChanged: (p0) {
                 setState(() {
                   dataTableSelectedIndex = p0;

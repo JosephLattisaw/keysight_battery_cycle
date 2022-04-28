@@ -5,10 +5,6 @@
             "serial_number": "",
             "comments": ""
         },
-        "joe": {
-            "serial_number": "131123",
-            "comments": "sadsasd"
-        },
         "sfdfdsfds": {
             "serial_number": "324234",
             "comments": "sdfsdffds",
@@ -41,6 +37,10 @@
                     "voltage": "2"
                 }
             }
+        },
+        "ljkhfsahjklsfda": {
+            "serial_number": "sdadsa",
+            "comments": "saddsa"
         }
     }
 }

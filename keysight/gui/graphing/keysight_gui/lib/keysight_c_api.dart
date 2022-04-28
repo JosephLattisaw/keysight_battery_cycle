@@ -361,21 +361,35 @@ class KeysightCAPI extends ChangeNotifier {
 
     final sequences = getSequences();
     for (int i = 0; i < sequences.size; i++) {
+      final sequenceInfo = List<dynamic>.empty(growable: true);
       final sequence =
           sequences.sequences.elementAt(i).cast<ffi.Pointer<Sequence>>().value;
 
       final name = sequence.ref.name.toDartString();
       final serial = sequence.ref.serial.toDartString();
       final comments = sequence.ref.comments.toDartString();
-      print("sequence $i: name: $name, serial: $serial, comments: $comments");
+      print(
+          "sequence $i: name: $name, serial: $serial, comments: $comments, steps size: ${sequence.ref.steps_size}");
+
+      sequenceInfo.add(name);
+      sequenceInfo.add(serial);
+      sequenceInfo.add(comments);
+
+      final sequenceSteps = List<dynamic>.empty(growable: true);
 
       for (int k = 0; k < sequence.ref.steps_size; k++) {
+        final steps = List<dynamic>.empty(growable: true);
         final step =
             sequence.ref.steps.elementAt(k).cast<ffi.Pointer<Step>>().value;
         final mode = step.ref.mode;
         final seconds = step.ref.seconds;
         final current = step.ref.current;
         final voltage = step.ref.voltage;
+
+        steps.add(mode);
+        steps.add(seconds);
+        steps.add(current);
+        steps.add(voltage);
 
         print(
             "step $k:, mode: $mode, seconds: $seconds, current: $current, voltage: $voltage");
@@ -400,7 +414,11 @@ class KeysightCAPI extends ChangeNotifier {
         }
 
         malloc.free(step);
+
+        sequenceSteps.add(steps);
       }
+
+      sequenceInfo.add(sequenceSteps);
 
       if (sequence.ref.steps_size > 0) {
         malloc.free(sequence.ref.steps);
@@ -410,12 +428,17 @@ class KeysightCAPI extends ChangeNotifier {
       malloc.free(sequence.ref.serial);
       malloc.free(sequence.ref.comments);
       malloc.free(sequence);
+
+      loadedSequences.add(sequenceInfo);
     }
 
     if (sequences.size > 0) {
       malloc.free(sequences.sequences);
     }
   }
+
+  List<dynamic> loadedSequences = List<dynamic>.empty(growable: true);
+  List<dynamic> get getLoadedSequences => loadedSequences;
 
   final List<bool> sequencesStarted = List.generate(8, (index) => false);
 

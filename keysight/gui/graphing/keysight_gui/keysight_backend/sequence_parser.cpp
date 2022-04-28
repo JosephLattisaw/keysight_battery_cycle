@@ -235,7 +235,7 @@ std::array<std::map<std::string, std::any>, 3> SequenceParser::load_all_sequence
                     }
                 }
 
-                // auto tests_tree = st_it.second.get_child_optional("tests");
+                sequences_steps.insert({name, ssv});
             }
         }
     }
