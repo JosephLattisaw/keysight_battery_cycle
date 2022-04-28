@@ -350,6 +350,7 @@ struct Sequences get_sequences() {
 
                 // allocating the size of our test
                 step->tests_size = stv.size();
+                std::cout << "tests size: " << stv.size() << std::endl;
                 step->tests = (Test **)malloc(step->tests_size * sizeof(Test *));
 
                 for (auto j = 0; j < stv.size(); j++) {

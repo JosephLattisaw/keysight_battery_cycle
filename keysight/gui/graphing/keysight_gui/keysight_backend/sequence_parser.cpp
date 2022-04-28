@@ -55,22 +55,41 @@ void SequenceParser::add_save_sequence_test(int test_type, int test_action, doub
         sequence_test_map test_map;
 
         auto steps = std::any_cast<sequence_step_vector>(sequences_steps.at(last_started_saved_sequence));
+        LOG_OUT << "steps size: " << steps.size();
         test_map.insert({steps.size() - 1, sequence_test_vector{{static_cast<double>(test_type), static_cast<double>(test_action), value,
                                                                  static_cast<double>(time_type), static_cast<double>(time_limit)}}});
 
         sequences_tests.insert({last_started_saved_sequence, test_map});
     } else {
-        LOG_OUT << "attempting to add next step to test in a sequence step";
+        LOG_OUT << "attempting to add next test to test in a sequence step";
 
         // first thing is to get the number step we are on
-        auto total_steps = std::any_cast<sequence_step_vector>(sequences_steps.at(last_started_saved_sequence)).size();
+        auto steps = std::any_cast<sequence_step_vector>(sequences_steps.at(last_started_saved_sequence));
 
-        LOG_OUT << "total steps: " << total_steps;
+        // next thing todo is get our test map
+        auto test_map = std::any_cast<sequence_test_map>(sequences_tests.at(last_started_saved_sequence));
+
+        LOG_OUT << "total steps: " << steps.size();
+
         // now we add to the mapping
-        std::any_cast<sequence_test_map>(sequences_tests.at(last_started_saved_sequence))
-            .at(total_steps - 1)
-            .push_back({static_cast<double>(test_type), static_cast<double>(test_action), value, static_cast<double>(time_type),
-                        static_cast<double>(time_limit)});
+
+        LOG_OUT << "bad any cast?";
+
+        sequence_test_type stt = {static_cast<double>(test_type), static_cast<double>(test_action), value, static_cast<double>(time_type),
+                                  static_cast<double>(time_limit)};
+
+        if (test_map.find(steps.size() - 1) != test_map.end()) {
+            LOG_OUT << "found test map";
+            sequence_test_vector x = test_map.at(steps.size() - 1);
+            x.push_back(stt);
+            test_map.at(steps.size() - 1) = x;
+        } else {
+            LOG_OUT << "didnt find test map";
+            test_map.insert({steps.size() - 1, sequence_test_vector{stt}});
+        }
+
+        sequences_tests.at(last_started_saved_sequence) = test_map;
+        LOG_OUT << "bad any cast?4";
     }
 }
 
@@ -139,6 +158,7 @@ void SequenceParser::finish_save_sequence() {
 
         if (test_map.find(i) != test_map.end()) {
             auto stv = test_map.at(i);
+            std::cout << "STV SIZE: " << stv.size() << std::endl;
             for (auto k = 0; k < stv.size(); k++) {
                 auto st = stv.at(k);
                 property_tree.put(
@@ -195,7 +215,7 @@ void SequenceParser::delete_all_keys(const std::string &name) {
 void SequenceParser::clear_all_maps() {
     sequences_info.clear();
     sequences_steps.clear();
-    sequences_steps.clear();
+    sequences_tests.clear();
 }
 
 std::array<std::map<std::string, std::any>, 3> SequenceParser::load_all_sequences() {
@@ -236,7 +256,9 @@ std::array<std::map<std::string, std::any>, 3> SequenceParser::load_all_sequence
                         auto tests_tree = steps_it.second.get_child_optional("tests");
                         if (tests_tree.get_ptr()) {
                             sequence_test_vector stv;
+                            // std::cout << "found tests" << std::endl;
                             for (auto &tests_it : *tests_tree) {
+                                //  std::cout << "test: " << tests_it.first << std::endl;
                                 auto test_type = tests_it.second.get<double>("test_type");
                                 auto test_action = tests_it.second.get<double>("test_action");
                                 auto value = tests_it.second.get<double>("value");

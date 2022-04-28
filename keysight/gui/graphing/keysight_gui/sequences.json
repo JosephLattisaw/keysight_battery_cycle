@@ -1,43 +1,6 @@
 {
     "api": "1",
     "sequences": {
-        "sfdfdsfds": {
-            "serial_number": "324234",
-            "comments": "sdfsdffds",
-            "steps": {
-                "0": {
-                    "mode": "0",
-                    "seconds": "1",
-                    "current": "0.10000000000000001",
-                    "voltage": "2"
-                },
-                "1": {
-                    "mode": "0",
-                    "seconds": "1",
-                    "current": "0.10000000000000001",
-                    "voltage": "2",
-                    "tests": {
-                        "0": {
-                            "test_type": "0",
-                            "test_action": "0",
-                            "value": "2",
-                            "time_type": "0",
-                            "time_limit": "20"
-                        }
-                    }
-                },
-                "2": {
-                    "mode": "0",
-                    "seconds": "1",
-                    "current": "0.10000000000000001",
-                    "voltage": "2"
-                }
-            }
-        },
-        "ljkhfsahjklsfda": {
-            "serial_number": "sdadsa",
-            "comments": "saddsa"
-        },
         "joe1": {
             "serial_number": "",
             "comments": "",
@@ -80,6 +43,63 @@
                     "seconds": "1",
                     "current": "0.10000000000000001",
                     "voltage": "2"
+                }
+            }
+        },
+        "ljkhfsahjklsfda": {
+            "serial_number": "sdadsa",
+            "comments": "saddsa",
+            "steps": {
+                "0": {
+                    "mode": "0",
+                    "seconds": "1",
+                    "current": "0.10000000000000001",
+                    "voltage": "2",
+                    "tests": {
+                        "0": {
+                            "test_type": "0",
+                            "test_action": "0",
+                            "value": "2",
+                            "time_type": "0",
+                            "time_limit": "20"
+                        },
+                        "1": {
+                            "test_type": "0",
+                            "test_action": "0",
+                            "value": "2",
+                            "time_type": "0",
+                            "time_limit": "20"
+                        },
+                        "2": {
+                            "test_type": "0",
+                            "test_action": "0",
+                            "value": "2",
+                            "time_type": "0",
+                            "time_limit": "20"
+                        },
+                        "3": {
+                            "test_type": "0",
+                            "test_action": "0",
+                            "value": "2",
+                            "time_type": "0",
+                            "time_limit": "20"
+                        }
+                    }
+                },
+                "1": {
+                    "mode": "0",
+                    "seconds": "1",
+                    "current": "0.10000000000000001",
+                    "voltage": "2",
+                    "tests": {
+                        "0": {
+                            "test_type": "0",
+                            "test_action": "0",
+                            "value": "2",
+                            "time_type": "0",
+                            "time_limit": "20"
+                        }
+                    }
                 }
             }
         }
