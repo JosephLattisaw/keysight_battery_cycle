@@ -231,12 +231,11 @@ std::array<std::map<std::string, std::any>, 3> SequenceParser::load_all_sequence
     }
 
     for (auto &it : property_tree) {
-        std::cout << it.first << std::endl;  // seqeunces
         if (std::string("sequences").compare(it.first) == 0) {
-            std::cout << "found sequences" << std::endl;
+            LOG_OUT << "found sequences";
             auto seq_tree = property_tree.get_child(it.first);
             for (auto &st_it : seq_tree) {
-                std::cout << "found sequence name: " << st_it.first << std::endl;  // sequencename
+                LOG_OUT << "found sequence name: " << st_it.first;  // sequencename
                 auto name = st_it.first;
                 auto serial_number = st_it.second.get<std::string>("serial_number");
                 auto comments = st_it.second.get<std::string>("comments");
@@ -244,9 +243,10 @@ std::array<std::map<std::string, std::any>, 3> SequenceParser::load_all_sequence
 
                 auto steps_tree = st_it.second.get_child_optional("steps");
                 sequence_step_vector ssv;
+                sequence_test_map stm;
                 if (steps_tree.get_ptr()) {
                     for (auto &steps_it : *steps_tree) {
-                        std::cout << "steps " << steps_it.first << std::endl;
+                        LOG_OUT << "steps " << steps_it.first;
                         auto mode = steps_it.second.get<double>("mode");
                         auto seconds = steps_it.second.get<double>("seconds");
                         auto current = steps_it.second.get<double>("current");
@@ -256,9 +256,9 @@ std::array<std::map<std::string, std::any>, 3> SequenceParser::load_all_sequence
                         auto tests_tree = steps_it.second.get_child_optional("tests");
                         if (tests_tree.get_ptr()) {
                             sequence_test_vector stv;
-                            // std::cout << "found tests" << std::endl;
+                            LOG_OUT << "found tests: " << ssv.size();
                             for (auto &tests_it : *tests_tree) {
-                                //  std::cout << "test: " << tests_it.first << std::endl;
+                                LOG_OUT << "test: " << tests_it.first;
                                 auto test_type = tests_it.second.get<double>("test_type");
                                 auto test_action = tests_it.second.get<double>("test_action");
                                 auto value = tests_it.second.get<double>("value");
@@ -267,14 +267,13 @@ std::array<std::map<std::string, std::any>, 3> SequenceParser::load_all_sequence
                                 stv.push_back({test_type, test_action, value, time_type, time_limit});
                             }
 
-                            sequence_test_map stm;
                             stm.insert({ssv.size() - 1, stv});
-                            sequences_tests.insert({name, stm});
                         }
                     }
                 }
 
                 sequences_steps.insert({name, ssv});
+                sequences_tests.insert({name, stm});
             }
         }
     }
