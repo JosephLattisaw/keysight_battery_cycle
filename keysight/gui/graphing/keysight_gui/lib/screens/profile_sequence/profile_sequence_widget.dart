@@ -35,9 +35,7 @@ class ProfileSequenceWidget extends HookWidget {
     final backend = Provider.of<KeysightCAPI>(context, listen: false);
     final pageController = usePageController(initialPage: 0, keepPage: false);
 
-    useMemoized(() {
-      backend.loadAllSequences();
-    });
+    useMemoized(() {});
 
     void setSequenceIndex(int index) {
       selectedSequence.value = index;

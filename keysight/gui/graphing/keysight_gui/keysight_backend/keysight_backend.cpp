@@ -190,13 +190,6 @@ void sequence_remove(const char *name) {
         print_backend_doesnt_exist_error();
 }
 
-void load_all_sequences() {
-    if (backend)
-        backend->sequence_parser->load_all_sequences();
-    else
-        print_backend_doesnt_exist_error();
-}
-
 void run_service() {
     std::thread t([&] {
         work_guard_type work_guard(io_service.get_executor());

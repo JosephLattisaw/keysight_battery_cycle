@@ -325,10 +325,6 @@ class KeysightCAPI extends ChangeNotifier {
     int keysightConnectionNativePort =
         keysightConnectionPort.sendPort.nativePort;
 
-    loadAllSequences = lib
-        .lookup<ffi.NativeFunction<VoidFunctionFFI>>("load_all_sequences")
-        .asFunction();
-
     createCoordinate = lib
         .lookup<ffi.NativeFunction<CreateCoordinateFFI>>("create_coordinate")
         .asFunction();
@@ -497,7 +493,6 @@ class KeysightCAPI extends ChangeNotifier {
   late CreateBackendC _createBackend;
   late VoidFunctionC _runService;
   late SequenceRemoveC sequenceRemove;
-  late VoidFunctionC loadAllSequences;
   late VoidFunctionC connectKeysight;
   late VoidFunctionC disconnectKeysight;
   late CreateCoordinateC createCoordinate;
