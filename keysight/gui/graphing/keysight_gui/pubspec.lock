@@ -69,6 +69,13 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_expandable_table:
+    dependency: "direct main"
+    description:
+      name: flutter_expandable_table
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.2"
   flutter_hooks:
     dependency: "direct main"
     description:
@@ -83,6 +90,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.4"
+  flutter_scroll_shadow:
+    dependency: transitive
+    description:
+      name: flutter_scroll_shadow
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.2"
   flutter_spinbox:
     dependency: "direct main"
     description:
@@ -102,6 +116,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.17.0"
+  linked_scroll_controller:
+    dependency: transitive
+    description:
+      name: linked_scroll_controller
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.2.0"
   lints:
     dependency: transitive
     description:

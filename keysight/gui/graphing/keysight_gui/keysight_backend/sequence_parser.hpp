@@ -11,7 +11,7 @@
 
 class SequenceParser {
 public:
-    SequenceParser(LoadSequencesCallback load_sequences_callback);
+    SequenceParser();
 
     // function set for saving a sequence
     void add_save_sequence_step(int mode, int seconds, double current, double voltage);
@@ -20,7 +20,7 @@ public:
     void start_save_sequence(std::string name, std::string serial_number, std::string comments);
 
     void delete_sequence(std::string name);
-    void load_all_sequences();
+    std::array<std::map<std::string, std::any>, 3> load_all_sequences();
 
 private:
     void clear_all_maps();
@@ -31,8 +31,6 @@ private:
     seqeunces_steps_map_type sequences_steps;
     sequences_tests_map_type sequences_tests;
     std::string last_started_saved_sequence;
-
-    LoadSequencesCallback load_sequences_callback;
 };
 
 #endif

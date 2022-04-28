@@ -7,7 +7,7 @@
 
 #include "types.hpp"
 
-//#define SOFTWARE_ONLY 1
+#define SOFTWARE_ONLY 1
 
 class Keysight {
 public:

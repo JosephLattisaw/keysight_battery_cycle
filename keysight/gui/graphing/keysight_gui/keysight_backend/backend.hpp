@@ -13,8 +13,8 @@
 
 class Backend {
 public:
-    Backend(boost::asio::io_service &io_service, ActiveCardsCallback active_cards_callback, LoadSequencesCallback load_sequences_callback,
-            ConnectionStatusCallback connection_status_callback, PortDoubleCallback port_double_callback, PortUint16Callback port_uint16_callback);
+    Backend(boost::asio::io_service &io_service, ActiveCardsCallback active_cards_callback, ConnectionStatusCallback connection_status_callback,
+            PortDoubleCallback port_double_callback, PortUint16Callback port_uint16_callback);
     ~Backend();
 
     // TODO find out if we can make this private
@@ -42,7 +42,6 @@ private:
     // callbacks
     ActiveCardsCallback active_cards_callback;
     ConnectionStatusCallback connection_status_callback;
-    LoadSequencesCallback load_sequences_callback;
     PortDoubleCallback port_double_callback;
     PortUint16Callback port_uint16_callback;
 };

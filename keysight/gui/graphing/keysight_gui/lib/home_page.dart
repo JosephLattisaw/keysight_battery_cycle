@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:keysight_gui/application_bar.dart';
+import 'package:keysight_gui/system.dart';
 import 'package:keysight_gui/tab_widget.dart';
 import 'package:keysight_gui/screens/instrument_connection/instrument_widget.dart';
 import 'package:keysight_gui/screens/profile_sequence/profile_sequence_widget.dart';
 import 'package:keysight_gui/screens/measurements/measurement_widget.dart';
 import 'package:keysight_gui/screens/test/test_widget.dart';
+import 'package:keysight_gui/expandable_table.dart';
 
 class HomePage extends HookWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -54,17 +56,21 @@ class HomePage extends HookWidget {
                   child: TabWidget(
                     tabs: const [
                       Text("Instrument Connection"),
-                      Text("Profile Sequence"),
-                      Text("All Measurements"),
-                      Text("Test"),
+                      Text("Create/Edit Profile Sequences"),
+                      Text("Test Management"),
+                      //Text("Measurements"),
+                      //Text("System"),
+                      Text("System Telemetry"),
                     ],
                     tabWidgets: [
                       const InstrumentWidget(),
                       const ProfileSequenceWidget(),
-                      MeasurementWidget(
-                        key: UniqueKey(),
-                      ),
                       const TestWidget(),
+                      /*MeasurementWidget(
+                        key: UniqueKey(),
+                      ),*/
+                      //JoeHomePage(),
+                      SystemPage(),
                     ],
                   ),
                 ),

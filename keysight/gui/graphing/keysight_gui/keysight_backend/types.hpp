@@ -17,9 +17,13 @@ typedef std::vector<sequence_test_type> sequence_test_vector;
 typedef std::map<std::string, sequence_info_type> sequence_info_map;
 typedef std::map<int, sequence_test_vector> sequence_test_map;
 
-typedef std::map<std::string, sequence_info_type> sequences_info_map_type;
-typedef std::map<std::string, sequence_step_vector> seqeunces_steps_map_type;
-typedef std::map<std::string, sequence_test_map> sequences_tests_map_type;
+// typedef std::map<std::string, sequence_info_type> sequences_info_map_type;
+// typedef std::map<std::string, sequence_step_vector> seqeunces_steps_map_type;
+// typedef std::map<std::string, sequence_test_map> sequences_tests_map_type;
+
+typedef std::map<std::string, std::any> sequences_info_map_type;
+typedef std::map<std::string, std::any> seqeunces_steps_map_type;
+typedef std::map<std::string, std::any> sequences_tests_map_type;
 
 namespace SequenceTypes {
 enum sequence_info_access_type {
@@ -70,7 +74,6 @@ enum port_uint16_data_type {
 
 using ActiveCardsCallback = std::function<void(active_cards_type)>;
 using ConnectionStatusCallback = std::function<void(bool)>;
-using LoadSequencesCallback = std::function<void(sequences_info_map_type)>;
 
 using PortDoubleCallback = std::function<void(PortTypes::port_double_data_type, map_double_data_type)>;
 using PortUint16Callback = std::function<void(PortTypes::port_uint16_data_type, map_uint16_data_type)>;

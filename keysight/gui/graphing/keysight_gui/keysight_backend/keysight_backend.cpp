@@ -153,18 +153,6 @@ void create_backend(bool using_dart = false, std::int64_t load_sequences_port = 
                         LOG_ERR << "received invalid active cards size";
                 }
             },
-            [&, using_dart, load_sequences_port, fin_load_sequences_port](sequences_info_map_type sequences_info) {
-                if (using_dart) {
-                    for (auto const &[name, val] : sequences_info) {
-                        post_data_string(load_sequences_port, name);  // sending name
-
-                        // sending info
-                        for (auto const &info : val) {
-                            post_data_string(load_sequences_port, info);
-                        }
-                    }
-                }
-            },
             [&, using_dart, keysight_connection_port](bool status) {
                 // connection callback status
                 if (using_dart) {
@@ -230,6 +218,245 @@ void disconnect_keysight() {
     else
         print_backend_doesnt_exist_error();
 }
+
+struct Coordinate {
+    double latitude;
+    double longitude;
+    std::int32_t joe[2];
+    std::int32_t *jay;
+
+    std::uint32_t size;
+    const char *strings;
+};
+
+std::int32_t three[2] = {5, 4};
+const char *joe[2] = {"joe", "joe1"};
+
+struct Coordinate create_coordinate() {
+    struct Coordinate coordinate;
+    coordinate.longitude = 12.0;
+    coordinate.latitude = 234.2;
+    coordinate.joe[0] = 3;
+    coordinate.joe[0] = 7;
+    coordinate.jay = (std::int32_t *)malloc(2 * sizeof(coordinate.jay));
+    coordinate.jay[0] = 12;
+    coordinate.jay[1] = 5;
+    coordinate.strings = *joe;
+
+    return coordinate;
+}
+
+struct Test {
+    std::uint32_t test_type;
+    std::uint32_t test_action;
+    double value;
+    std::uint32_t time_type;
+    int time_limit;
+};
+
+struct Step {
+    std::uint32_t mode;
+    std::uint32_t seconds;
+    std::double_t current;
+    std::double_t voltage;
+    Test **tests;
+    std::uint32_t tests_size;
+};
+
+struct Sequence {
+    const char *name;
+    const char *serial;
+    const char *comments;
+    Step **steps;
+    std::uint32_t steps_size;
+};
+
+struct Sequences {
+    Sequence **sequences;
+    std::uint32_t size;
+};
+
+struct Sequences get_sequences() {
+    std::cout << "get_sequences()" << std::endl;
+    struct Sequences sequences;
+
+    if (backend) {
+        std::cout << "backend exists" << std::endl;
+        auto load_map = backend->sequence_parser->load_all_sequences();
+        auto sequence_info = load_map.at(0);
+        auto sequence_steps = load_map.at(1);
+        auto sequence_tests = load_map.at(2);
+
+        sequences.size = sequence_info.size();
+        sequences.sequences = (Sequence **)malloc(sequences.size * sizeof(Sequence *));
+
+        int x = 0;
+        for (const auto &i : sequence_info) {
+            Sequence *seq = (Sequence *)malloc(sizeof(Sequence));
+            sequences.sequences[x] = seq;
+            x++;
+
+            auto seq_info = std::any_cast<sequence_info_type>(i.second);
+
+            auto name = i.first;
+            auto serial = seq_info.at(SequenceTypes::SERIAL_NUMBER);
+            auto comments = seq_info.at(SequenceTypes::COMMENTS);
+
+            // copying the name
+            char *name_c = (char *)malloc((name.length() + 1) * sizeof(char));
+            std::strcpy(name_c, name.c_str());
+
+            // copying the serial number
+            char *serial_c = (char *)malloc((serial.length() + 1) * sizeof(char));
+            std::strcpy(serial_c, serial.c_str());
+
+            // copying the comments
+            char *comments_c = (char *)malloc((comments.length() + 1) * sizeof(char));
+            std::strcpy(comments_c, comments.c_str());
+
+            // adding the names to our structure
+            seq->name = name_c;
+            seq->serial = serial_c;
+            seq->comments = comments_c;
+
+            // finding out how many steops we have in this sequence
+            sequence_step_vector ssv;
+            if (sequence_steps.find(i.first) != sequence_steps.end()) {
+                // we found some sequence steps
+                ssv = std::any_cast<sequence_step_vector>(sequence_steps.at(i.first));
+            }
+
+            seq->steps_size = ssv.size();  // recording the total amount of steps
+
+            seq->steps = (Step **)malloc(seq->steps_size * sizeof(Step *));  // allocating space for steps
+
+            // look to see if we have any test at all for this particular sequence
+            sequence_test_map stm;
+            if (sequence_tests.find(i.first) != sequence_tests.end()) {
+                stm = std::any_cast<sequence_test_map>(sequence_tests.at(i.first));
+            }
+
+            for (auto k = 0; k < seq->steps_size; k++) {
+                Step *step = (Step *)malloc(sizeof(Step));
+                auto steps_info = ssv.at(k);
+
+                // recording all of the values for the steps
+                step->mode = steps_info.at(SequenceTypes::sequence_step_access_type::MODE);
+                step->seconds = steps_info.at(SequenceTypes::sequence_step_access_type::SECONDS);
+                step->current = steps_info.at(SequenceTypes::sequence_step_access_type::CURRENT);
+                step->voltage = steps_info.at(SequenceTypes::sequence_step_access_type::VOLTAGE);
+
+                seq->steps[k] = step;  // adding our step to the structure
+
+                sequence_test_vector stv;
+
+                // check if we have any tests for this sequence
+                if (stm.find(k) != stm.end()) {
+                    stv = stm.at(k);
+                }
+
+                // allocating the size of our test
+                step->tests_size = stv.size();
+                step->tests = (Test **)malloc(step->tests_size * sizeof(Test *));
+
+                for (auto j = 0; j < stv.size(); j++) {
+                    Test *test = (Test *)malloc(sizeof(Test));
+                    auto stt = stv.at(j);
+                    test->test_type = stt.at(SequenceTypes::sequence_test_access_type::TEST_TYPE);
+                    test->test_action = stt.at(SequenceTypes::sequence_test_access_type::TEST_ACTION);
+                    test->time_limit = stt.at(SequenceTypes::sequence_test_access_type::TIME_LIMIT);
+                    test->time_type = stt.at(SequenceTypes::sequence_test_access_type::TIME_TYPE);
+                    test->value = stt.at(SequenceTypes::sequence_test_access_type::VALUE);
+                    step->tests[j] = test;
+                }
+            }
+        }
+    } else {
+        sequences.size = 0;
+    }
+
+    return sequences;
+    /*
+        // Sequences -----------------------------------
+        struct Sequences seqs;
+        seqs.size = 2;
+        seqs.sequences = (Sequence **)malloc(seqs.size * sizeof(Sequence *));
+        //---------------------------------------------
+
+        // Sequence ------------------------------------
+        Sequence *seq1 = (Sequence *)malloc(sizeof(Sequence));
+        seq1->steps_size = 1;
+
+        std::string name = "joe2";
+        std::string serial = "";
+        std::string comments = "what is thissss?";
+
+        char *name_c = (char *)malloc((name.length() + 1) * sizeof(char));
+        strcpy(name_c, name.c_str());
+
+        char *serial_c = (char *)malloc((serial.length() + 1) * sizeof(char));
+        strcpy(serial_c, serial.c_str());
+
+        char *comments_c = (char *)malloc((comments.length() + 1) * sizeof(char));
+        strcpy(comments_c, comments.c_str());
+
+        seq1->name = name_c;
+        seq1->serial = serial_c;
+        seq1->comments = comments_c;
+
+        seq1->steps = (Step **)malloc(seq1->steps_size * sizeof(Step *));
+
+        // steps 1------------------------------------------------
+        Step *step1 = (Step *)malloc(sizeof(Step));
+        step1->tests_size = 1;
+
+        step1->mode = 3;
+        step1->seconds = 2;
+        step1->current = 3.0;
+        step1->voltage = 24.0;
+
+        seq1->steps[0] = step1;
+
+        step1->tests = (Test **)malloc(step1->tests_size * sizeof(Test *));
+
+        // test 1
+        Test *test1 = (Test *)malloc(sizeof(Test));
+        test1->test_action = 0;
+        test1->test_type = 1;
+        test1->time_limit = 2;
+        test1->time_type = 3;
+        test1->value = 34.3;
+        step1->tests[0] = test1;
+
+        // Sequence 2 ------------------------------------------
+        Sequence *seq2 = (Sequence *)malloc(sizeof(Sequence));
+        seq2->steps_size = 0;
+
+        std::string name2 = "joe27";
+        std::string serial2 = "323";
+        std::string comments2 = "what is thissss?";
+
+        char *name_c2 = (char *)malloc((name2.length() + 1) * sizeof(char));
+        strcpy(name_c2, name2.c_str());
+
+        char *serial_c2 = (char *)malloc((serial2.length() + 1) * sizeof(char));
+        strcpy(serial_c2, serial2.c_str());
+
+        char *comments_c2 = (char *)malloc((comments2.length() + 1) * sizeof(char));
+        strcpy(comments_c2, comments2.c_str());
+
+        seq2->name = name_c2;
+        seq2->serial = serial_c2;
+        seq2->comments = comments_c2;
+
+        seqs.sequences[0] = seq1;
+        seqs.sequences[1] = seq2;
+        return seqs;*/
+}
+
+struct Sequence get_sequence(Sequences *seq) {
+    std::cout << "get_sequence called" << std::endl;
+}
 }
 
 int main(int argc, char **argv) {
@@ -251,9 +478,6 @@ int main(int argc, char **argv) {
                     [&](active_cards_type data) {
                         // active cells callback
                         std::cout << "got the active cards callback " << data.size() << std::endl;
-                    },
-                    [&](sequences_info_map_type sequences_info) {
-                        // sequences info data callback
                     },
                     [&](bool) {
                         // connection callback status

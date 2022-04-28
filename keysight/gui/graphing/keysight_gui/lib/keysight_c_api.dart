@@ -1,12 +1,93 @@
 library c_api;
 
 import 'dart:isolate';
+import 'dart:typed_data';
+import 'dart:ffi';
 
 import 'package:flutter/material.dart';
 import 'dart:ffi' as ffi;
 import 'package:ffi/ffi.dart';
 import 'dart:io';
 import 'package:path/path.dart';
+
+class MyStruct extends ffi.Struct {
+  external ffi.Pointer<Utf8> info;
+}
+
+typedef CreateStruct = MyStruct Function();
+typedef GetInfo = ffi.Pointer<Utf8> Function(ffi.Pointer<MyStruct>);
+
+class Coordinate extends ffi.Struct {
+  @ffi.Double()
+  external double latitude;
+
+  @ffi.Double()
+  external double longitude;
+
+  @ffi.Array(2)
+  external ffi.Array<ffi.Uint8> joe;
+
+  external ffi.Pointer<ffi.Int32> jay;
+
+  @ffi.Uint32()
+  external int size;
+
+  external ffi.Pointer<ffi.Pointer<Utf8>> strings;
+}
+
+class Test extends ffi.Struct {
+  @ffi.Uint32()
+  external int test_type;
+
+  @ffi.Uint32()
+  external int test_action;
+
+  @ffi.Double()
+  external double value;
+
+  @ffi.Uint32()
+  external int time_type;
+
+  @ffi.Uint32()
+  external int time_limit;
+}
+
+class Step extends ffi.Struct {
+  @ffi.Uint32()
+  external int mode;
+
+  @ffi.Uint32()
+  external int seconds;
+
+  @ffi.Double()
+  external double current;
+
+  @ffi.Double()
+  external double voltage;
+
+  external ffi.Pointer<ffi.Pointer<Test>> tests;
+
+  @ffi.Uint32()
+  external int tests_size;
+}
+
+class Sequence extends ffi.Struct {
+  external ffi.Pointer<Utf8> name;
+  external ffi.Pointer<Utf8> serial;
+  external ffi.Pointer<Utf8> comments;
+
+  external ffi.Pointer<ffi.Pointer<Step>> steps;
+
+  @ffi.Uint32()
+  external int steps_size;
+}
+
+class Sequences extends ffi.Struct {
+  external ffi.Pointer<ffi.Pointer<Sequence>> sequences;
+
+  @ffi.Uint32()
+  external int size;
+}
 
 class KeysightCAPI extends ChangeNotifier {
   KeysightCAPI() {
@@ -248,6 +329,14 @@ class KeysightCAPI extends ChangeNotifier {
         .lookup<ffi.NativeFunction<VoidFunctionFFI>>("load_all_sequences")
         .asFunction();
 
+    createCoordinate = lib
+        .lookup<ffi.NativeFunction<CreateCoordinateFFI>>("create_coordinate")
+        .asFunction();
+
+    getSequences = lib
+        .lookup<ffi.NativeFunction<SequencesFFI>>("get_sequences")
+        .asFunction();
+
     _createBackend(
       1,
       loadSequencesNativePort,
@@ -262,6 +351,74 @@ class KeysightCAPI extends ChangeNotifier {
       keysightUint16NativePort,
     );
     _runService();
+
+    final c = createCoordinate();
+    final ffi.Pointer<ffi.Int32> j = c.jay;
+    final ffi.Pointer<Pointer<Utf8>> jj = c.strings;
+
+    final x = j.asTypedList(2);
+    final ffi.Pointer<Utf8> xx = c.strings.elementAt(1).cast();
+
+    print(
+        "c interop using class ${c.longitude} ${c.latitude} ${c.joe[0]} ${c.jay} ${x.length} ${x.elementAt(0)} ${x.elementAt(1)} ${xx.toDartString()}");
+    calloc.free(c.jay);
+
+    final sequences = getSequences();
+    for (int i = 0; i < sequences.size; i++) {
+      final sequence =
+          sequences.sequences.elementAt(i).cast<ffi.Pointer<Sequence>>().value;
+
+      final name = sequence.ref.name.toDartString();
+      final serial = sequence.ref.serial.toDartString();
+      final comments = sequence.ref.comments.toDartString();
+      print("sequence $i: name: $name, serial: $serial, comments: $comments");
+
+      for (int k = 0; k < sequence.ref.steps_size; k++) {
+        final step =
+            sequence.ref.steps.elementAt(k).cast<ffi.Pointer<Step>>().value;
+        final mode = step.ref.mode;
+        final seconds = step.ref.seconds;
+        final current = step.ref.current;
+        final voltage = step.ref.voltage;
+
+        print(
+            "step $k:, mode: $mode, seconds: $seconds, current: $current, voltage: $voltage");
+
+        for (int j = 0; j < step.ref.tests_size; j++) {
+          final test =
+              step.ref.tests.elementAt(j).cast<ffi.Pointer<Test>>().value;
+          final test_type = test.ref.test_type;
+          final test_action = test.ref.test_action;
+          final value = test.ref.value;
+          final time_type = test.ref.time_type;
+          final time_limit = test.ref.time_limit;
+
+          print(
+              "test $j:, test type: $test_type, test action: $test_action, value: $value, time type: $time_type, time limit: $time_limit");
+
+          malloc.free(test);
+        }
+
+        if (step.ref.tests_size > 0) {
+          malloc.free(step.ref.tests);
+        }
+
+        malloc.free(step);
+      }
+
+      if (sequence.ref.steps_size > 0) {
+        malloc.free(sequence.ref.steps);
+      }
+
+      malloc.free(sequence.ref.name);
+      malloc.free(sequence.ref.serial);
+      malloc.free(sequence.ref.comments);
+      malloc.free(sequence);
+    }
+
+    if (sequences.size > 0) {
+      malloc.free(sequences.sequences);
+    }
   }
 
   final List<bool> sequencesStarted = List.generate(8, (index) => false);
@@ -343,6 +500,8 @@ class KeysightCAPI extends ChangeNotifier {
   late VoidFunctionC loadAllSequences;
   late VoidFunctionC connectKeysight;
   late VoidFunctionC disconnectKeysight;
+  late CreateCoordinateC createCoordinate;
+  late SequencesC getSequences;
 
   static const String _libraryName = 'lib/libkeysight_backend.so';
 }
@@ -352,6 +511,14 @@ KeysightCAPI? keysightCAPI;
 //FFI signature types
 typedef VoidFunctionFFI = ffi.Void Function();
 typedef VoidFunctionC = void Function();
+
+//FFI create coordinate
+typedef CreateCoordinateFFI = Coordinate Function();
+typedef CreateCoordinateC = Coordinate Function();
+
+//FFI get sequence
+typedef SequencesFFI = Sequences Function();
+typedef SequencesC = Sequences Function();
 
 //create backend
 typedef CreateBackendFFI = ffi.Void Function(

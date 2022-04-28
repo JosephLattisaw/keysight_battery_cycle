@@ -18,7 +18,7 @@
 // typedef std::map<std::string, sequence_info_type> sequence_info_map;
 // typedef std::map<int, sequence_test_vector> sequence_test_map;
 
-SequenceParser::SequenceParser(LoadSequencesCallback ls_cb) : load_sequences_callback{ls_cb} {}
+SequenceParser::SequenceParser() {}
 
 void SequenceParser::start_save_sequence(std::string name, std::string serial_number, std::string comments) {
     LOG_OUT << "saving sequence called, name: " << name << ", serial number: " << serial_number << ", comments: " << comments;
@@ -65,9 +65,10 @@ void SequenceParser::add_save_sequence_test(int test_type, int test_action, doub
         // first thing is to get the number step we are on
         auto total_steps = std::any_cast<sequence_step_vector>(sequences_steps.at(last_started_saved_sequence)).size();
 
+        LOG_OUT << "total steps: " << total_steps;
         // now we add to the mapping
         std::any_cast<sequence_test_map>(sequences_tests.at(last_started_saved_sequence))
-            .at(total_steps)
+            .at(total_steps - 1)
             .push_back({static_cast<double>(test_type), static_cast<double>(test_action), value, static_cast<double>(time_type),
                         static_cast<double>(time_limit)});
     }
@@ -197,7 +198,7 @@ void SequenceParser::clear_all_maps() {
     sequences_steps.clear();
 }
 
-void SequenceParser::load_all_sequences() {
+std::array<std::map<std::string, std::any>, 3> SequenceParser::load_all_sequences() {
     LOG_OUT << "load all sequences called";
 
     clear_all_maps();
@@ -239,5 +240,5 @@ void SequenceParser::load_all_sequences() {
         }
     }
 
-    // load_sequences_callback(sequence_info);
+    return {sequences_info, sequences_steps, sequences_tests};
 }

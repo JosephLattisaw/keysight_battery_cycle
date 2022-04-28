@@ -3,15 +3,14 @@
 #include <iostream>
 #include <memory>
 
-Backend::Backend(boost::asio::io_service &io_service, ActiveCardsCallback ac_cb, LoadSequencesCallback ls_cb, ConnectionStatusCallback conn_cb,
-                 PortDoubleCallback pd_cb, PortUint16Callback pu16_cb)
+Backend::Backend(boost::asio::io_service &io_service, ActiveCardsCallback ac_cb, ConnectionStatusCallback conn_cb, PortDoubleCallback pd_cb,
+                 PortUint16Callback pu16_cb)
     : io_service(io_service),
       active_cards_callback{ac_cb},
-      load_sequences_callback{ls_cb},
       connection_status_callback{conn_cb},
       port_double_callback{pd_cb},
       port_uint16_callback{pu16_cb} {
-    sequence_parser = std::make_shared<SequenceParser>([&](sequences_info_map_type sequence_info) { load_sequences_callback(sequence_info); });
+    sequence_parser = std::make_shared<SequenceParser>();
 
     // starting thread to start keysight stuff
     keysight_thread = std::thread(std::bind(&Backend::worker_thread, this));

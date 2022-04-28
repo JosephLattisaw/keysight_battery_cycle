@@ -74,7 +74,9 @@ class ProfileSequenceWidget extends HookWidget {
 
       SequenceBuilderKeepAliveClient sw = sequenceWidgets.value.elementAt(index)
           as SequenceBuilderKeepAliveClient;
-      backend.sequenceRemove(sw.sequenceTextController.text.toNativeUtf8());
+      final st = sw.sequenceTextController.text.toNativeUtf8();
+      backend.sequenceRemove(st);
+      calloc.free(st);
       sw.keepAliveUpdate();
       sequenceWidgets.value = List.from(sequenceWidgets.value)..removeAt(index);
 
@@ -111,10 +113,14 @@ class ProfileSequenceWidget extends HookWidget {
       commentsTextList.value = List.from(commentsTextList.value)
         ..[index] = sw.commentsTextController.text;
 
-      backend.startSaveSequence(
-          sw.sequenceTextController.text.toNativeUtf8(),
-          sw.cellTextController.text.toNativeUtf8(),
-          sw.commentsTextController.text.toNativeUtf8());
+      final st = sw.sequenceTextController.text.toNativeUtf8();
+      final ct = sw.cellTextController.text.toNativeUtf8();
+      final co = sw.commentsTextController.text.toNativeUtf8();
+
+      backend.startSaveSequence(st, ct, co);
+      calloc.free(st);
+      calloc.free(ct);
+      calloc.free(co);
 
       for (int i = 0; i < sw.table.length; i++) {
         List<dynamic> step = sw.table.elementAt(i);
