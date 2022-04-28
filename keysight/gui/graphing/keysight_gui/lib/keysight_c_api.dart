@@ -391,10 +391,13 @@ class KeysightCAPI extends ChangeNotifier {
         steps.add(current);
         steps.add(voltage);
 
+        final stepTests = List<dynamic>.empty(growable: true);
+
         print(
             "step $k:, mode: $mode, seconds: $seconds, current: $current, voltage: $voltage");
 
         for (int j = 0; j < step.ref.tests_size; j++) {
+          final tests = List<dynamic>.empty(growable: true);
           final test =
               step.ref.tests.elementAt(j).cast<ffi.Pointer<Test>>().value;
           final test_type = test.ref.test_type;
@@ -403,9 +406,16 @@ class KeysightCAPI extends ChangeNotifier {
           final time_type = test.ref.time_type;
           final time_limit = test.ref.time_limit;
 
+          tests.add(test_type);
+          tests.add(test_action);
+          tests.add(value);
+          tests.add(time_type);
+          tests.add(time_limit);
+
           print(
               "test $j:, test type: $test_type, test action: $test_action, value: $value, time type: $time_type, time limit: $time_limit");
 
+          stepTests.add(tests);
           malloc.free(test);
         }
 
@@ -415,6 +425,7 @@ class KeysightCAPI extends ChangeNotifier {
 
         malloc.free(step);
 
+        steps.add(stepTests);
         sequenceSteps.add(steps);
       }
 

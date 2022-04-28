@@ -170,6 +170,7 @@ class ProfileSequenceWidget extends HookWidget {
           sw.commentsTextController.text = comments;
 
           print("loaded $loadedSequences");
+          int stepIndex = -1;
           for (int k = 0; k < steps.length; k++) {
             List<dynamic> step = steps.elementAt(k);
             print("steps: $k $step");
@@ -177,8 +178,23 @@ class ProfileSequenceWidget extends HookWidget {
             final seconds = step.elementAt(1);
             final current = step.elementAt(2);
             final voltage = step.elementAt(3);
+            final List<dynamic> tests = step.elementAt(4);
 
             sw.addTableStep([mode, seconds, current, voltage, []]);
+            stepIndex++;
+
+            for (int j = 0; j < tests.length; j++) {
+              final List<dynamic> test = tests.elementAt(j);
+              final test_type = test.elementAt(0);
+              final test_action = test.elementAt(1);
+              final value = test.elementAt(2);
+              final time_type = test.elementAt(3);
+              final time_limit = test.elementAt(4);
+              sw.addTableTest(
+                  [test_type, test_action, value, time_type, time_limit],
+                  stepIndex);
+              stepIndex++;
+            }
           }
         }
 
@@ -294,43 +310,6 @@ class SequenceBuilderKeepAliveClient extends StatefulWidget {
     table.add(step);
   }
 
-  bool get wantKeepAlive => client.wantKeepAlive_;
-
-  //List<List<dynamic>> get table => client.table;
-
-  @override
-  _SequenceBuilderKeepAliveClientState createState() {
-    client = _SequenceBuilderKeepAliveClientState();
-    return client;
-  }
-}
-
-class _SequenceBuilderKeepAliveClientState
-    extends State<SequenceBuilderKeepAliveClient>
-    with AutomaticKeepAliveClientMixin<SequenceBuilderKeepAliveClient> {
-  int dataTableSelectedIndex = -1;
-  bool sequenceTextError = false;
-  bool wantKeepAlive_ = true;
-
-  void refresh() {
-    setState(() {});
-  }
-
-  void addTableStep(List<dynamic> step) {
-    setState(() {
-      widget.table.add(step);
-    });
-  }
-
-  void addTableTest(List<dynamic> test) {
-    setState(() {
-      List<int> indexes = List.filled(2, 0, growable: true);
-      indexes = getTableIndexes(dataTableSelectedIndex);
-
-      widget.table.elementAt(indexes.elementAt(0)).elementAt(4).add(test);
-    });
-  }
-
   List<int> getTableIndexes(int index) {
     List<int> result = List.filled(2, 0, growable: false);
 
@@ -339,7 +318,7 @@ class _SequenceBuilderKeepAliveClientState
     int totalIndex = 0;
     bool nestedBreak = false;
 
-    for (var element in widget.table) {
+    for (var element in table) {
       secondIndex = -1;
 
       if (totalIndex == index) {
@@ -366,6 +345,47 @@ class _SequenceBuilderKeepAliveClientState
     return result;
   }
 
+  void addTableTest(List<dynamic> test, int index) {
+    List<int> indexes = List.filled(2, 0, growable: true);
+    indexes = getTableIndexes(index);
+
+    table.elementAt(indexes.elementAt(0)).elementAt(4).add(test);
+  }
+
+  bool get wantKeepAlive => client.wantKeepAlive_;
+
+  //List<List<dynamic>> get table => client.table;
+
+  @override
+  _SequenceBuilderKeepAliveClientState createState() {
+    client = _SequenceBuilderKeepAliveClientState();
+    return client;
+  }
+}
+
+class _SequenceBuilderKeepAliveClientState
+    extends State<SequenceBuilderKeepAliveClient>
+    with AutomaticKeepAliveClientMixin<SequenceBuilderKeepAliveClient> {
+  int dataTableSelectedIndex = -1;
+  bool sequenceTextError = false;
+  bool wantKeepAlive_ = true;
+
+  void refresh() {
+    setState(() {});
+  }
+
+  void addTableStep(List<dynamic> step) {
+    setState(() {
+      widget.addTableStep(step);
+    });
+  }
+
+  void addTableTest(List<dynamic> test) {
+    setState(() {
+      widget.addTableTest(test, dataTableSelectedIndex);
+    });
+  }
+
   void keepAliveUpdate() {
     updateKeepAlive();
   }
@@ -373,7 +393,7 @@ class _SequenceBuilderKeepAliveClientState
   bool moveUpPossible() {
     bool result = false;
 
-    List<int> mapping = getTableIndexes(dataTableSelectedIndex);
+    List<int> mapping = widget.getTableIndexes(dataTableSelectedIndex);
 
     if (mapping.elementAt(1) >= 0) {
       result = false;
@@ -389,7 +409,7 @@ class _SequenceBuilderKeepAliveClientState
   bool moveDownPossible() {
     bool result = false;
 
-    List<int> mapping = getTableIndexes(dataTableSelectedIndex);
+    List<int> mapping = widget.getTableIndexes(dataTableSelectedIndex);
 
     if (dataTableSelectedIndex < 0) {
       result = false;
@@ -406,7 +426,7 @@ class _SequenceBuilderKeepAliveClientState
 
   void moveUp() {
     setState(() {
-      List<int> mapping = getTableIndexes(dataTableSelectedIndex);
+      List<int> mapping = widget.getTableIndexes(dataTableSelectedIndex);
 
       if (mapping.elementAt(1) < 0) {
         dynamic removedItem = widget.table.elementAt(mapping.elementAt(0));
@@ -418,7 +438,7 @@ class _SequenceBuilderKeepAliveClientState
 
   void moveDown() {
     setState(() {
-      List<int> mapping = getTableIndexes(dataTableSelectedIndex);
+      List<int> mapping = widget.getTableIndexes(dataTableSelectedIndex);
 
       if (mapping.elementAt(1) < 0) {
         widget.table = List.from(widget.table);
@@ -431,7 +451,7 @@ class _SequenceBuilderKeepAliveClientState
 
   void deleteStep() {
     setState(() {
-      List<int> mapping = getTableIndexes(dataTableSelectedIndex);
+      List<int> mapping = widget.getTableIndexes(dataTableSelectedIndex);
 
       if (mapping.elementAt(1) >= 0) {
         widget.table = List.from(widget.table)

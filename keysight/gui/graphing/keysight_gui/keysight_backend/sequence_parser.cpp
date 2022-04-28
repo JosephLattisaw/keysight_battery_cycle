@@ -232,6 +232,23 @@ std::array<std::map<std::string, std::any>, 3> SequenceParser::load_all_sequence
                         auto current = steps_it.second.get<double>("current");
                         auto voltage = steps_it.second.get<double>("voltage");
                         ssv.push_back({mode, seconds, current, voltage});
+
+                        auto tests_tree = steps_it.second.get_child_optional("tests");
+                        if (tests_tree.get_ptr()) {
+                            sequence_test_vector stv;
+                            for (auto &tests_it : *tests_tree) {
+                                auto test_type = tests_it.second.get<double>("test_type");
+                                auto test_action = tests_it.second.get<double>("test_action");
+                                auto value = tests_it.second.get<double>("value");
+                                auto time_type = tests_it.second.get<double>("time_type");
+                                auto time_limit = tests_it.second.get<double>("time_limit");
+                                stv.push_back({test_type, test_action, value, time_type, time_limit});
+                            }
+
+                            sequence_test_map stm;
+                            stm.insert({ssv.size() - 1, stv});
+                            sequences_tests.insert({name, stm});
+                        }
                     }
                 }
 
