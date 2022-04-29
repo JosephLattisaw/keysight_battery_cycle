@@ -72,10 +72,15 @@ enum port_uint16_data_type {
 };
 }  // namespace PortTypes
 
+typedef std::array<std::string, 8> loaded_profile_type;
+typedef std::array<std::uint32_t, 8> profile_status_type;
+
 using ActiveCardsCallback = std::function<void(active_cards_type)>;
 using ConnectionStatusCallback = std::function<void(bool)>;
 
 using PortDoubleCallback = std::function<void(PortTypes::port_double_data_type, map_double_data_type)>;
 using PortUint16Callback = std::function<void(PortTypes::port_uint16_data_type, map_uint16_data_type)>;
+using LoadedProfilesCallback = std::function<void(loaded_profile_type)>;
+using ProfilesStatusCallback = std::function<void(profile_status_type)>;
 
 #endif

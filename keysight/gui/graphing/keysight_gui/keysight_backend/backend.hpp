@@ -14,12 +14,15 @@
 class Backend {
 public:
     Backend(boost::asio::io_service &io_service, ActiveCardsCallback active_cards_callback, ConnectionStatusCallback connection_status_callback,
-            PortDoubleCallback port_double_callback, PortUint16Callback port_uint16_callback);
+            PortDoubleCallback port_double_callback, PortUint16Callback port_uint16_callback, LoadedProfilesCallback loaded_profiles_callback,
+            ProfilesStatusCallback profiles_status_callback);
     ~Backend();
 
     // TODO find out if we can make this private
     void active_cards_request(active_cards_type active_cards);
     void connection_status_request(bool status);
+    void loaded_profiles_request(loaded_profile_type profiles);
+    void profile_statuses_request(profile_status_type statuses);
     void port_double_data_request(PortTypes::port_double_data_type data_type, map_double_data_type data);
     void port_uint16_data_request(PortTypes::port_uint16_data_type data_type, map_uint16_data_type data);
 
@@ -27,6 +30,8 @@ public:
 
     void connect_keysight();
     void disconnect_keysight();
+
+    void load_profile(std::string name, int slot);
 
 private:
     // thread management
@@ -44,6 +49,8 @@ private:
     ConnectionStatusCallback connection_status_callback;
     PortDoubleCallback port_double_callback;
     PortUint16Callback port_uint16_callback;
+    LoadedProfilesCallback loaded_profiles_callback;
+    ProfilesStatusCallback profiles_status_callback;
 };
 
 #endif

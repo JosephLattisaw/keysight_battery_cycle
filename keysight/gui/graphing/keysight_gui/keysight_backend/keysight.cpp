@@ -15,13 +15,18 @@ extern ViSession session;
 using namespace keysight;
 
 Keysight::Keysight(boost::asio::io_service &io_service, ActiveCardsCallback ac_cb, ConnectionStatusCallback conn_cb, PortDoubleCallback pd_cb,
-                   PortUint16Callback pu16_cb)
+                   PortUint16Callback pu16_cb, LoadedProfilesCallback lp_cb, ProfilesStatusCallback ps_cb)
     : io_service(io_service),
       cell_status_timer(io_service),
       active_cards_callback{ac_cb},
       connection_status_callback{conn_cb},
       port_double_callback{pd_cb},
-      port_uint16_callback{pu16_cb} {}
+      port_uint16_callback{pu16_cb},
+      loaded_profiles_callback{lp_cb},
+      profile_status_callback{ps_cb} {
+    currently_loaded_profiles.fill("");
+    current_profile_statuses.fill(0);
+}
 
 Keysight::~Keysight() { disconnect(); }
 
@@ -578,6 +583,17 @@ bool Keysight::get_cell_verbose(int card_number) {
     return true;
 #endif
 }
+
+void Keysight::load_sequence(std::string name, int slot) {
+    if (slot < currently_loaded_profiles.size()) {
+        currently_loaded_profiles[slot] = name;
+        current_profile_statuses[slot] = 1;
+        if (slot > 3) current_profile_statuses[slot] = 2;
+        loaded_profiles_callback(currently_loaded_profiles);
+        profile_status_callback(current_profile_statuses);
+    }
+}
+
 //
 /*
     // sequence example

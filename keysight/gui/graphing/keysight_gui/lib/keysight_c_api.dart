@@ -138,6 +138,10 @@ class KeysightCAPI extends ChangeNotifier {
         .lookup<ffi.NativeFunction<SequenceRemoveFFI>>("sequence_remove")
         .asFunction();
 
+    loadProfile = lib
+        .lookup<ffi.NativeFunction<LoadProfileFFI>>("load_profile")
+        .asFunction();
+
     connectKeysight = lib
         .lookup<ffi.NativeFunction<VoidFunctionFFI>>("connect_keysight")
         .asFunction();
@@ -152,6 +156,30 @@ class KeysightCAPI extends ChangeNotifier {
       });
 
     int loadSequencesNativePort = loadSequencesPort.sendPort.nativePort;
+
+    ReceivePort loadedProfilesPort = ReceivePort()
+      ..listen((data) {
+        print("seq received $data");
+        tempLoadedProfiles.add(data);
+
+        if (tempLoadedProfiles.length == 8) {
+          loadedProfiles = List.from(tempLoadedProfiles);
+          tempLoadedProfiles.clear();
+
+          notifyListeners();
+        }
+      });
+
+    int loadProfilesNativePort = loadedProfilesPort.sendPort.nativePort;
+
+    ReceivePort profileStatusesPort = ReceivePort()
+      ..listen((data) {
+        profilesStatuses = List<int>.from(data);
+
+        notifyListeners();
+      });
+
+    int profileStatusesNativePort = profileStatusesPort.sendPort.nativePort;
 
     ReceivePort finishLoadSequencesPort = ReceivePort()
       ..listen((data) {
@@ -325,39 +353,25 @@ class KeysightCAPI extends ChangeNotifier {
     int keysightConnectionNativePort =
         keysightConnectionPort.sendPort.nativePort;
 
-    createCoordinate = lib
-        .lookup<ffi.NativeFunction<CreateCoordinateFFI>>("create_coordinate")
-        .asFunction();
-
     getSequences = lib
         .lookup<ffi.NativeFunction<SequencesFFI>>("get_sequences")
         .asFunction();
 
     _createBackend(
-      1,
-      loadSequencesNativePort,
-      finishLoadSequencesNativePort,
-      loadStepsNativePort,
-      loadTestsNativePort,
-      activeCardsNativePort,
-      keysightConnectionNativePort,
-      keysightDoubleNativePort,
-      cellStateNativePort,
-      cellStatusNativePort,
-      keysightUint16NativePort,
-    );
+        1,
+        loadSequencesNativePort,
+        finishLoadSequencesNativePort,
+        loadStepsNativePort,
+        loadTestsNativePort,
+        activeCardsNativePort,
+        keysightConnectionNativePort,
+        keysightDoubleNativePort,
+        cellStateNativePort,
+        cellStatusNativePort,
+        keysightUint16NativePort,
+        loadProfilesNativePort,
+        profileStatusesNativePort);
     _runService();
-
-    final c = createCoordinate();
-    final ffi.Pointer<ffi.Int32> j = c.jay;
-    final ffi.Pointer<Pointer<Utf8>> jj = c.strings;
-
-    final x = j.asTypedList(2);
-    final ffi.Pointer<Utf8> xx = c.strings.elementAt(1).cast();
-
-    print(
-        "c interop using class ${c.longitude} ${c.latitude} ${c.joe[0]} ${c.jay} ${x.length} ${x.elementAt(0)} ${x.elementAt(1)} ${xx.toDartString()}");
-    calloc.free(c.jay);
 
     final sequences = getSequences();
     for (int i = 0; i < sequences.size; i++) {
@@ -452,6 +466,10 @@ class KeysightCAPI extends ChangeNotifier {
 
   List<dynamic> loadedSequences = List<dynamic>.empty(growable: true);
   List<dynamic> get getLoadedSequences => loadedSequences;
+
+  List<String> tempLoadedProfiles = List<String>.empty(growable: true);
+  List<String> loadedProfiles = List<String>.filled(8, "");
+  List<int> profilesStatuses = List<int>.filled(8, 0);
 
   final List<bool> sequencesStarted = List.generate(8, (index) => false);
 
@@ -552,9 +570,9 @@ class KeysightCAPI extends ChangeNotifier {
   late CreateBackendC _createBackend;
   late VoidFunctionC _runService;
   late SequenceRemoveC sequenceRemove;
+  late LoadProfileC loadProfile;
   late VoidFunctionC connectKeysight;
   late VoidFunctionC disconnectKeysight;
-  late CreateCoordinateC createCoordinate;
   late SequencesC getSequences;
 
   static const String _libraryName = 'lib/libkeysight_backend.so';
@@ -565,10 +583,6 @@ KeysightCAPI? keysightCAPI;
 //FFI signature types
 typedef VoidFunctionFFI = ffi.Void Function();
 typedef VoidFunctionC = void Function();
-
-//FFI create coordinate
-typedef CreateCoordinateFFI = Coordinate Function();
-typedef CreateCoordinateC = Coordinate Function();
 
 //FFI get sequence
 typedef SequencesFFI = Sequences Function();
@@ -586,7 +600,9 @@ typedef CreateBackendFFI = ffi.Void Function(
     ffi.Int64 keysightDoublePort,
     ffi.Int64 cellStatePort,
     ffi.Int64 cellStatusPort,
-    ffi.Int64 keysightUint16Port);
+    ffi.Int64 keysightUint16Port,
+    ffi.Int64 loadedProfilesPort,
+    ffi.Int64 profileStatusesPort);
 
 typedef CreateBackendC = void Function(
     int usingDart,
@@ -599,7 +615,9 @@ typedef CreateBackendC = void Function(
     int keysightDoublePort,
     int cellStatePort,
     int cellStatusPort,
-    int keysightUint16Port);
+    int keysightUint16Port,
+    int loadedProfilesPort,
+    int profileStatusesPort);
 
 //start save sequence
 typedef StartSaveSequenceFFI = ffi.Void Function(ffi.Pointer<Utf8> name,
@@ -625,6 +643,10 @@ typedef AddSaveSequenceTestC = void Function(
 
 typedef SequenceRemoveFFI = ffi.Void Function(ffi.Pointer<Utf8> name);
 typedef SequenceRemoveC = void Function(ffi.Pointer<Utf8> name);
+
+typedef LoadProfileFFI = ffi.Void Function(
+    ffi.Pointer<Utf8> name, ffi.Uint32 slot);
+typedef LoadProfileC = void Function(ffi.Pointer<Utf8> name, int slot);
 
 final List<bool> cardsActiveDefault = List<bool>.filled(8, false);
 final List<List<String>> cellsDefaultNan =

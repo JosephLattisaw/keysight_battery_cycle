@@ -138,7 +138,8 @@ void finish_save_sequence() {
 void create_backend(bool using_dart = false, std::int64_t load_sequences_port = 0, std::int64_t fin_load_sequences_port = 0,
                     std::int64_t load_steps_port = 0, std::int64_t load_tests_port = 0, std::int64_t active_cards_port = 0,
                     std::int64_t keysight_connection_port = 0, std::int64_t keysight_double_port = 0, std::int64_t cell_state_port = 0,
-                    std::int64_t cell_status_port = 0, std::int64_t keysight_uint16_port = 0) {
+                    std::int64_t cell_status_port = 0, std::int64_t keysight_uint16_port = 0, std::int64_t loaded_profiles_port = 0,
+                    std::int64_t profile_statuses_port = 0) {
     if (!backend)
         backend = std::make_shared<Backend>(
             io_service,
@@ -177,6 +178,21 @@ void create_backend(bool using_dart = false, std::int64_t load_sequences_port = 
                         post_data_object(keysight_uint16_port, val);
                     }
                 }
+            },
+            [&, using_dart, loaded_profiles_port](loaded_profile_type profiles) {
+                if (using_dart) {
+                    LOG_OUT << "load profiles callback called";
+                    for (auto i : profiles) {
+                        post_data_string(loaded_profiles_port, i);
+                    }
+                }
+            },
+            [&, using_dart, profile_statuses_port](profile_status_type statuses) {
+                if (using_dart) {
+                    std::vector<std::uint16_t> data;
+                    for (auto i : statuses) data.push_back(i);
+                    post_data_object(profile_statuses_port, data);
+                }
             });
     else
         print_backend_doesnt_exist_error();
@@ -188,6 +204,11 @@ void sequence_remove(const char *name) {
         backend->sequence_parser->delete_sequence(name);
     } else
         print_backend_doesnt_exist_error();
+}
+
+void load_profile(const char *name, std::uint32_t slot) {
+    LOG_OUT << "load profile called: " << name << ", slot: " << slot;
+    if (backend) backend->load_profile(name, slot);
 }
 
 void run_service() {
@@ -210,33 +231,6 @@ void disconnect_keysight() {
         backend->disconnect_keysight();
     else
         print_backend_doesnt_exist_error();
-}
-
-struct Coordinate {
-    double latitude;
-    double longitude;
-    std::int32_t joe[2];
-    std::int32_t *jay;
-
-    std::uint32_t size;
-    const char *strings;
-};
-
-std::int32_t three[2] = {5, 4};
-const char *joe[2] = {"joe", "joe1"};
-
-struct Coordinate create_coordinate() {
-    struct Coordinate coordinate;
-    coordinate.longitude = 12.0;
-    coordinate.latitude = 234.2;
-    coordinate.joe[0] = 3;
-    coordinate.joe[0] = 7;
-    coordinate.jay = (std::int32_t *)malloc(2 * sizeof(coordinate.jay));
-    coordinate.jay[0] = 12;
-    coordinate.jay[1] = 5;
-    coordinate.strings = *joe;
-
-    return coordinate;
 }
 
 struct Test {
@@ -370,86 +364,6 @@ struct Sequences get_sequences() {
     }
 
     return sequences;
-    /*
-        // Sequences -----------------------------------
-        struct Sequences seqs;
-        seqs.size = 2;
-        seqs.sequences = (Sequence **)malloc(seqs.size * sizeof(Sequence *));
-        //---------------------------------------------
-
-        // Sequence ------------------------------------
-        Sequence *seq1 = (Sequence *)malloc(sizeof(Sequence));
-        seq1->steps_size = 1;
-
-        std::string name = "joe2";
-        std::string serial = "";
-        std::string comments = "what is thissss?";
-
-        char *name_c = (char *)malloc((name.length() + 1) * sizeof(char));
-        strcpy(name_c, name.c_str());
-
-        char *serial_c = (char *)malloc((serial.length() + 1) * sizeof(char));
-        strcpy(serial_c, serial.c_str());
-
-        char *comments_c = (char *)malloc((comments.length() + 1) * sizeof(char));
-        strcpy(comments_c, comments.c_str());
-
-        seq1->name = name_c;
-        seq1->serial = serial_c;
-        seq1->comments = comments_c;
-
-        seq1->steps = (Step **)malloc(seq1->steps_size * sizeof(Step *));
-
-        // steps 1------------------------------------------------
-        Step *step1 = (Step *)malloc(sizeof(Step));
-        step1->tests_size = 1;
-
-        step1->mode = 3;
-        step1->seconds = 2;
-        step1->current = 3.0;
-        step1->voltage = 24.0;
-
-        seq1->steps[0] = step1;
-
-        step1->tests = (Test **)malloc(step1->tests_size * sizeof(Test *));
-
-        // test 1
-        Test *test1 = (Test *)malloc(sizeof(Test));
-        test1->test_action = 0;
-        test1->test_type = 1;
-        test1->time_limit = 2;
-        test1->time_type = 3;
-        test1->value = 34.3;
-        step1->tests[0] = test1;
-
-        // Sequence 2 ------------------------------------------
-        Sequence *seq2 = (Sequence *)malloc(sizeof(Sequence));
-        seq2->steps_size = 0;
-
-        std::string name2 = "joe27";
-        std::string serial2 = "323";
-        std::string comments2 = "what is thissss?";
-
-        char *name_c2 = (char *)malloc((name2.length() + 1) * sizeof(char));
-        strcpy(name_c2, name2.c_str());
-
-        char *serial_c2 = (char *)malloc((serial2.length() + 1) * sizeof(char));
-        strcpy(serial_c2, serial2.c_str());
-
-        char *comments_c2 = (char *)malloc((comments2.length() + 1) * sizeof(char));
-        strcpy(comments_c2, comments2.c_str());
-
-        seq2->name = name_c2;
-        seq2->serial = serial_c2;
-        seq2->comments = comments_c2;
-
-        seqs.sequences[0] = seq1;
-        seqs.sequences[1] = seq2;
-        return seqs;*/
-}
-
-struct Sequence get_sequence(Sequences *seq) {
-    std::cout << "get_sequence called" << std::endl;
 }
 }
 
@@ -480,6 +394,12 @@ int main(int argc, char **argv) {
 
                     },
                     [&](PortTypes::port_uint16_data_type data_type, map_uint16_data_type data) {
+
+                    },
+                    [&](loaded_profile_type profiles) {
+
+                    },
+                    [&](profile_status_type statuses) {
 
                     });
                 io_service.run();

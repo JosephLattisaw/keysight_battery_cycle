@@ -12,11 +12,14 @@
 class Keysight {
 public:
     Keysight(boost::asio::io_service &io_service, ActiveCardsCallback active_cards_callback, ConnectionStatusCallback connection_status_callback,
-             PortDoubleCallback port_double_callback, PortUint16Callback port_uint16_callback);
+             PortDoubleCallback port_double_callback, PortUint16Callback port_uint16_callback, LoadedProfilesCallback loaded_profiles_callback,
+             ProfilesStatusCallback profile_status_callback);
     ~Keysight();
 
     void connect();
     void disconnect();
+
+    void load_sequence(std::string name, int slot);
 
 private:
     // opening visa sessions
@@ -63,8 +66,13 @@ private:
     PortUint16Callback port_uint16_callback;
     ActiveCardsCallback active_cards_callback;
     ConnectionStatusCallback connection_status_callback;
+    LoadedProfilesCallback loaded_profiles_callback;
+    ProfilesStatusCallback profile_status_callback;
 
     std::vector<std::vector<std::string>> last_valid_verbose_response;
+
+    loaded_profile_type currently_loaded_profiles;
+    profile_status_type current_profile_statuses;
 
     const std::string VISA_ADDRESS_BT2203A = "USB0::0x008D::0x3502::MY58000516::0::INSTR";  // usb address of battery cycler
 
