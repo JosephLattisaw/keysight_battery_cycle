@@ -13,15 +13,28 @@ class TestTabbedWidget extends HookWidget {
 
   final int sequenceNumber;
 
+  String getDropDownText(int index, int value) {
+    String s = "Sequence ${index + 1}";
+
+    if (value != 2) {
+      s = s + ": INVALID";
+    }
+    return s;
+  }
+
   @override
   Widget build(BuildContext context) {
     final canStartSequence = useState(false);
     final sequenceStarted = context.select(
         (KeysightCAPI k) => k.sequencesStarted.elementAt(sequenceNumber));
     final cApi = Provider.of<KeysightCAPI>(context, listen: false);
+    final profileStatuses =
+        context.select((KeysightCAPI k) => k.profilesStatuses);
 
     final checkCount = useState(
         List<List<bool>>.generate(8, (index) => List<bool>.filled(32, false)));
+
+    final dropdownStatus = useState(0);
 
     return Padding(
       padding: const EdgeInsets.only(top: 8),
@@ -94,13 +107,21 @@ class TestTabbedWidget extends HookWidget {
               children: [
                 IntrinsicWidth(
                   child: DropdownButtonFormField(
-                    value: 0,
+                    value: dropdownStatus.value,
                     items: List.generate(
                         8,
                         (index) => DropdownMenuItem(
-                            child: Text("Sequence ${index + 1}"),
+                            child: Text(
+                                getDropDownText(
+                                    index, profileStatuses.elementAt(index)),
+                                style: TextStyle(
+                                    color: profileStatuses.elementAt(index) != 2
+                                        ? Colors.red
+                                        : Colors.white)),
                             value: index)),
-                    onChanged: (int? value) {},
+                    onChanged: (int? value) {
+                      dropdownStatus.value = value ?? 0;
+                    },
                     style: const TextStyle(color: Colors.white),
                     dropdownColor: Colors.blueAccent,
                     iconEnabledColor: Colors.white,
@@ -134,7 +155,9 @@ class TestTabbedWidget extends HookWidget {
                 ),
                 const Spacer(),
                 ElevatedButton(
-                  onPressed: !canStartSequence.value && !sequenceStarted
+                  onPressed: ((!canStartSequence.value && !sequenceStarted) ||
+                          (profileStatuses.elementAt(dropdownStatus.value) !=
+                              2))
                       ? null
                       : () {
                           Future.delayed(Duration.zero, () async {
