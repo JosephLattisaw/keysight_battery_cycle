@@ -748,14 +748,14 @@ std::string Keysight::get_test_type(int value) {
 }
 
 void Keysight::start_sequence(std::uint32_t slot, std::vector<std::uint32_t> cells) {
-    std::string s1 = "@(";
+    std::string s1 = "(@";
 
     for (auto i = 0; i < cells.size(); i++) {
         s1 += std::to_string(cells.at(i));
         if (i != cells.size() - 1) s1 += ",";
     }
 
-    std::string enab = "CELL:ENABLE " + s1 + ")," + std::to_string(slot) + "\n";
+    std::string enab = "CELL:ENABLE " + s1 + ")," + std::to_string(slot + 1) + "\n";
     std::string init = "CELL:INIT " + s1 + ")\n";
 
     LOG_OUT << "enabled cells: " << enab;
