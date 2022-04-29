@@ -142,12 +142,24 @@ class KeysightCAPI extends ChangeNotifier {
         .lookup<ffi.NativeFunction<LoadProfileFFI>>("load_profile")
         .asFunction();
 
+    startSequence = lib
+        .lookup<ffi.NativeFunction<StartSequenceFFI>>("start_sequence")
+        .asFunction();
+
     connectKeysight = lib
         .lookup<ffi.NativeFunction<VoidFunctionFFI>>("connect_keysight")
         .asFunction();
 
     disconnectKeysight = lib
         .lookup<ffi.NativeFunction<VoidFunctionFFI>>("disconnect_keysight")
+        .asFunction();
+
+    clearCells = lib
+        .lookup<ffi.NativeFunction<VoidFunctionFFI>>("clear_cells")
+        .asFunction();
+
+    selectCell = lib
+        .lookup<ffi.NativeFunction<SelectCellFFI>>("select_cell")
         .asFunction();
 
     ReceivePort loadSequencesPort = ReceivePort()
@@ -524,9 +536,30 @@ class KeysightCAPI extends ChangeNotifier {
 
   bool keysightConnectionStatus = false;
 
-  void setSequenceStarted(int index, bool value) {
+  void setSequenceStarted(int index, int slot, bool value) {
     if (index < sequencesStarted.length) {
       sequencesStarted[index] = value;
+
+      print("set seq started");
+      clearCells();
+
+      for (int i = 0; i < cellsSelected.length; i++) {
+        List<int> inners = cellsSelected.elementAt(i);
+        for (int k = 0; k < inners.length; k++) {
+          int value = inners.elementAt(k);
+          if (value == index) {
+            //we have a winner
+            int mod = (i + 1) * 1000;
+            int card = k + 1;
+            selectCell(mod + card);
+          }
+        }
+      }
+
+      if (value) {
+        startSequence(slot);
+      }
+
       notifyListeners();
     }
   }
@@ -571,9 +604,12 @@ class KeysightCAPI extends ChangeNotifier {
   late VoidFunctionC _runService;
   late SequenceRemoveC sequenceRemove;
   late LoadProfileC loadProfile;
+  late StartSequenceC startSequence;
   late VoidFunctionC connectKeysight;
   late VoidFunctionC disconnectKeysight;
   late SequencesC getSequences;
+  late SelectCellC selectCell;
+  late VoidFunctionC clearCells;
 
   static const String _libraryName = 'lib/libkeysight_backend.so';
 }
@@ -647,6 +683,12 @@ typedef SequenceRemoveC = void Function(ffi.Pointer<Utf8> name);
 typedef LoadProfileFFI = ffi.Void Function(
     ffi.Pointer<Utf8> name, ffi.Uint32 slot);
 typedef LoadProfileC = void Function(ffi.Pointer<Utf8> name, int slot);
+
+typedef StartSequenceFFI = ffi.Void Function(ffi.Uint32 slot);
+typedef StartSequenceC = void Function(int slot);
+
+typedef SelectCellFFI = ffi.Void Function(ffi.Uint32 cell);
+typedef SelectCellC = void Function(int cell);
 
 final List<bool> cardsActiveDefault = List<bool>.filled(8, false);
 final List<List<String>> cellsDefaultNan =

@@ -80,7 +80,12 @@ void Backend::keysight_thread_is_up() {  // ysight_service.post(std::bind(&Keysi
 void Backend::connect_keysight() { keysight_service.post(std::bind(&Keysight::connect, keysight)); }
 void Backend::disconnect_keysight() { keysight_service.post(std::bind(&Keysight::disconnect, keysight)); }
 
-void Backend::load_profile(std::string name, int slot) {
+void Backend::load_profile(std::string name, int slot, sequence_step_vector steps, sequence_test_map tests) {
     LOG_OUT << "load profile called";
-    keysight_service.post(std::bind(&Keysight::load_sequence, keysight, name, slot));
+    keysight_service.post(std::bind(&Keysight::load_sequence, keysight, name, slot, steps, tests));
+}
+
+void Backend::start_sequence(std::uint32_t slot, std::vector<std::uint32_t> cells) {
+    LOG_OUT << "start sequence called";
+    keysight_service.post(std::bind(&Keysight::start_sequence, keysight, slot, cells));
 }

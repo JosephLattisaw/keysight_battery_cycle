@@ -589,13 +589,218 @@ bool Keysight::get_cell_verbose(int card_number) {
 #endif
 }
 
-void Keysight::load_sequence(std::string name, int slot) {
+std::string Keysight::get_mode(int value) {
+    switch (value) {
+        case 1:
+            return "CHARGE";
+        case 2:
+            return "DISCHARGE";
+        default:
+            return "REST";
+    }
+}
+
+std::string Keysight::get_time_type(int value) {
+    switch (value) {
+        case 1:
+            return "AFTER";
+        case 2:
+            return "BEFORE";
+        case 3:
+            return "BEFORE_START";
+        default:
+            return "AT";
+    }
+}
+
+std::string Keysight::get_test_action(int value) {
+    switch (value) {
+        case 1:
+            return "NEXT";
+        default:
+            return "FAIL";
+    }
+}
+
+std::string Keysight::get_test_type(int value) {
+    switch (value) {
+        case 0:
+            return "VOLT_GE";
+        case 1:
+            return "VOLT_LE";
+        case 2:
+            return "CURR_GE";
+        case 3:
+            return "CURR_LE";
+        case 4:
+            return "POWER_GE";
+        case 5:
+            return "POWER_LE";
+        case 6:
+            return "AMPH_GE";
+        case 7:
+            return "AMPH_LE";
+        case 8:
+            return "WATTH_GE";
+        case 9:
+            return "WATTH_LE";
+        case 10:
+            return "POS_DVDT_GE";
+        case 11:
+            return "POS_DVDT_LE";
+        case 12:
+            return "NEG_DVDT_GE";
+        case 13:
+            return "NEG_DVDT_LE";
+        case 14:
+            return "POS_DIDT_GE";
+        case 15:
+            return "POS_DIDT_LE";
+        case 16:
+            return "NEG_DIDT_GE";
+        case 17:
+            return "NEG_DIDT_LE";
+        case 18:
+            return "DVMAX_GE";
+        case 19:
+            return "DVMAX_LE";
+        case 20:
+            return "DVMIN_GE";
+        case 21:
+            return "DVMIN_LE";
+        case 22:
+            return "DIMAX_GE";
+        case 23:
+            return "DIMAX_LE";
+        case 24:
+            return "DIMIN_GE";
+        case 25:
+            return "DIMIN_LE";
+        default:
+            return "NONE";
+    }
+}
+
+void Keysight::start_sequence(std::uint32_t slot, std::vector<std::uint32_t> cells) {
+    std::string s1 = "@(";
+
+    for (auto i = 0; i < cells.size(); i++) {
+        s1 += std::to_string(cells.at(i));
+        if (i != cells.size() - 1) s1 += ",";
+    }
+
+    std::string enab = "CELL:ENABLE " + s1 + ")," + std::to_string(slot) + "\n";
+    std::string init = "CELL:INIT " + s1 + ")\n";
+
+    LOG_OUT << "enabled cells: " << enab;
+    LOG_OUT << "init cells: " << init;
+
+#ifndef SOFTWARE_ONLY
+    auto status = viPrintf(session, enab.c_str());
+    auto res = keysight::verify_vi_status(session, status, "sending enab", "There was a problem enabling cells error code: ");
+
+    if (!res) {
+        disconnect();
+        return;
+    }
+
+    status = viPrintf(session, init.c_str());
+    res = keysight::verify_vi_status(session, status, "sending enab", "There was a problem enabling cells error code: ");
+
+    if (!res) {
+        disconnect();
+        return;
+    }
+#endif
+}
+
+void Keysight::load_sequence(std::string name, int slot, sequence_step_vector steps, sequence_test_map tests) {
     if (slot < currently_loaded_profiles.size()) {
         currently_loaded_profiles[slot] = name;
+
+#ifdef SOFTWARE_ONLY
+
         current_profile_statuses[slot] = 1;
         if (slot > 3) current_profile_statuses[slot] = 2;
         loaded_profiles_callback(currently_loaded_profiles);
         profile_status_callback(current_profile_statuses);
+        LOG_OUT << "steps size: " << steps.size();
+#endif
+        for (auto i = 0; i < steps.size(); i++) {
+            auto step = steps.at(i);
+            auto mode_value = step.at(SequenceTypes::sequence_step_access_type::MODE);
+
+            auto seq_id = slot + 1;  // 1 indexed
+            auto step_id = i + 1;
+            auto mode = get_mode(mode_value);
+            auto duration = static_cast<int>(step.at(SequenceTypes::sequence_step_access_type::SECONDS));
+            auto current = step.at(SequenceTypes::sequence_step_access_type::CURRENT);
+            auto voltage = step.at(SequenceTypes::sequence_step_access_type::VOLTAGE);
+
+            std::string s1 = "SEQ:STEP:DEF ";
+            std::string s2 = std::to_string(seq_id) + ",";
+            std::string s3 = std::to_string(step_id) + ",";
+            std::string s4 = mode + ",";
+            std::string s5 = std::to_string(duration) + ",";
+            std::string s6 = std::to_string(current) + ",";
+            std::string s7 = std::to_string(voltage) + "\n";
+
+            auto s = s1 + s2 + s3 + s4 + s5 + s6 + s7;
+
+            LOG_OUT << "step command: " << s;
+#ifndef SOFTWARE_ONLY
+            auto status = viPrintf(session, s.c_str());
+            auto res = keysight::verify_vi_status(session, status, "sending step", "There was a problem sending step error code: ");
+
+            if (!res) {
+                disconnect();
+                return;
+            }
+#endif
+        }
+
+        for (const auto &i : tests) {
+            auto test_vec = i.second;
+
+            for (auto k = 0; k < test_vec.size(); k++) {
+                auto test = test_vec.at(k);
+                auto test_type_value = test.at(SequenceTypes::sequence_test_access_type::TEST_TYPE);
+                auto time_type_value = test.at(SequenceTypes::sequence_test_access_type::TIME_TYPE);
+                auto test_action_value = test.at(SequenceTypes::sequence_test_access_type::TEST_ACTION);
+
+                auto seq_id = slot + 1;
+                auto step_id = i.first + 1;
+                auto test_id = k + 1;
+                auto test_type = get_test_type(test_type_value);
+                auto value = test.at(SequenceTypes::sequence_test_access_type::VALUE);
+                auto time_type = get_time_type(time_type_value);
+                auto time_limit = test.at(SequenceTypes::sequence_test_access_type::TIME_LIMIT);
+                auto test_action = get_test_action(test_action_value);
+
+                std::string s1 = "SEQ:TEST:DEF ";
+                std::string s2 = std::to_string(seq_id) + ",";
+                std::string s3 = std::to_string(step_id) + ",";
+                std::string s4 = std::to_string(test_id) + ",";
+                std::string s5 = test_type + ",";
+                std::string s6 = std::to_string(value) + ",";
+                std::string s7 = time_type + ",";
+                std::string s8 = std::to_string(time_limit) + ",";
+                std::string s9 = test_action + "\n";
+
+                auto s = s1 + s2 + s3 + s4 + s5 + s6 + s7 + s8 + s9;
+
+                LOG_OUT << "test command: " << s;
+#ifndef SOFTWARE_ONLY
+                auto status = viPrintf(session, s.c_str());
+                auto res = keysight::verify_vi_status(session, status, "sending step", "There was a problem sending step error code: ");
+
+                if (!res) {
+                    disconnect();
+                    return;
+                }
+#endif
+            }
+        }
     }
 }
 

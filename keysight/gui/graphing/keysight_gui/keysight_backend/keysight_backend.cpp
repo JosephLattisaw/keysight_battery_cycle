@@ -21,6 +21,7 @@ namespace {
 // the language itself. No one should be accessing these outside of the library itself
 boost::asio::io_service io_service;
 std::shared_ptr<Backend> backend;
+std::vector<std::uint32_t> selected_cells;
 
 void print_backend_doesnt_exist_error() { LOG_ERR << "backend: backend object doesn't exist "; }
 
@@ -208,7 +209,28 @@ void sequence_remove(const char *name) {
 
 void load_profile(const char *name, std::uint32_t slot) {
     LOG_OUT << "load profile called: " << name << ", slot: " << slot;
-    if (backend) backend->load_profile(name, slot);
+    if (backend) {
+        auto sequences = backend->sequence_parser->load_all_sequences();
+        auto steps = std::any_cast<seqeunces_steps_map_type>(sequences.at(1));
+        auto tests = std::any_cast<sequences_tests_map_type>(sequences.at(2));
+
+        sequence_step_vector sv;
+        if (steps.find(name) != steps.end()) {
+            sv = std::any_cast<sequence_step_vector>(steps.at(name));
+        }
+
+        sequence_test_map sm;
+        if (tests.find(name) != tests.end()) {
+            sm = std::any_cast<sequence_test_map>(tests.at(name));
+        }
+
+        backend->load_profile(name, slot, sv, sm);
+    }
+}
+
+void start_sequence(std::uint32_t slot) {
+    LOG_OUT << "load sequence called on: " << slot;
+    if (backend) backend->start_sequence(slot, selected_cells);
 }
 
 void run_service() {
@@ -231,6 +253,16 @@ void disconnect_keysight() {
         backend->disconnect_keysight();
     else
         print_backend_doesnt_exist_error();
+}
+
+void clear_cells() {
+    LOG_OUT << "clear cells called";
+    selected_cells.clear();
+}
+
+void select_cell(std::uint32_t cell) {
+    LOG_OUT << "select cell called: " << cell;
+    selected_cells.push_back(cell);
 }
 
 struct Test {

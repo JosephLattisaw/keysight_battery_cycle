@@ -19,7 +19,8 @@ public:
     void connect();
     void disconnect();
 
-    void load_sequence(std::string name, int slot);
+    void load_sequence(std::string name, int slot, sequence_step_vector steps, sequence_test_map tests);
+    void start_sequence(std::uint32_t slot, std::vector<std::uint32_t> cells);
 
 private:
     // opening visa sessions
@@ -40,6 +41,11 @@ private:
     bool get_cap_ahr(int card_number);
     bool get_cap_whr(int card_number);
     bool get_cell_verbose(int card_number);
+
+    std::string get_mode(int value);
+    std::string get_test_type(int value);
+    std::string get_time_type(int value);
+    std::string get_test_action(int value);
 
     // polling
     void start_polling_cell_status();
