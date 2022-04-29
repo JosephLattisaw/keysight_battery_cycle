@@ -97,7 +97,12 @@ void Keysight::disconnect() {
 
         cell_status_timer.cancel();
 
+        currently_loaded_profiles.fill("");
+        current_profile_statuses.fill(0);
+
         update_connection_status(false);
+        loaded_profiles_callback(currently_loaded_profiles);
+        profile_status_callback(current_profile_statuses);
     }
 }
 

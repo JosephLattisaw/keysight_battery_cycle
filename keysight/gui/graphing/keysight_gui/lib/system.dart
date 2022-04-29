@@ -60,7 +60,7 @@ class SystemPage extends StatelessWidget {
               columns: [
                 DataColumn(
                   label: Text(
-                    'Sequence #',
+                    'Test #',
                     style: TextStyle(color: Colors.white),
                   ),
                 ),

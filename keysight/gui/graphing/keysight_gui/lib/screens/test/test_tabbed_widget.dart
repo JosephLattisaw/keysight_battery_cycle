@@ -95,14 +95,11 @@ class TestTabbedWidget extends HookWidget {
                 IntrinsicWidth(
                   child: DropdownButtonFormField(
                     value: 0,
-                    items: const [
-                      DropdownMenuItem(child: Text("1 Second"), value: 0),
-                      DropdownMenuItem(child: Text("10 Seconds"), value: 1),
-                      DropdownMenuItem(child: Text("30 Seconds"), value: 2),
-                      DropdownMenuItem(child: Text("60 seconds"), value: 3),
-                      DropdownMenuItem(child: Text("5 minutes"), value: 4),
-                      DropdownMenuItem(child: Text("10 minutes"), value: 5),
-                    ],
+                    items: List.generate(
+                        8,
+                        (index) => DropdownMenuItem(
+                            child: Text("Sequence ${index + 1}"),
+                            value: index)),
                     onChanged: (int? value) {},
                     style: const TextStyle(color: Colors.white),
                     dropdownColor: Colors.blueAccent,
