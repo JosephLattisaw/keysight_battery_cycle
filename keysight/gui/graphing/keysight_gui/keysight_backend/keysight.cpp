@@ -38,20 +38,27 @@ void Keysight::connect() {
                 if (enable_read_termination_character()) {
                     if (identification_query()) {
                         LOG_OUT << "identified " << VISA_ADDRESS_BT2203A;
+
                         if (detect_cards_at_boot()) {
-                            LOG_OUT << "successfully detected all cards at boot";
-                            if (define_cells_for_all_cards()) {
-                                LOG_OUT << "successfully set all cell names";
-                                update_connection_status(true);
-                                start_polling_cell_status();
+                            if (reset()) {
+                                LOG_OUT << "successfully detected all cards at boot";
+                                if (define_cells_for_all_cards()) {
+                                    LOG_OUT << "successfully set all cell names";
+                                    update_connection_status(true);
+                                    start_polling_cell_status();
+                                } else {
+                                    LOG_ERR << "failed to set all active cells";
+                                    disconnect();
+                                }
                             } else {
-                                LOG_ERR << "failed to set all active cells";
+                                LOG_ERR << "failed to reset all data";
                                 disconnect();
                             }
                         } else {
                             LOG_ERR << "failed to determine the active cards";
                             disconnect();
                         }
+
                     } else {
                         LOG_ERR << "failed to find identify: " << VISA_ADDRESS_BT2203A;
                         disconnect();
@@ -164,6 +171,9 @@ bool Keysight::enable_read_termination_character() {
             status = viSetAttribute(session, VI_ATTR_TERMCHAR_EN, VI_TRUE);
             res = keysight::verify_vi_status(session, status, "enabled read termination character",
                                              "There was a problem setting the attributes termination character name, error code: ");
+
+            status = viSetAttribute(session, VI_ATTR_TMO_VALUE, 2000);
+            res = keysight::verify_vi_status(session, status, "timeout", "There was a problem setting the attributes timeout, error code: ");
             return res;
         } else
             return true;  // success
@@ -172,6 +182,30 @@ bool Keysight::enable_read_termination_character() {
 #else
     return true;
 #endif
+}
+
+bool Keysight::reset() {
+    LOG_OUT << "attempting to reset state";
+
+#ifndef SOFTWARE_ONLY
+    bool res;
+
+    auto status = viPrintf(session, "CELL:ABORT 0\n");  // sending identification query command
+    res = keysight::verify_vi_status(session, status, "aborting any cells", "There was a problem aborting cells, error code: ");
+
+    if (res) {
+        status = viPrintf(session, "CELL:CLEAR 0\n");  // sending identification query command
+        res = keysight::verify_vi_status(session, status, "clearing cells", "There was a problem clearing cells, error code: ");
+        if (res) {
+            status = viPrintf(session, "SEQ:CLEAR 0\n");  // sending identification query command
+            res = keysight::verify_vi_status(session, status, "clearing sequences", "There was a problem clearing any sequences, error code: ");
+        }
+    }
+
+    return res;
+#endif
+
+    return true;
 }
 
 bool Keysight::identification_query() {
@@ -458,6 +492,38 @@ bool Keysight::get_cap_ahr(int card_number) {
 #endif
 }
 
+std::vector<int> Keysight::get_catalog() {
+    std::string s = "SEQ:CAT?\n";
+    ViChar catalog[65535];
+    auto status = viPrintf(session, s.c_str());
+    auto res = keysight::verify_vi_status(session, status, "get catalog", "There was a problem sending get catalog command, error code: ");
+
+    std::vector<int> result;
+
+    if (res) {
+        status = viScanf(session, "%t", catalog);
+        res = keysight::verify_vi_status(session, status, "get catalog", "There was a problem getting catalog, error code: ");
+        if (res) {
+            status = viFlush(session, VI_READ_BUF);  // discards any read buf so next scan is fine
+            res = keysight::verify_vi_status(session, status, "flusing keysight buffer", "There was a problem flushing the keysight buffer");
+
+            LOG_OUT << "get_catalog: " << catalog;
+            auto values = comma_delimiter(catalog);
+            for (const auto &i : values) {
+                auto val = std::stoi(i) - 1;
+                LOG_OUT << "valid value: " << val;
+                result.push_back(val);
+            }
+        } else {
+            disconnect();
+        }
+    } else {
+        disconnect();
+    }
+
+    return result;
+}
+
 bool Keysight::get_cap_whr(int card_number) {
 #ifndef SOFTWARE_ONLY
     ViChar cap_whr[65535];
@@ -717,12 +783,12 @@ void Keysight::start_sequence(std::uint32_t slot, std::vector<std::uint32_t> cel
 void Keysight::load_sequence(std::string name, int slot, sequence_step_vector steps, sequence_test_map tests) {
     if (slot < currently_loaded_profiles.size()) {
         currently_loaded_profiles[slot] = name;
+        loaded_profiles_callback(currently_loaded_profiles);
 
 #ifdef SOFTWARE_ONLY
 
         current_profile_statuses[slot] = 1;
         if (slot > 3) current_profile_statuses[slot] = 2;
-        loaded_profiles_callback(currently_loaded_profiles);
         profile_status_callback(current_profile_statuses);
         LOG_OUT << "steps size: " << steps.size();
 #endif
@@ -801,6 +867,18 @@ void Keysight::load_sequence(std::string name, int slot, sequence_step_vector st
 #endif
             }
         }
+
+        auto catalog = get_catalog();
+        for (const auto &i : catalog) {
+            if (i == slot) {
+                current_profile_statuses[slot] = 2;
+                profile_status_callback(current_profile_statuses);
+                return;
+            }
+        }
+
+        current_profile_statuses[slot] = 1;
+        profile_status_callback(current_profile_statuses);
     }
 }
 

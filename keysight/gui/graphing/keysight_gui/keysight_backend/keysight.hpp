@@ -7,7 +7,7 @@
 
 #include "types.hpp"
 
-#define SOFTWARE_ONLY 1
+//#define SOFTWARE_ONLY 1
 
 class Keysight {
 public:
@@ -28,6 +28,7 @@ private:
     bool open_resource_manager();
     bool enable_read_termination_character();
     bool identification_query();
+    bool reset();
 
     // commands
     // NOTE: all cell names are defined 1:1
@@ -41,6 +42,7 @@ private:
     bool get_cap_ahr(int card_number);
     bool get_cap_whr(int card_number);
     bool get_cell_verbose(int card_number);
+    std::vector<int> get_catalog();
 
     std::string get_mode(int value);
     std::string get_test_type(int value);

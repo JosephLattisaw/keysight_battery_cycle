@@ -32,6 +32,30 @@
                     }
                 }
             }
+        },
+        "Life_4_2_EPCV_HighD_T1": {
+            "serial_number": "",
+            "comments": "4.2V EOCV 5A discharge 2.5A charge",
+            "steps": {
+                "0": {
+                    "mode": "1",
+                    "seconds": "3600",
+                    "current": "2.5",
+                    "voltage": "4.2000000000000002"
+                },
+                "1": {
+                    "mode": "2",
+                    "seconds": "1800",
+                    "current": "5",
+                    "voltage": "2.5"
+                },
+                "2": {
+                    "mode": "1",
+                    "seconds": "3600",
+                    "current": "2.5",
+                    "voltage": "4.2000000000000002"
+                }
+            }
         }
     }
 }
