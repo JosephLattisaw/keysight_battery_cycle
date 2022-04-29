@@ -435,6 +435,8 @@ class KeysightCAPI extends ChangeNotifier {
         malloc.free(sequence.ref.steps);
       }
 
+      addSavedSequence(sequence.ref.name.toDartString());
+
       malloc.free(sequence.ref.name);
       malloc.free(sequence.ref.serial);
       malloc.free(sequence.ref.comments);
@@ -457,6 +459,29 @@ class KeysightCAPI extends ChangeNotifier {
       List.generate(8, (index) => List<int>.filled(32, -1));
 
   List<bool> cardsActive = List.from(cardsActiveDefault);
+
+  List<String> savedSequences = List<String>.empty(growable: true);
+
+  void addSavedSequence(String name) {
+    for (int i = 0; i < savedSequences.length; i++) {
+      if (savedSequences.elementAt(i).compareTo(name) == 0) {
+        return;
+      }
+    }
+
+    savedSequences = List.from(savedSequences)..add(name);
+    notifyListeners();
+  }
+
+  void deleteSavedSeqeunce(String name) {
+    for (int i = 0; i < savedSequences.length; i++) {
+      if (savedSequences.elementAt(i).compareTo(name) == 0) {
+        savedSequences = List.from(savedSequences)..removeAt(i);
+        notifyListeners();
+        return;
+      }
+    }
+  }
 
   final List<List<String>> cellNames = List.generate(
       8,

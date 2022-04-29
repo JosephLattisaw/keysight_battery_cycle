@@ -85,6 +85,7 @@ class ProfileSequenceWidget extends HookWidget {
           as SequenceBuilderKeepAliveClient;
       final st = sw.sequenceTextController.text.toNativeUtf8();
       backend.sequenceRemove(st);
+      backend.deleteSavedSeqeunce(sw.sequenceTextController.text);
       calloc.free(st);
       sw.keepAliveUpdate();
       sequenceWidgets.value = List.from(sequenceWidgets.value)..removeAt(index);
@@ -153,6 +154,7 @@ class ProfileSequenceWidget extends HookWidget {
       }
 
       backend.finishSaveSequence();
+      backend.addSavedSequence(sw.sequenceTextController.text);
     }
 
     useMemoized(() {

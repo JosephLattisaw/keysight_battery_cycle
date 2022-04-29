@@ -5,23 +5,9 @@
             "serial_number": "",
             "comments": ""
         },
-        "eee": {
+        "jim": {
             "serial_number": "",
-            "comments": "",
-            "steps": {
-                "0": {
-                    "mode": "0",
-                    "seconds": "1",
-                    "current": "0.10000000000000001",
-                    "voltage": "2"
-                },
-                "1": {
-                    "mode": "0",
-                    "seconds": "1",
-                    "current": "0.10000000000000001",
-                    "voltage": "2"
-                }
-            }
+            "comments": ""
         }
     }
 }

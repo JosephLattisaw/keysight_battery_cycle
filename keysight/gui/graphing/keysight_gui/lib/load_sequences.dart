@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:keysight_gui/keysight_c_api.dart';
+import 'package:provider/provider.dart';
 
 class LoadSequences extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final savedSequences = context.select((KeysightCAPI k) => k.savedSequences);
+
     return Padding(
       padding: const EdgeInsets.all(8),
       child: SingleChildScrollView(
@@ -83,14 +87,13 @@ class LoadSequences extends StatelessWidget {
                 DataCell(IntrinsicWidth(
                   child: DropdownButtonFormField(
                     value: 0,
-                    items: const [
-                      DropdownMenuItem(child: Text("1 Second"), value: 0),
-                      DropdownMenuItem(child: Text("10 Seconds"), value: 1),
-                      DropdownMenuItem(child: Text("30 Seconds"), value: 2),
-                      DropdownMenuItem(child: Text("60 seconds"), value: 3),
-                      DropdownMenuItem(child: Text("5 minutes"), value: 4),
-                      DropdownMenuItem(child: Text("10 minutes"), value: 5),
-                    ],
+                    items: List.generate(
+                      savedSequences.length,
+                      (index) => DropdownMenuItem(
+                        child: Text(savedSequences.elementAt(index)),
+                        value: index,
+                      ),
+                    ),
                     onChanged: (int? value) {},
                     style: const TextStyle(color: Colors.white),
                     dropdownColor: Colors.blueAccent,
