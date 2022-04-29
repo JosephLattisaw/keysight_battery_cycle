@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:keysight_gui/application_bar.dart';
+import 'package:keysight_gui/load_sequences.dart';
 import 'package:keysight_gui/system.dart';
 import 'package:keysight_gui/tab_widget.dart';
 import 'package:keysight_gui/screens/instrument_connection/instrument_widget.dart';
@@ -57,19 +58,24 @@ class HomePage extends HookWidget {
                     tabs: const [
                       Text("Instrument Connection"),
                       Text("Create/Edit Profile Sequences"),
+                      Text("Load Sequences"),
                       Text("Test Management"),
                       //Text("Measurements"),
                       //Text("System"),
+
                       Text("System Telemetry"),
                     ],
                     tabWidgets: [
                       const InstrumentWidget(),
                       const ProfileSequenceWidget(),
+                      LoadSequences(),
                       const TestWidget(),
+
                       /*MeasurementWidget(
                         key: UniqueKey(),
                       ),*/
                       //JoeHomePage(),
+
                       SystemPage(),
                     ],
                   ),

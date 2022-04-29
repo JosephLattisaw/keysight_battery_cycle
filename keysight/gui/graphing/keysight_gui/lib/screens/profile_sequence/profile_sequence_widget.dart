@@ -26,10 +26,13 @@ class ProfileSequenceWidget extends HookWidget {
 
     final sequenceWidgets = useState(<Widget>[
       SequenceBuilderKeepAliveClient(
-        key: UniqueKey(),
-        pageIndex: totalPageCount.value - 1,
-        currentIndex: 0,
-      )
+          key: UniqueKey(),
+          pageIndex: totalPageCount.value + 1,
+          onChanged: (int index) {
+            print("on changed $index");
+            sequenceSaveList.value = List.from(sequenceSaveList.value)
+              ..[index] = false;
+          })
     ]);
 
     final backend = Provider.of<KeysightCAPI>(context, listen: false);
@@ -55,10 +58,13 @@ class ProfileSequenceWidget extends HookWidget {
         ..add(commentsText);
 
       sequenceWidgets.value.add(SequenceBuilderKeepAliveClient(
-        key: UniqueKey(),
-        pageIndex: totalPageCount.value,
-        currentIndex: sequenceList.value.length - 1,
-      ));
+          key: UniqueKey(),
+          pageIndex: totalPageCount.value + 1,
+          onChanged: (int index) {
+            print("on changed $index");
+            sequenceSaveList.value = List.from(sequenceSaveList.value)
+              ..[index] = false;
+          }));
 
       totalPageCount.value++;
       setSequenceIndex(sequenceList.value.length - 1);
@@ -82,6 +88,14 @@ class ProfileSequenceWidget extends HookWidget {
       calloc.free(st);
       sw.keepAliveUpdate();
       sequenceWidgets.value = List.from(sequenceWidgets.value)..removeAt(index);
+
+      //reset all the indexes
+      for (int i = 0; i < sequenceWidgets.value.length; i++) {
+        SequenceBuilderKeepAliveClient sw = sequenceWidgets.value.elementAt(i)
+            as SequenceBuilderKeepAliveClient;
+
+        sw.updateIndex(i);
+      }
 
       //just goto last index if we're deleting last index
       if (index == (length - 1)) {
@@ -281,11 +295,12 @@ class ProfileSequenceWidget extends HookWidget {
 
 class SequenceBuilderKeepAliveClient extends StatefulWidget {
   SequenceBuilderKeepAliveClient(
-      {Key? key, required this.pageIndex, required this.currentIndex})
+      {Key? key, required this.pageIndex, required this.onChanged})
       : super(key: key);
 
-  final int pageIndex;
-  final int currentIndex;
+  int pageIndex;
+
+  final void Function(int) onChanged;
 
   final TextEditingController sequenceTextController = TextEditingController();
   final TextEditingController cellTextController = TextEditingController();
@@ -296,6 +311,11 @@ class SequenceBuilderKeepAliveClient extends StatefulWidget {
   void setSequenceTextError(bool flag) {
     client.sequenceTextError = flag;
     client.refresh();
+  }
+
+  void updateIndex(int index) {
+    print("update index called $index $pageIndex");
+    pageIndex = index;
   }
 
   bool get sequenceTextError => client.sequenceTextError;
@@ -377,6 +397,7 @@ class _SequenceBuilderKeepAliveClientState
   void addTableStep(List<dynamic> step) {
     setState(() {
       widget.addTableStep(step);
+      widget.onChanged(widget.pageIndex);
     });
   }
 
