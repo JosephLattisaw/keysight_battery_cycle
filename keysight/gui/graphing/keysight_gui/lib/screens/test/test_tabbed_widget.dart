@@ -43,38 +43,6 @@ class TestTabbedWidget extends HookWidget {
       padding: const EdgeInsets.only(top: 8),
       child: Column(
         children: [
-          /*Padding(
-            padding:
-                const EdgeInsets.only(left: 20, top: 8, right: 8, bottom: 8),
-            child: Row(
-              children: [
-                ElevatedButton(onPressed: () {}, child: const Text("Browse")),
-                const SizedBox(
-                  width: 8,
-                ),
-                Expanded(
-                  child: TextField(
-                    decoration: InputDecoration(
-                      enabledBorder: const OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.white),
-                      ),
-                      border: const OutlineInputBorder(),
-                      hintText: "Select a .csv File to Log Telemetry to a file",
-                      hintStyle: TextStyle(
-                          color: Colors.grey.shade500,
-                          fontStyle: FontStyle.italic),
-                      filled: true,
-                      fillColor: Colors.grey.shade800,
-                      isDense: true,
-                      contentPadding: const EdgeInsets.all(14.0),
-                    ),
-                    style: const TextStyle(color: Colors.white, fontSize: 14.0),
-                    readOnly: true,
-                  ),
-                )
-              ],
-            ),
-          ),*/
           Expanded(
             child: Padding(
               padding: const EdgeInsets.all(8.0),

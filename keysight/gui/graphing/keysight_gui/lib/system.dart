@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:keysight_gui/keysight_c_api.dart';
 import 'package:keysight_gui/screens/measurements/measurement_widget.dart';
 import 'package:keysight_gui/screens/test/test_sequence_chart_tab.dart';
 import 'package:keysight_gui/tab_widget.dart';
+import 'package:provider/provider.dart';
 
 class SystemPage extends StatelessWidget {
   List<String> sequences = ["1", "2", "3", "4", "5", "6", "7", "8"];
@@ -42,6 +44,14 @@ class SystemPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final sequencesStartedSlots =
+        context.select((KeysightCAPI k) => k.sequencesStartedSlots);
+    final loadedProfiles = context.select((KeysightCAPI k) => k.loadedProfiles);
+
+    print("sequences started: ${sequencesStartedSlots.elementAt(0)}");
+    //print(
+    //  "sequences started: ${loadedProfiles.elementAt(sequencesStartedSlots.elementAt(0))}");
+
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: TabWidget(
@@ -117,7 +127,10 @@ class SystemPage extends StatelessWidget {
                     ),
                     DataCell(
                       Text(
-                        profileNames.elementAt(index),
+                        sequencesStartedSlots.elementAt(index) == -1
+                            ? "N/A"
+                            : loadedProfiles.elementAt(
+                                sequencesStartedSlots.elementAt(index)),
                         style: const TextStyle(color: Colors.white),
                       ),
                     ),

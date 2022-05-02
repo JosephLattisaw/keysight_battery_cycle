@@ -559,8 +559,9 @@ class KeysightCAPI extends ChangeNotifier {
 
       if (value) {
         sequencesStartedSlots[index] = slot;
-      } else
-        sequencesStartedSlots[index] = slot;
+      } else {
+        sequencesStartedSlots[index] = -1;
+      }
 
       if (value) {
         startSequence(index, slot);
