@@ -526,7 +526,7 @@ class _SequenceBuilderKeepAliveClientState
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            /*const SizedBox(height: 12),
             Row(
               children: [
                 Expanded(
@@ -549,7 +549,7 @@ class _SequenceBuilderKeepAliveClientState
                   ),
                 ),
               ],
-            ),
+            ),*/
             const SizedBox(height: 12),
             TextField(
               controller: widget.commentsTextController,
