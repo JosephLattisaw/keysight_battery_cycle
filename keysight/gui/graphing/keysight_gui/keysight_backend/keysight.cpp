@@ -396,8 +396,9 @@ bool Keysight::get_cell_status() {
             std::vector<std::uint16_t> steps;
             std::vector<double> volts;
             std::vector<double> current;
-            for (const auto &k : last_valid_verbose_response) {
-                if (k.size() == 10) {
+            for (auto k = 0; k < last_valid_verbose_response.size(); k++) {
+                auto x = last_valid_verbose_response.at(k);
+                if (x.size() == 10) {
                     // TODO 0 = state
                     // 1 = sequence id
                     // 2 = step id
@@ -408,10 +409,21 @@ bool Keysight::get_cell_status() {
                     // TODO 7 = testType
                     // TODO 8 = expLim
                     // TODO 9 = meadLim
-                    sequences.push_back(std::stoi(k.at(1)));
-                    steps.push_back(std::stoi(k.at(2)));
-                    volts.push_back(std::stod(k.at(3)));
-                    current.push_back(std::stod(k.at(4)));
+                    sequences.push_back(std::stoi(x.at(1)));
+                    steps.push_back(std::stoi(x.at(2)));
+                    volts.push_back(std::stod(x.at(3)));
+                    current.push_back(std::stod(x.at(4)));
+                    auto cell = ((i + 1) * 1000) + (k + 1);
+                    if (logging_map.find(cell) != logging_map.end()) {
+                        // we have an open file
+                        auto slot = logging_map.at(cell);
+
+                        // TODO some bounds checking
+                        auto cap_ahr = cell_cap_ahr_data.at(i).at(k);
+                        auto cap_whr = cell_cap_whr_data.at(i).at(k);
+
+                        log_data(cell, slot, volts.back(), current.back(), cap_ahr, cap_whr);
+                    }
                 } else {
                     LOG_ERR << "invalid response size";
                     return false;
@@ -422,6 +434,8 @@ bool Keysight::get_cell_status() {
             cell_step_id_data[i] = steps;
             cell_voltage_data[i] = volts;
             cell_current_data[i] = current;
+
+            LOG_OUT << "volts size: " << volts.size();
         }
     }
 
@@ -747,6 +761,36 @@ std::string Keysight::get_test_type(int value) {
     }
 }
 
+void Keysight::start_logging(std::vector<std::uint32_t> cells) {
+    std::ofstream csv_file;
+    auto c = new std::ofstream;
+    logging_files.push_back(c);
+    logging_files.back()->open("test.csv", std::ios::out | std::ios::app);
+    *logging_files.back() << "Cell Number, Voltage (V), Current (A), Capacity (aH), Capacity (Wh), Timestamp\n";
+    logging_files.back()->flush();
+
+    for (const auto &i : cells) {
+        logging_map[i] = logging_files.size() - 1;
+    }
+}
+
+void Keysight::log_data(std::uint32_t cell, std::uint32_t slot, double volts, double current, double cap_ahr, double cap_whr) {
+    LOG_OUT << "log data called on: " << cell << ", slot: " << slot;
+
+    std::time_t time = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+    // TODO some bounds checking
+    auto s1 = std::to_string(cell) + ", ";
+    auto s2 = std::to_string(volts) + ", ";
+    auto s3 = std::to_string(current) + ", ";
+    auto s4 = std::to_string(cap_ahr) + ", ";
+    auto s5 = std::to_string(cap_whr) + ",";
+    auto s6 = std::string(std::ctime(&time));
+    auto s = s1 + s2 + s3 + s4 + s5 + s6;
+
+    *logging_files.at(slot) << s;
+    logging_files.at(slot)->flush();
+}
+
 void Keysight::start_sequence(std::uint32_t slot, std::vector<std::uint32_t> cells) {
     std::string s1 = "(@";
 
@@ -778,6 +822,8 @@ void Keysight::start_sequence(std::uint32_t slot, std::vector<std::uint32_t> cel
         return;
     }
 #endif
+
+    start_logging(cells);
 }
 
 void Keysight::load_sequence(std::string name, int slot, sequence_step_vector steps, sequence_test_map tests) {
@@ -790,7 +836,6 @@ void Keysight::load_sequence(std::string name, int slot, sequence_step_vector st
         current_profile_statuses[slot] = 1;
         if (slot > 3) current_profile_statuses[slot] = 2;
         profile_status_callback(current_profile_statuses);
-        LOG_OUT << "steps size: " << steps.size();
 #endif
         for (auto i = 0; i < steps.size(); i++) {
             auto step = steps.at(i);
@@ -868,6 +913,7 @@ void Keysight::load_sequence(std::string name, int slot, sequence_step_vector st
             }
         }
 
+#ifndef SOFTWARE_ONLY
         auto catalog = get_catalog();
         for (const auto &i : catalog) {
             if (i == slot) {
@@ -879,6 +925,7 @@ void Keysight::load_sequence(std::string name, int slot, sequence_step_vector st
 
         current_profile_statuses[slot] = 1;
         profile_status_callback(current_profile_statuses);
+#endif
     }
 }
 
