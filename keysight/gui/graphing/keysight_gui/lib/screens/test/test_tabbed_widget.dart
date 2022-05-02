@@ -141,7 +141,7 @@ class TestTabbedWidget extends HookWidget {
                 ),
                 Visibility(
                   child: const Text(
-                    "<-- Select a Sequence From the Dropwdown Menu",
+                    "<-- Select a Sequence From the Dropdown Menu",
                     style: TextStyle(
                       color: Colors.white,
                     ),
