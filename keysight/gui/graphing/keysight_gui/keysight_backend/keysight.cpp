@@ -417,13 +417,13 @@ bool Keysight::get_cell_status() {
                     else
                         states.push_back(1);
 
-                    if (x.at(0).compare("NEXT") == 0) {
+                    if (x.at(5).compare("NEXT") == 0) {
                         statuses.push_back(5);
-                    } else if (x.at(0).compare("ABORTED") == 0) {
+                    } else if (x.at(5).compare("ABORTED") == 0) {
                         statuses.push_back(4);
-                    } else if (x.at(0).compare("FAIL") == 0) {
+                    } else if (x.at(5).compare("FAIL") == 0) {
                         statuses.push_back(3);
-                    } else if (x.at(0).compare("OK") == 0) {
+                    } else if (x.at(5).compare("OK") == 0) {
                         statuses.push_back(2);
                     } else {
                         statuses.push_back(1);
