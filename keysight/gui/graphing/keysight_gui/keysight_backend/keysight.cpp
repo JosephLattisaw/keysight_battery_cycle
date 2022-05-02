@@ -1,5 +1,7 @@
 #include "keysight.hpp"
 
+#include <algorithm>
+
 #include "common.hpp"
 #include "logger.hpp"
 
@@ -16,7 +18,7 @@ using namespace keysight;
 
 Keysight::Keysight(boost::asio::io_service &io_service, ActiveCardsCallback ac_cb, ConnectionStatusCallback conn_cb, PortDoubleCallback pd_cb,
                    PortUint16Callback pu16_cb, LoadedProfilesCallback lp_cb, ProfilesStatusCallback ps_cb, ProfilesStatusCallback ss_cb,
-                   TimeStatusCallback ts_cb)
+                   TimeStatusCallback ts_cb, ProfilesStatusCallback cyc_cb)
     : io_service(io_service),
       cell_status_timer(io_service),
       active_cards_callback{ac_cb},
@@ -26,10 +28,12 @@ Keysight::Keysight(boost::asio::io_service &io_service, ActiveCardsCallback ac_c
       loaded_profiles_callback{lp_cb},
       profile_status_callback{ps_cb},
       slot_status_callback{ss_cb},
-      time_status_callback{ts_cb} {
+      time_status_callback{ts_cb},
+      cycles_status_callback{cyc_cb} {
     currently_loaded_profiles.fill("");
     current_profile_statuses.fill(0);
     current_seq_uptime.fill(0.0);
+    cycles_count.fill(0);
 }
 
 Keysight::~Keysight() { disconnect(); }
@@ -474,7 +478,12 @@ bool Keysight::get_cell_status() {
     auto res = get_cells_running_uptime();
     if (!res) {
         return res;
+    } else {
+        res = check_cells_sequence_rollover_and_failures();
+        if (!res) return res;
     }
+
+    cycles_status_callback(cycles_count);
 
     return true;
 }
@@ -848,6 +857,69 @@ void Keysight::log_data(std::uint32_t cell, std::uint32_t slot, double volts, do
     logging_files.at(slot)->flush();
 }
 
+bool Keysight::check_cells_sequence_rollover_and_failures() {
+    LOG_OUT << "checking cells seq rollover";
+    for (const auto &i : cells_being_run_map) {
+        std::string s1 = "(@";
+        for (auto k = 0; k < i.second.size(); k++) {
+            s1 += std::to_string(i.second.at(k));
+            if (k != i.second.size() - 1) s1 += ",";
+        }
+
+        std::string report = "STAT:CELL:REP? " + s1 + ")\n";
+        LOG_OUT << "getting report: " << report;
+
+#ifndef SOFTWARE_ONLY
+        auto status = viPrintf(session, report.c_str());
+        auto res = keysight::verify_vi_status(session, status, "sending report query", "There was a problem sendfing report error code: ");
+
+        if (res) {
+            ViChar report_res[65535];
+            status = viScanf(session, "%t", report_res);
+            res = keysight::verify_vi_status(session, status, "getting cell report", "There was a problem getting cell report error code: ");
+            LOG_OUT << "report: " << report_res;
+            if (res) {
+                status = viFlush(session, VI_READ_BUF);  // discards any read buf so next scan is fine
+                res = keysight::verify_vi_status(session, status, "flusing keysight buffer", "There was a problem flushing the keysight buffer");
+                if (res) {
+                    auto cell_rep = comma_delimiter(report_res);
+
+                    // check if they are all "OK"
+                    bool cell_rep_finished = true;
+                    for (auto t : cell_rep) {
+                        t.erase(std::remove_if(t.begin(), t.end(), ::isspace), t.end());
+                        if (t.compare("4") != 0) {
+                            LOG_OUT << "didnt match: " << t;
+                            cell_rep_finished = false;
+                            break;
+                        }
+                    }
+
+                    LOG_OUT << "cell rep finished: " << cell_rep_finished;
+
+                    if (cell_rep_finished && (successively_slots.at(i.first) == true)) {
+                        if (cells_being_run_map.find(i.first) != cells_being_run_map.end() &&
+                            cells_slots_being_run_map.find(i.first) != cells_slots_being_run_map.end()) {
+                            auto c = cells_being_run_map.at(i.first);
+                            auto slot = cells_slots_being_run_map.at(i.first);
+                            start_sequence(i.first, slot, c, true);
+                            cycles_count[i.first]++;
+                        }
+                    }
+
+                } else
+                    return false;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+#endif
+    }
+    return true;
+}
+
 bool Keysight::get_cells_running_uptime() {
     for (const auto &i : cells_being_run_map) {
         std::string s1 = "(@";
@@ -935,6 +1007,7 @@ void Keysight::start_sequence(std::uint32_t test, std::uint32_t slot, std::vecto
 
     start_logging(cells);
     cells_being_run_map[test] = cells;
+    cells_slots_being_run_map[test] = slot;
 }
 
 void Keysight::stop_sequence(std::uint32_t test, std::uint32_t slot, std::vector<std::uint32_t> cells) {
@@ -950,7 +1023,7 @@ void Keysight::stop_sequence(std::uint32_t test, std::uint32_t slot, std::vector
 
     if (test < slot_status.size()) {
         slot_status[test] = 0;
-        successively_slots[test] = 0;
+        successively_slots[test] = false;
         slot_status_callback(slot_status);
     }
 
@@ -968,6 +1041,10 @@ void Keysight::stop_sequence(std::uint32_t test, std::uint32_t slot, std::vector
 
     if (cells_being_run_map.find(test) != cells_being_run_map.end()) {
         cells_being_run_map.erase(test);
+    }
+
+    if (cells_slots_being_run_map.find(test) != cells_slots_being_run_map.end()) {
+        cells_slots_being_run_map.erase(test);
     }
 }
 

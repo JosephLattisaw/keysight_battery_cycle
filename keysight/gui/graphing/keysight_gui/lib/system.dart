@@ -84,6 +84,7 @@ class SystemPage extends StatelessWidget {
     final loadedProfiles = context.select((KeysightCAPI k) => k.loadedProfiles);
     final slotStatuses = context.select((KeysightCAPI k) => k.slotStatuses);
     final timeStatuses = context.select((KeysightCAPI k) => k.timeStatuses);
+    final cycleStatuses = context.select((KeysightCAPI k) => k.cycleStatuses);
 
     print("time statuses: $timeStatuses");
 
@@ -202,7 +203,7 @@ class SystemPage extends StatelessWidget {
                     ),
                     DataCell(
                       Text(
-                        "1",
+                        cycleStatuses.elementAt(index).toString(),
                         style: const TextStyle(color: Colors.white),
                       ),
                     ),

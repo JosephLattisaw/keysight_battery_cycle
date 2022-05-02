@@ -14,7 +14,8 @@ class Keysight {
 public:
     Keysight(boost::asio::io_service &io_service, ActiveCardsCallback active_cards_callback, ConnectionStatusCallback connection_status_callback,
              PortDoubleCallback port_double_callback, PortUint16Callback port_uint16_callback, LoadedProfilesCallback loaded_profiles_callback,
-             ProfilesStatusCallback profile_status_callback, ProfilesStatusCallback slot_status_callback, TimeStatusCallback time_status_callback);
+             ProfilesStatusCallback profile_status_callback, ProfilesStatusCallback slot_status_callback, TimeStatusCallback time_status_callback,
+             ProfilesStatusCallback cycles_status_callback);
     ~Keysight();
 
     void connect();
@@ -45,6 +46,7 @@ private:
     bool get_cap_whr(int card_number);
     bool get_cell_verbose(int card_number);
     bool get_cells_running_uptime();
+    bool check_cells_sequence_rollover_and_failures();
     std::vector<int> get_catalog();
 
     std::string get_mode(int value);
@@ -78,6 +80,7 @@ private:
     map_uint16_data_type cell_run_state_data;
     map_uint16_data_type cell_run_status_data;
     std::map<std::uint32_t, std::vector<std::uint32_t>> cells_being_run_map;
+    std::map<std::uint32_t, std::uint32_t> cells_slots_being_run_map;
 
     boost::asio::io_service &io_service;
     boost::asio::steady_timer cell_status_timer;
@@ -91,6 +94,7 @@ private:
     ProfilesStatusCallback profile_status_callback;
     ProfilesStatusCallback slot_status_callback;
     TimeStatusCallback time_status_callback;
+    ProfilesStatusCallback cycles_status_callback;
 
     std::vector<std::vector<std::string>> last_valid_verbose_response;
 
@@ -98,6 +102,7 @@ private:
     profile_status_type current_profile_statuses;
     profile_status_type successively_slots;
     profile_status_type slot_status;
+    profile_status_type cycles_count;
     uptime_time_type current_seq_uptime;
 
     const std::string VISA_ADDRESS_BT2203A = "USB0::0x008D::0x3502::MY58000516::0::INSTR";  // usb address of battery cycler

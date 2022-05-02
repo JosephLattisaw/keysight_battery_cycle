@@ -15,7 +15,8 @@ class Backend {
 public:
     Backend(boost::asio::io_service &io_service, ActiveCardsCallback active_cards_callback, ConnectionStatusCallback connection_status_callback,
             PortDoubleCallback port_double_callback, PortUint16Callback port_uint16_callback, LoadedProfilesCallback loaded_profiles_callback,
-            ProfilesStatusCallback profiles_status_callback, ProfilesStatusCallback slot_status_callback, TimeStatusCallback time_status_callback);
+            ProfilesStatusCallback profiles_status_callback, ProfilesStatusCallback slot_status_callback, TimeStatusCallback time_status_callback,
+            ProfilesStatusCallback cycles_status_callback);
     ~Backend();
 
     // TODO find out if we can make this private
@@ -24,6 +25,7 @@ public:
     void loaded_profiles_request(loaded_profile_type profiles);
     void profile_statuses_request(profile_status_type statuses);
     void slot_statuses_request(profile_status_type statuses);
+    void cycle_statuses_request(profile_status_type statuses);
     void time_statuses_request(uptime_time_type statuses);
     void port_double_data_request(PortTypes::port_double_data_type data_type, map_double_data_type data);
     void port_uint16_data_request(PortTypes::port_uint16_data_type data_type, map_uint16_data_type data);
@@ -56,6 +58,7 @@ private:
     LoadedProfilesCallback loaded_profiles_callback;
     ProfilesStatusCallback profiles_status_callback;
     ProfilesStatusCallback slot_status_callback;
+    ProfilesStatusCallback cycles_status_callback;
     TimeStatusCallback time_status_callback;
 };
 

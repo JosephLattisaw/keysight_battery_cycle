@@ -56,6 +56,18 @@
                     "voltage": "4.2000000000000002"
                 }
             }
+        },
+        "rest sequence": {
+            "serial_number": "",
+            "comments": "",
+            "steps": {
+                "0": {
+                    "mode": "0",
+                    "seconds": "10",
+                    "current": "0.10000000000000001",
+                    "voltage": "2"
+                }
+            }
         }
     }
 }

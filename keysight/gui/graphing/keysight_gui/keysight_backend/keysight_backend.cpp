@@ -140,7 +140,8 @@ void create_backend(bool using_dart = false, std::int64_t load_sequences_port = 
                     std::int64_t load_steps_port = 0, std::int64_t load_tests_port = 0, std::int64_t active_cards_port = 0,
                     std::int64_t keysight_connection_port = 0, std::int64_t keysight_double_port = 0, std::int64_t cell_state_port = 0,
                     std::int64_t cell_status_port = 0, std::int64_t keysight_uint16_port = 0, std::int64_t loaded_profiles_port = 0,
-                    std::int64_t profile_statuses_port = 0, std::int64_t slot_statuses_port = 0, std::int64_t time_statuses_port = 0) {
+                    std::int64_t profile_statuses_port = 0, std::int64_t slot_statuses_port = 0, std::int64_t time_statuses_port = 0,
+                    std::int64_t cycle_statuses_port = 0) {
     if (!backend)
         backend = std::make_shared<Backend>(
             io_service,
@@ -207,6 +208,13 @@ void create_backend(bool using_dart = false, std::int64_t load_sequences_port = 
                     std::vector<double> data;
                     for (auto i : statuses) data.push_back(i);
                     post_data_object(time_statuses_port, data);
+                }
+            },
+            [&, using_dart, cycle_statuses_port](profile_status_type statuses) {
+                if (using_dart) {
+                    std::vector<std::uint16_t> data;
+                    for (auto i : statuses) data.push_back(i);
+                    post_data_object(cycle_statuses_port, data);
                 }
             });
     else
@@ -457,6 +465,9 @@ int main(int argc, char **argv) {
 
                     },
                     [&](uptime_time_type) {
+
+                    },
+                    [&](profile_status_type statuses) {
 
                     });
                 io_service.run();
