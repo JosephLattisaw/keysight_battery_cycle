@@ -36,6 +36,8 @@ class TestTabbedWidget extends HookWidget {
 
     final dropdownStatus = useState(0);
 
+    final successivelyCheckbox = useState(false);
+
     print(
         "seq started $sequenceStarted, canstart ${canStartSequence.value}, (${profileStatuses.elementAt(dropdownStatus.value)}");
 
@@ -43,6 +45,21 @@ class TestTabbedWidget extends HookWidget {
       padding: const EdgeInsets.only(top: 8),
       child: Column(
         children: [
+          Visibility(
+            child: CheckboxListTile(
+              title: Text(
+                "Run Sequence Successively",
+                style: TextStyle(color: Colors.white),
+              ),
+              value: successivelyCheckbox.value,
+              onChanged: (newValue) {
+                successivelyCheckbox.value = newValue ?? false;
+              },
+              controlAffinity:
+                  ListTileControlAffinity.leading, //  <-- leading Checkbox
+            ),
+            visible: !sequenceStarted,
+          ),
           Expanded(
             child: Padding(
               padding: const EdgeInsets.all(8.0),

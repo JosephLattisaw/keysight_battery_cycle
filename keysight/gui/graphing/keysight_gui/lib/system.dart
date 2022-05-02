@@ -185,7 +185,7 @@ class SystemPage extends StatelessWidget {
                         onPressed: () => RouterUtility.routerUtility(
                             context,
                             MeasurementTableScaffold(
-                              sequenceNumber: 0,
+                              sequenceNumber: index,
                             )),
                       ),
                     ),
