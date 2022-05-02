@@ -14,7 +14,7 @@ class MeasurementWidget extends HookWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
+          /*Container(
             color: Colors.black,
             child: Padding(
               padding: const EdgeInsets.all(8.0),
@@ -73,7 +73,7 @@ class MeasurementWidget extends HookWidget {
               ),
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 12),*/
           const Expanded(child: MeasurementTableWidget()),
         ],
       ),
