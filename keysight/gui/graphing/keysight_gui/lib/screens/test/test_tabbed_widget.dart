@@ -43,7 +43,7 @@ class TestTabbedWidget extends HookWidget {
       padding: const EdgeInsets.only(top: 8),
       child: Column(
         children: [
-          Padding(
+          /*Padding(
             padding:
                 const EdgeInsets.only(left: 20, top: 8, right: 8, bottom: 8),
             child: Row(
@@ -74,7 +74,7 @@ class TestTabbedWidget extends HookWidget {
                 )
               ],
             ),
-          ),
+          ),*/
           Expanded(
             child: Padding(
               padding: const EdgeInsets.all(8.0),
