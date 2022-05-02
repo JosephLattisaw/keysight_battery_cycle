@@ -820,6 +820,7 @@ void Keysight::stop_logging(std::vector<std::uint32_t> cells) {
     }
 
     logging_files.clear();
+    logging_map.clear();
 }
 
 void Keysight::log_data(std::uint32_t cell, std::uint32_t slot, double volts, double current, double cap_ahr, double cap_whr) {
@@ -888,7 +889,8 @@ void Keysight::stop_sequence(std::uint32_t test, std::uint32_t slot, std::vector
         if (i != cells.size() - 1) s1 += ",";
     }
 
-    std::string abort = "CELL:ABORT " + s1 + ")," + std::to_string(slot + 1) + "\n";
+    std::string abort = "CELL:ABORT " + s1 + ")\n";
+    LOG_OUT << "sending command: " << abort;
 
     if (test < slot_status.size()) {
         slot_status[test] = 0;
