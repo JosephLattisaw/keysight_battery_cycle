@@ -45,15 +45,36 @@ class SystemPage extends StatelessWidget {
     "0d 0hr 0m 10s",
   ];
 
+  String getSlotStatusText(int value) {
+    switch (value) {
+      case 1:
+        return "FAILED";
+      case 2:
+        return "RUNNING";
+      default:
+        return "NOT RUNNING";
+    }
+  }
+
+  Color getSlotColor(int value) {
+    switch (value) {
+      case 1:
+        return Colors.red;
+      case 2:
+        return Colors.green;
+      default:
+        return Colors.white;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final sequencesStartedSlots =
         context.select((KeysightCAPI k) => k.sequencesStartedSlots);
     final loadedProfiles = context.select((KeysightCAPI k) => k.loadedProfiles);
+    final slotStatuses = context.select((KeysightCAPI k) => k.slotStatuses);
 
-    print("sequences started: ${sequencesStartedSlots.elementAt(0)}");
-    //print(
-    //  "sequences started: ${loadedProfiles.elementAt(sequencesStartedSlots.elementAt(0))}");
+    print("slot statuses: $slotStatuses");
 
     return Padding(
       padding: const EdgeInsets.all(8.0),
@@ -145,14 +166,12 @@ class SystemPage extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               Text(
-                                statuses.elementAt(index),
-                                style: TextStyle(
-                                    color: (statuses1.elementAt(index) > 0)
-                                        ? (statuses1.elementAt(index) == 1
-                                            ? Colors.green
-                                            : Colors.red)
-                                        : Colors.white),
-                              ),
+                                  getSlotStatusText(
+                                      slotStatuses.elementAt(index)),
+                                  style: TextStyle(
+                                    color: getSlotColor(
+                                        slotStatuses.elementAt(index)),
+                                  )),
                             ],
                           ),
                         ],

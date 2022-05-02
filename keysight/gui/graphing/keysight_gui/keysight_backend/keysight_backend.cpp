@@ -140,7 +140,7 @@ void create_backend(bool using_dart = false, std::int64_t load_sequences_port = 
                     std::int64_t load_steps_port = 0, std::int64_t load_tests_port = 0, std::int64_t active_cards_port = 0,
                     std::int64_t keysight_connection_port = 0, std::int64_t keysight_double_port = 0, std::int64_t cell_state_port = 0,
                     std::int64_t cell_status_port = 0, std::int64_t keysight_uint16_port = 0, std::int64_t loaded_profiles_port = 0,
-                    std::int64_t profile_statuses_port = 0) {
+                    std::int64_t profile_statuses_port = 0, std::int64_t slot_statuses_port = 0) {
     if (!backend)
         backend = std::make_shared<Backend>(
             io_service,
@@ -194,6 +194,13 @@ void create_backend(bool using_dart = false, std::int64_t load_sequences_port = 
                     for (auto i : statuses) data.push_back(i);
                     post_data_object(profile_statuses_port, data);
                 }
+            },
+            [&, using_dart, slot_statuses_port](profile_status_type statuses) {
+                if (using_dart) {
+                    std::vector<std::uint16_t> data;
+                    for (auto i : statuses) data.push_back(i);
+                    post_data_object(slot_statuses_port, data);
+                }
             });
     else
         print_backend_doesnt_exist_error();
@@ -228,9 +235,14 @@ void load_profile(const char *name, std::uint32_t slot) {
     }
 }
 
-void start_sequence(std::uint32_t test, std::uint32_t slot) {
+void start_sequence(std::uint32_t test, std::uint32_t slot, bool successively) {
     LOG_OUT << "load sequence called on: " << test << ", " << slot;
-    if (backend) backend->start_sequence(test, slot, selected_cells);
+    if (backend) backend->start_sequence(test, slot, selected_cells, successively);
+}
+
+void stop_sequence(std::uint32_t test, std::uint32_t slot) {
+    LOG_OUT << "stop sequence called on: " << test << ", " << slot;
+    if (backend) backend->stop_sequence(test, slot, selected_cells);
 }
 
 void run_service() {
@@ -429,6 +441,9 @@ int main(int argc, char **argv) {
 
                     },
                     [&](loaded_profile_type profiles) {
+
+                    },
+                    [&](profile_status_type statuses) {
 
                     },
                     [&](profile_status_type statuses) {

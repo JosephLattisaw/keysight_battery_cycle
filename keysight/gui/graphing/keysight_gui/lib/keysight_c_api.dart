@@ -146,6 +146,10 @@ class KeysightCAPI extends ChangeNotifier {
         .lookup<ffi.NativeFunction<StartSequenceFFI>>("start_sequence")
         .asFunction();
 
+    stopSequence = lib
+        .lookup<ffi.NativeFunction<StopSequenceFFI>>("stop_sequence")
+        .asFunction();
+
     connectKeysight = lib
         .lookup<ffi.NativeFunction<VoidFunctionFFI>>("connect_keysight")
         .asFunction();
@@ -192,6 +196,15 @@ class KeysightCAPI extends ChangeNotifier {
       });
 
     int profileStatusesNativePort = profileStatusesPort.sendPort.nativePort;
+
+    ReceivePort slotStatusesPort = ReceivePort()
+      ..listen((data) {
+        slotStatuses = List<int>.from(data);
+
+        notifyListeners();
+      });
+
+    int slotStatusesNativePort = slotStatusesPort.sendPort.nativePort;
 
     ReceivePort finishLoadSequencesPort = ReceivePort()
       ..listen((data) {
@@ -394,7 +407,8 @@ class KeysightCAPI extends ChangeNotifier {
         cellStatusNativePort,
         keysightUint16NativePort,
         loadProfilesNativePort,
-        profileStatusesNativePort);
+        profileStatusesNativePort,
+        slotStatusesNativePort);
     _runService();
 
     final sequences = getSequences();
@@ -494,6 +508,7 @@ class KeysightCAPI extends ChangeNotifier {
   List<String> tempLoadedProfiles = List<String>.empty(growable: true);
   List<String> loadedProfiles = List<String>.filled(8, "");
   List<int> profilesStatuses = List<int>.filled(8, 0);
+  List<int> slotStatuses = List<int>.filled(8, 0);
 
   final List<bool> sequencesStarted = List.generate(8, (index) => false);
   final List<int> sequencesStartedSlots = List.generate(8, (index) => -1);
@@ -551,7 +566,7 @@ class KeysightCAPI extends ChangeNotifier {
 
   bool keysightConnectionStatus = false;
 
-  void setSequenceStarted(int index, int slot, bool value) {
+  void setSequenceStarted(int index, int slot, bool value, bool successive) {
     if (index < sequencesStarted.length) {
       sequencesStarted[index] = value;
 
@@ -578,8 +593,9 @@ class KeysightCAPI extends ChangeNotifier {
       }
 
       if (value) {
-        startSequence(index, slot);
-      }
+        startSequence(index, slot, successive);
+      } else
+        stopSequence(index, slot);
 
       notifyListeners();
     }
@@ -626,6 +642,7 @@ class KeysightCAPI extends ChangeNotifier {
   late SequenceRemoveC sequenceRemove;
   late LoadProfileC loadProfile;
   late StartSequenceC startSequence;
+  late StopSequenceC stopSequence;
   late VoidFunctionC connectKeysight;
   late VoidFunctionC disconnectKeysight;
   late SequencesC getSequences;
@@ -659,7 +676,8 @@ typedef CreateBackendFFI = ffi.Void Function(
     ffi.Int64 cellStatusPort,
     ffi.Int64 keysightUint16Port,
     ffi.Int64 loadedProfilesPort,
-    ffi.Int64 profileStatusesPort);
+    ffi.Int64 profileStatusesPort,
+    ffi.Int64 slotStatusesPort);
 
 typedef CreateBackendC = void Function(
     int usingDart,
@@ -674,7 +692,8 @@ typedef CreateBackendC = void Function(
     int cellStatusPort,
     int keysightUint16Port,
     int loadedProfilesPort,
-    int profileStatusesPort);
+    int profileStatusesPort,
+    int slotStatusesPort);
 
 //start save sequence
 typedef StartSaveSequenceFFI = ffi.Void Function(ffi.Pointer<Utf8> name,
@@ -705,8 +724,12 @@ typedef LoadProfileFFI = ffi.Void Function(
     ffi.Pointer<Utf8> name, ffi.Uint32 slot);
 typedef LoadProfileC = void Function(ffi.Pointer<Utf8> name, int slot);
 
-typedef StartSequenceFFI = ffi.Void Function(ffi.Uint32 test, ffi.Uint32 slot);
-typedef StartSequenceC = void Function(int test, int slot);
+typedef StartSequenceFFI = ffi.Void Function(
+    ffi.Uint32 test, ffi.Uint32 slot, ffi.Bool successively);
+typedef StartSequenceC = void Function(int test, int slot, bool successively);
+
+typedef StopSequenceFFI = ffi.Void Function(ffi.Uint32 test, ffi.Uint32 slot);
+typedef StopSequenceC = void Function(int test, int slot);
 
 typedef SelectCellFFI = ffi.Void Function(ffi.Uint32 cell);
 typedef SelectCellC = void Function(int cell);

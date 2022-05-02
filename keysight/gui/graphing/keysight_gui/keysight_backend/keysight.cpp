@@ -15,7 +15,7 @@ extern ViSession session;
 using namespace keysight;
 
 Keysight::Keysight(boost::asio::io_service &io_service, ActiveCardsCallback ac_cb, ConnectionStatusCallback conn_cb, PortDoubleCallback pd_cb,
-                   PortUint16Callback pu16_cb, LoadedProfilesCallback lp_cb, ProfilesStatusCallback ps_cb)
+                   PortUint16Callback pu16_cb, LoadedProfilesCallback lp_cb, ProfilesStatusCallback ps_cb, ProfilesStatusCallback ss_cb)
     : io_service(io_service),
       cell_status_timer(io_service),
       active_cards_callback{ac_cb},
@@ -23,7 +23,8 @@ Keysight::Keysight(boost::asio::io_service &io_service, ActiveCardsCallback ac_c
       port_double_callback{pd_cb},
       port_uint16_callback{pu16_cb},
       loaded_profiles_callback{lp_cb},
-      profile_status_callback{ps_cb} {
+      profile_status_callback{ps_cb},
+      slot_status_callback{ss_cb} {
     currently_loaded_profiles.fill("");
     current_profile_statuses.fill(0);
 }
@@ -455,8 +456,6 @@ bool Keysight::get_cell_status() {
             cell_current_data[i] = current;
             cell_run_state_data[i] = states;
             cell_run_status_data[i] = statuses;
-
-            LOG_OUT << "volts size: " << volts.size();
         }
     }
 
@@ -797,6 +796,7 @@ std::string Keysight::get_test_type(int value) {
 }
 
 void Keysight::start_logging(std::vector<std::uint32_t> cells) {
+    // TODO this is not the right way to log files
     std::ofstream csv_file;
     auto c = new std::ofstream;
     logging_files.push_back(c);
@@ -807,6 +807,19 @@ void Keysight::start_logging(std::vector<std::uint32_t> cells) {
     for (const auto &i : cells) {
         logging_map[i] = logging_files.size() - 1;
     }
+}
+
+void Keysight::stop_logging(std::vector<std::uint32_t> cells) {
+    // TODO this is not the right way to stop logging files
+    // close all the files and delete all the file pointers
+    for (auto i : logging_files) {
+        if (i) {
+            i->close();
+            delete i;
+        }
+    }
+
+    logging_files.clear();
 }
 
 void Keysight::log_data(std::uint32_t cell, std::uint32_t slot, double volts, double current, double cap_ahr, double cap_whr) {
@@ -826,7 +839,7 @@ void Keysight::log_data(std::uint32_t cell, std::uint32_t slot, double volts, do
     logging_files.at(slot)->flush();
 }
 
-void Keysight::start_sequence(std::uint32_t test, std::uint32_t slot, std::vector<std::uint32_t> cells) {
+void Keysight::start_sequence(std::uint32_t test, std::uint32_t slot, std::vector<std::uint32_t> cells, bool successively) {
     std::string s1 = "(@";
 
     for (auto i = 0; i < cells.size(); i++) {
@@ -841,7 +854,9 @@ void Keysight::start_sequence(std::uint32_t test, std::uint32_t slot, std::vecto
     LOG_OUT << "init cells: " << init;
 
     if (test < slot_status.size()) {
-        slot_status[test] = slot + 1;
+        slot_status[test] = 2;
+        successively_slots[test] = successively;
+        slot_status_callback(slot_status);
     }
 
 #ifndef SOFTWARE_ONLY
@@ -863,6 +878,35 @@ void Keysight::start_sequence(std::uint32_t test, std::uint32_t slot, std::vecto
 #endif
 
     start_logging(cells);
+}
+
+void Keysight::stop_sequence(std::uint32_t test, std::uint32_t slot, std::vector<std::uint32_t> cells) {
+    std::string s1 = "(@";
+
+    for (auto i = 0; i < cells.size(); i++) {
+        s1 += std::to_string(cells.at(i));
+        if (i != cells.size() - 1) s1 += ",";
+    }
+
+    std::string abort = "CELL:ABORT " + s1 + ")," + std::to_string(slot + 1) + "\n";
+
+    if (test < slot_status.size()) {
+        slot_status[test] = 0;
+        successively_slots[test] = 0;
+        slot_status_callback(slot_status);
+    }
+
+#ifndef SOFTWARE_ONLY
+    auto status = viPrintf(session, abort.c_str());
+    auto res = keysight::verify_vi_status(session, status, "sending enab", "There was a problem enabling cells error code: ");
+
+    if (!res) {
+        disconnect();
+        return;
+    }
+#endif
+
+    stop_logging(cells);
 }
 
 void Keysight::load_sequence(std::string name, int slot, sequence_step_vector steps, sequence_test_map tests) {

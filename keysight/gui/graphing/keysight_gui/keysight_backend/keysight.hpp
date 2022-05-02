@@ -14,14 +14,15 @@ class Keysight {
 public:
     Keysight(boost::asio::io_service &io_service, ActiveCardsCallback active_cards_callback, ConnectionStatusCallback connection_status_callback,
              PortDoubleCallback port_double_callback, PortUint16Callback port_uint16_callback, LoadedProfilesCallback loaded_profiles_callback,
-             ProfilesStatusCallback profile_status_callback);
+             ProfilesStatusCallback profile_status_callback, ProfilesStatusCallback slot_status_callback);
     ~Keysight();
 
     void connect();
     void disconnect();
 
     void load_sequence(std::string name, int slot, sequence_step_vector steps, sequence_test_map tests);
-    void start_sequence(std::uint32_t test, std::uint32_t slot, std::vector<std::uint32_t> cells);
+    void start_sequence(std::uint32_t test, std::uint32_t slot, std::vector<std::uint32_t> cells, bool successfully);
+    void stop_sequence(std::uint32_t test, std::uint32_t slot, std::vector<std::uint32_t> cells);
 
 private:
     // opening visa sessions
@@ -54,11 +55,11 @@ private:
     void start_polling_cell_status();
 
     void start_logging(std::vector<std::uint32_t> cells);
+    void stop_logging(std::vector<std::uint32_t> cells);
     void log_data(std::uint32_t cell, std::uint32_t slot, double volts, double current, double cap_ahr, double cap_whr);
 
     std::map<std::uint32_t, std::uint32_t> logging_map;
     std::vector<std::ofstream *> logging_files;
-    std::vector<std::uint32_t> slot_status;
 
     void update_connection_status(bool flag);
 
@@ -86,11 +87,14 @@ private:
     ConnectionStatusCallback connection_status_callback;
     LoadedProfilesCallback loaded_profiles_callback;
     ProfilesStatusCallback profile_status_callback;
+    ProfilesStatusCallback slot_status_callback;
 
     std::vector<std::vector<std::string>> last_valid_verbose_response;
 
     loaded_profile_type currently_loaded_profiles;
     profile_status_type current_profile_statuses;
+    profile_status_type successively_slots;
+    profile_status_type slot_status;
 
     const std::string VISA_ADDRESS_BT2203A = "USB0::0x008D::0x3502::MY58000516::0::INSTR";  // usb address of battery cycler
 

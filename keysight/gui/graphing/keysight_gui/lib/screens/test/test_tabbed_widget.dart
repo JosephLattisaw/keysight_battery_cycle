@@ -157,8 +157,11 @@ class TestTabbedWidget extends HookWidget {
                           (sequenceStarted)
                       ? () {
                           Future.delayed(Duration.zero, () async {
-                            cApi.setSequenceStarted(sequenceNumber,
-                                dropdownStatus.value, !sequenceStarted);
+                            cApi.setSequenceStarted(
+                                sequenceNumber,
+                                dropdownStatus.value,
+                                !sequenceStarted,
+                                successivelyCheckbox.value);
                           });
                         }
                       : null,
