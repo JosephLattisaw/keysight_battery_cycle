@@ -21,7 +21,7 @@ public:
     void disconnect();
 
     void load_sequence(std::string name, int slot, sequence_step_vector steps, sequence_test_map tests);
-    void start_sequence(std::uint32_t slot, std::vector<std::uint32_t> cells);
+    void start_sequence(std::uint32_t test, std::uint32_t slot, std::vector<std::uint32_t> cells);
 
 private:
     // opening visa sessions
@@ -58,6 +58,7 @@ private:
 
     std::map<std::uint32_t, std::uint32_t> logging_map;
     std::vector<std::ofstream *> logging_files;
+    std::vector<std::uint32_t> slot_status;
 
     void update_connection_status(bool flag);
 

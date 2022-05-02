@@ -791,7 +791,7 @@ void Keysight::log_data(std::uint32_t cell, std::uint32_t slot, double volts, do
     logging_files.at(slot)->flush();
 }
 
-void Keysight::start_sequence(std::uint32_t slot, std::vector<std::uint32_t> cells) {
+void Keysight::start_sequence(std::uint32_t test, std::uint32_t slot, std::vector<std::uint32_t> cells) {
     std::string s1 = "(@";
 
     for (auto i = 0; i < cells.size(); i++) {
@@ -804,6 +804,10 @@ void Keysight::start_sequence(std::uint32_t slot, std::vector<std::uint32_t> cel
 
     LOG_OUT << "enabled cells: " << enab;
     LOG_OUT << "init cells: " << init;
+
+    if (test < slot_status.size()) {
+        slot_status[test] = slot + 1;
+    }
 
 #ifndef SOFTWARE_ONLY
     auto status = viPrintf(session, enab.c_str());

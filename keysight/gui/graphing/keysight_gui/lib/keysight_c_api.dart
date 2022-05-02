@@ -557,7 +557,7 @@ class KeysightCAPI extends ChangeNotifier {
       }
 
       if (value) {
-        startSequence(slot);
+        startSequence(index, slot);
       }
 
       notifyListeners();
@@ -684,8 +684,8 @@ typedef LoadProfileFFI = ffi.Void Function(
     ffi.Pointer<Utf8> name, ffi.Uint32 slot);
 typedef LoadProfileC = void Function(ffi.Pointer<Utf8> name, int slot);
 
-typedef StartSequenceFFI = ffi.Void Function(ffi.Uint32 slot);
-typedef StartSequenceC = void Function(int slot);
+typedef StartSequenceFFI = ffi.Void Function(ffi.Uint32 test, ffi.Uint32 slot);
+typedef StartSequenceC = void Function(int test, int slot);
 
 typedef SelectCellFFI = ffi.Void Function(ffi.Uint32 cell);
 typedef SelectCellC = void Function(int cell);

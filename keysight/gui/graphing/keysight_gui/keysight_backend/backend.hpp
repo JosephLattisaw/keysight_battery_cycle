@@ -32,7 +32,7 @@ public:
     void disconnect_keysight();
 
     void load_profile(std::string name, int slot, sequence_step_vector steps, sequence_test_map tests);
-    void start_sequence(std::uint32_t slot, std::vector<std::uint32_t> cells);
+    void start_sequence(std::uint32_t test, std::uint32_t slot, std::vector<std::uint32_t> cells);
 
 private:
     // thread management

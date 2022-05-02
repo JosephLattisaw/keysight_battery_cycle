@@ -228,9 +228,9 @@ void load_profile(const char *name, std::uint32_t slot) {
     }
 }
 
-void start_sequence(std::uint32_t slot) {
-    LOG_OUT << "load sequence called on: " << slot;
-    if (backend) backend->start_sequence(slot, selected_cells);
+void start_sequence(std::uint32_t test, std::uint32_t slot) {
+    LOG_OUT << "load sequence called on: " << test << ", " << slot;
+    if (backend) backend->start_sequence(test, slot, selected_cells);
 }
 
 void run_service() {
