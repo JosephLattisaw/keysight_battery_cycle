@@ -353,6 +353,18 @@ class KeysightCAPI extends ChangeNotifier {
                 currentStepIds[index] = finishedData;
               }
               break;
+            case 2:
+              currentStateIds = List.from(currentStateIds);
+              if (index < currentStateIds.length) {
+                currentStateIds[index] = dataList;
+              }
+              break;
+            case 3:
+              currentStatusIds = List.from(currentStatusIds);
+              if (index < currentStatusIds.length) {
+                currentStatusIds[index] = dataList;
+              }
+              break;
             default:
           }
 
@@ -534,6 +546,8 @@ class KeysightCAPI extends ChangeNotifier {
   List<List<String>> currentValues = List.from(cellsDefaultNan);
   List<List<String>> currentSequenceIds = List.from(cellsDefaultNa);
   List<List<String>> currentStepIds = List.from(cellsDefaultNa);
+  List<List<int>> currentStateIds = List.from(cellsDefaultNbr);
+  List<List<int>> currentStatusIds = List.from(cellsDefaultNbr);
 
   bool keysightConnectionStatus = false;
 
@@ -702,3 +716,5 @@ final List<List<String>> cellsDefaultNan =
     List.generate(8, (i) => List.generate(32, (k) => "NaN"));
 final List<List<String>> cellsDefaultNa =
     List.generate(8, (i) => List.generate(32, (k) => "N/A"));
+final List<List<int>> cellsDefaultNbr =
+    List.generate(8, (i) => List.generate(32, (k) => 0));

@@ -73,6 +73,8 @@ private:
     map_double_data_type cell_current_data;
     map_uint16_data_type cell_sequence_id_data;
     map_uint16_data_type cell_step_id_data;
+    map_uint16_data_type cell_run_state_data;
+    map_uint16_data_type cell_run_status_data;
 
     boost::asio::io_service &io_service;
     boost::asio::steady_timer cell_status_timer;

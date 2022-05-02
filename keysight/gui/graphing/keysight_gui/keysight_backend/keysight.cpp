@@ -396,19 +396,38 @@ bool Keysight::get_cell_status() {
             std::vector<std::uint16_t> steps;
             std::vector<double> volts;
             std::vector<double> current;
+            std::vector<std::uint16_t> states;
+            std::vector<std::uint16_t> statuses;
             for (auto k = 0; k < last_valid_verbose_response.size(); k++) {
                 auto x = last_valid_verbose_response.at(k);
                 if (x.size() == 10) {
-                    // TODO 0 = state
+                    // 0 = state
                     // 1 = sequence id
                     // 2 = step id
                     // 3 = volts
                     // 4 = amps
-                    // TODO 5 = cellStat
+                    // 5 = cellStat
                     // TODO 6 = testId
                     // TODO 7 = testType
                     // TODO 8 = expLim
                     // TODO 9 = meadLim
+                    if (x.at(0).compare("RUNNING") == 0)
+                        states.push_back(2);
+                    else
+                        states.push_back(1);
+
+                    if (x.at(0).compare("NEXT") == 0) {
+                        statuses.push_back(5);
+                    } else if (x.at(0).compare("ABORTED") == 0) {
+                        statuses.push_back(4);
+                    } else if (x.at(0).compare("FAIL") == 0) {
+                        statuses.push_back(3);
+                    } else if (x.at(0).compare("OK") == 0) {
+                        statuses.push_back(2);
+                    } else {
+                        statuses.push_back(1);
+                    }
+
                     sequences.push_back(std::stoi(x.at(1)));
                     steps.push_back(std::stoi(x.at(2)));
                     volts.push_back(std::stod(x.at(3)));
@@ -434,6 +453,8 @@ bool Keysight::get_cell_status() {
             cell_step_id_data[i] = steps;
             cell_voltage_data[i] = volts;
             cell_current_data[i] = current;
+            cell_run_state_data[i] = states;
+            cell_run_status_data[i] = statuses;
 
             LOG_OUT << "volts size: " << volts.size();
         }
@@ -445,6 +466,8 @@ bool Keysight::get_cell_status() {
     port_double_callback(PortTypes::port_double_data_type::CURRENT, cell_current_data);
     port_uint16_callback(PortTypes::port_uint16_data_type::SEQUENCE, cell_sequence_id_data);
     port_uint16_callback(PortTypes::port_uint16_data_type::STEP, cell_step_id_data);
+    port_uint16_callback(PortTypes::port_uint16_data_type::STATES, cell_run_state_data);
+    port_uint16_callback(PortTypes::port_uint16_data_type::STATUSES, cell_run_status_data);
 
     return true;
 }
@@ -645,6 +668,8 @@ bool Keysight::get_cell_verbose(int card_number) {
                                                 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31};
     std::vector<std::uint16_t> cell_step = {3,  2,  12, 33, 44, 5,  6,  7,  8,  9,  10, 11, 12, 13, 14, 15,
                                             16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31};
+    std::vector<std::uint16_t> cell_state = {0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1};
+    std::vector<std::uint16_t> cell_status = {0, 1, 2, 3, 4, 5, 0, 1, 2, 3, 4, 5, 0, 1, 2, 3, 4, 5, 0, 1, 2, 3, 4, 5, 0, 1, 2, 3, 4, 5, 0, 1};
 
     cell_voltage_data[0] = cell_voltage;
     cell_voltage_data[1] = cell_voltage;
@@ -665,6 +690,16 @@ bool Keysight::get_cell_verbose(int card_number) {
     cell_step_id_data[1] = cell_step;
     cell_step_id_data[2] = cell_step;
     port_uint16_callback(PortTypes::port_uint16_data_type::STEP, cell_step_id_data);
+
+    cell_run_state_data[0] = cell_state;
+    cell_run_state_data[0] = cell_state;
+    cell_run_state_data[0] = cell_state;
+    port_uint16_callback(PortTypes::port_uint16_data_type::STATES, cell_run_state_data);
+
+    cell_run_status_data[0] = cell_status;
+    cell_run_status_data[0] = cell_status;
+    cell_run_status_data[0] = cell_status;
+    port_uint16_callback(PortTypes::port_uint16_data_type::STATUSES, cell_run_status_data);
     return true;
 #endif
 }

@@ -69,6 +69,8 @@ enum port_string_data_type {
 enum port_uint16_data_type {
     SEQUENCE = 0,
     STEP = 1,
+    STATES = 2,
+    STATUSES = 3,
 };
 }  // namespace PortTypes
 

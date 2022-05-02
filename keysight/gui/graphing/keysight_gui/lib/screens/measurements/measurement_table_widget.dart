@@ -21,6 +21,8 @@ class MeasurementTableWidget extends HookWidget {
     final stepIds = context.select((KeysightCAPI k) => k.currentStepIds);
     final sequenceIds =
         context.select((KeysightCAPI k) => k.currentSequenceIds);
+    final stateIds = context.select((KeysightCAPI k) => k.currentStateIds);
+    final statusIds = context.select((KeysightCAPI k) => k.currentStatusIds);
 
     final tableSize = useState(0);
     final cellIndexing = useState(<List<int>>[]);
@@ -50,6 +52,54 @@ class MeasurementTableWidget extends HookWidget {
     } else {
       cellIndexing.value = cApi.getCellsSelected(sequenceNumber);
       setTableSize(cellIndexing.value.length);
+    }
+
+    String getStateText(int value) {
+      switch (value) {
+        case 1:
+          return "IDLE";
+          break;
+        case 2:
+          return "RUNNING";
+          break;
+        default:
+          return "N/A";
+      }
+    }
+
+    Color getStateColor(int value) {
+      switch (value) {
+        case 2:
+          return Colors.green;
+        default:
+          return Colors.white;
+      }
+    }
+
+    String getStatusText(int value) {
+      switch (value) {
+        case 1:
+          return "NONE";
+        case 2:
+          return "OK";
+        case 3:
+          return "FAIL";
+        case 4:
+          return "ABORTED";
+        case 5:
+          return "NEXT";
+        default:
+          return "N/A";
+      }
+    }
+
+    Color getStatusColor(int value) {
+      switch (value) {
+        case 3:
+          return Colors.red;
+        default:
+          return Colors.white;
+      }
     }
 
     return SingleChildScrollView(
@@ -164,14 +214,24 @@ class MeasurementTableWidget extends HookWidget {
               ),
               DataCell(
                 Text(
-                  "N/A",
-                  style: const TextStyle(color: Colors.white),
+                  getStateText(stateIds
+                      .elementAt(getModuleIndex(index))
+                      .elementAt(getCellIndex(index))),
+                  style: TextStyle(
+                      color: getStateColor(stateIds
+                          .elementAt(getModuleIndex(index))
+                          .elementAt(getCellIndex(index)))),
                 ),
               ),
               DataCell(
                 Text(
-                  "N/A",
-                  style: const TextStyle(color: Colors.white),
+                  getStatusText(statusIds
+                      .elementAt(getModuleIndex(index))
+                      .elementAt(getCellIndex(index))),
+                  style: TextStyle(
+                      color: getStatusColor(statusIds
+                          .elementAt(getModuleIndex(index))
+                          .elementAt(getCellIndex(index)))),
                 ),
               ),
               DataCell(
