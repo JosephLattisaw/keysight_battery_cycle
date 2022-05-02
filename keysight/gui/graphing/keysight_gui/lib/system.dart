@@ -45,6 +45,16 @@ class SystemPage extends StatelessWidget {
     "0d 0hr 0m 10s",
   ];
 
+  String getTimeString(double seconds) {
+    int secs = seconds.toInt();
+    int minutes = secs ~/ 60;
+    int hours = minutes ~/ 60;
+    int days = hours ~/ 24;
+
+    String res = "${days}d ${hours % 24}h ${minutes % 60}m ${secs % 60}s";
+    return res;
+  }
+
   String getSlotStatusText(int value) {
     switch (value) {
       case 1:
@@ -73,8 +83,9 @@ class SystemPage extends StatelessWidget {
         context.select((KeysightCAPI k) => k.sequencesStartedSlots);
     final loadedProfiles = context.select((KeysightCAPI k) => k.loadedProfiles);
     final slotStatuses = context.select((KeysightCAPI k) => k.slotStatuses);
+    final timeStatuses = context.select((KeysightCAPI k) => k.timeStatuses);
 
-    print("slot statuses: $slotStatuses");
+    print("time statuses: $timeStatuses");
 
     return Padding(
       padding: const EdgeInsets.all(8.0),
@@ -185,7 +196,7 @@ class SystemPage extends StatelessWidget {
                     ),
                     DataCell(
                       Text(
-                        times.elementAt(index),
+                        getTimeString(timeStatuses.elementAt(index)),
                         style: const TextStyle(color: Colors.white),
                       ),
                     ),

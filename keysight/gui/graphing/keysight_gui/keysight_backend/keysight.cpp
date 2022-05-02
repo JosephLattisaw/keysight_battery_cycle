@@ -15,7 +15,8 @@ extern ViSession session;
 using namespace keysight;
 
 Keysight::Keysight(boost::asio::io_service &io_service, ActiveCardsCallback ac_cb, ConnectionStatusCallback conn_cb, PortDoubleCallback pd_cb,
-                   PortUint16Callback pu16_cb, LoadedProfilesCallback lp_cb, ProfilesStatusCallback ps_cb, ProfilesStatusCallback ss_cb)
+                   PortUint16Callback pu16_cb, LoadedProfilesCallback lp_cb, ProfilesStatusCallback ps_cb, ProfilesStatusCallback ss_cb,
+                   TimeStatusCallback ts_cb)
     : io_service(io_service),
       cell_status_timer(io_service),
       active_cards_callback{ac_cb},
@@ -24,9 +25,11 @@ Keysight::Keysight(boost::asio::io_service &io_service, ActiveCardsCallback ac_c
       port_uint16_callback{pu16_cb},
       loaded_profiles_callback{lp_cb},
       profile_status_callback{ps_cb},
-      slot_status_callback{ss_cb} {
+      slot_status_callback{ss_cb},
+      time_status_callback{ts_cb} {
     currently_loaded_profiles.fill("");
     current_profile_statuses.fill(0);
+    current_seq_uptime.fill(0.0);
 }
 
 Keysight::~Keysight() { disconnect(); }
@@ -468,6 +471,11 @@ bool Keysight::get_cell_status() {
     port_uint16_callback(PortTypes::port_uint16_data_type::STATES, cell_run_state_data);
     port_uint16_callback(PortTypes::port_uint16_data_type::STATUSES, cell_run_status_data);
 
+    auto res = get_cells_running_uptime();
+    if (!res) {
+        return res;
+    }
+
     return true;
 }
 
@@ -840,6 +848,53 @@ void Keysight::log_data(std::uint32_t cell, std::uint32_t slot, double volts, do
     logging_files.at(slot)->flush();
 }
 
+bool Keysight::get_cells_running_uptime() {
+    for (const auto &i : cells_being_run_map) {
+        std::string s1 = "(@";
+        for (auto k = 0; k < i.second.size(); k++) {
+            s1 += std::to_string(i.second.at(k));
+            if (k != i.second.size() - 1) s1 += ",";
+        }
+
+        std::string time = "CELL:TIME? " + s1 + ")\n";
+        LOG_OUT << "getting uptime: " << time;
+
+#ifndef SOFTWARE_ONLY
+        auto status = viPrintf(session, time.c_str());
+        auto res = keysight::verify_vi_status(session, status, "sending cell time", "There was a problem sendfing cell time error code: ");
+
+        if (res) {
+            ViChar time_res[65535];
+            status = viScanf(session, "%t", time_res);
+            res = keysight::verify_vi_status(session, status, "getting cell time", "There was a problem getting cell time error code: ");
+            LOG_OUT << "uptime: " << time_res;
+            if (res) {
+                status = viFlush(session, VI_READ_BUF);  // discards any read buf so next scan is fine
+                res = keysight::verify_vi_status(session, status, "flusing keysight buffer", "There was a problem flushing the keysight buffer");
+                if (res) {
+                    auto times = comma_delimiter(time_res);
+                    double greatest_time = 0.0;
+                    for (const auto &t : times) {
+                        double current_time = std::stod(t);
+                        if (current_time > greatest_time) greatest_time = current_time;
+                    }
+                    current_seq_uptime[i.first] = greatest_time;
+
+                } else
+                    return false;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+
+#endif
+    }
+    time_status_callback(current_seq_uptime);
+    return true;
+}
+
 void Keysight::start_sequence(std::uint32_t test, std::uint32_t slot, std::vector<std::uint32_t> cells, bool successively) {
     std::string s1 = "(@";
 
@@ -879,6 +934,7 @@ void Keysight::start_sequence(std::uint32_t test, std::uint32_t slot, std::vecto
 #endif
 
     start_logging(cells);
+    cells_being_run_map[test] = cells;
 }
 
 void Keysight::stop_sequence(std::uint32_t test, std::uint32_t slot, std::vector<std::uint32_t> cells) {
@@ -909,6 +965,10 @@ void Keysight::stop_sequence(std::uint32_t test, std::uint32_t slot, std::vector
 #endif
 
     stop_logging(cells);
+
+    if (cells_being_run_map.find(test) != cells_being_run_map.end()) {
+        cells_being_run_map.erase(test);
+    }
 }
 
 void Keysight::load_sequence(std::string name, int slot, sequence_step_vector steps, sequence_test_map tests) {
