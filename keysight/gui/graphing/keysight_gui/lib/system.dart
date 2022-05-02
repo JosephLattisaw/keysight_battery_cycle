@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:keysight_gui/keysight_c_api.dart';
+import 'package:keysight_gui/router_utility.dart';
+import 'package:keysight_gui/screens/measurements/measurement_table_scaffold.dart';
 import 'package:keysight_gui/screens/measurements/measurement_widget.dart';
+import 'package:keysight_gui/screens/profile_sequence/add_sequence_step_widget.dart';
 import 'package:keysight_gui/screens/test/test_sequence_chart_tab.dart';
 import 'package:keysight_gui/tab_widget.dart';
 import 'package:provider/provider.dart';
@@ -179,7 +182,11 @@ class SystemPage extends StatelessWidget {
                           Icons.arrow_forward_rounded,
                           color: Colors.grey.shade800,
                         ),
-                        onPressed: () {},
+                        onPressed: () => RouterUtility.routerUtility(
+                            context,
+                            MeasurementTableScaffold(
+                              sequenceNumber: 0,
+                            )),
                       ),
                     ),
                   ],
