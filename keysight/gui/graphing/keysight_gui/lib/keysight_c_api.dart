@@ -484,6 +484,7 @@ class KeysightCAPI extends ChangeNotifier {
   List<int> profilesStatuses = List<int>.filled(8, 0);
 
   final List<bool> sequencesStarted = List.generate(8, (index) => false);
+  final List<int> sequencesStartedSlots = List.generate(8, (index) => -1);
 
   final List<List<int>> cellsSelected =
       List.generate(8, (index) => List<int>.filled(32, -1));
@@ -555,6 +556,11 @@ class KeysightCAPI extends ChangeNotifier {
           }
         }
       }
+
+      if (value) {
+        sequencesStartedSlots[index] = slot;
+      } else
+        sequencesStartedSlots[index] = slot;
 
       if (value) {
         startSequence(index, slot);

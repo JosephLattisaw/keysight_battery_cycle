@@ -36,6 +36,9 @@ class TestTabbedWidget extends HookWidget {
 
     final dropdownStatus = useState(0);
 
+    print(
+        "seq started $sequenceStarted, canstart ${canStartSequence.value}, (${profileStatuses.elementAt(dropdownStatus.value)}");
+
     return Padding(
       padding: const EdgeInsets.only(top: 8),
       child: Column(
@@ -105,66 +108,75 @@ class TestTabbedWidget extends HookWidget {
                 const EdgeInsets.only(bottom: 20, left: 20, right: 20, top: 8),
             child: Row(
               children: [
-                IntrinsicWidth(
-                  child: DropdownButtonFormField(
-                    value: dropdownStatus.value,
-                    items: List.generate(
-                        8,
-                        (index) => DropdownMenuItem(
-                            child: Text(
-                                getDropDownText(
-                                    index, profileStatuses.elementAt(index)),
-                                style: TextStyle(
-                                    color: profileStatuses.elementAt(index) != 2
-                                        ? Colors.red
-                                        : Colors.white)),
-                            value: index)),
-                    onChanged: (int? value) {
-                      dropdownStatus.value = value ?? 0;
-                    },
-                    style: const TextStyle(color: Colors.white),
-                    dropdownColor: Colors.blueAccent,
-                    iconEnabledColor: Colors.white,
-                    icon: const Icon(Icons.arrow_drop_down),
-                    decoration: InputDecoration(
-                      enabledBorder: OutlineInputBorder(
-                        borderSide:
-                            const BorderSide(color: Colors.black, width: 1.4),
-                        borderRadius: BorderRadius.circular(5),
+                Visibility(
+                  visible: !sequenceStarted,
+                  child: IntrinsicWidth(
+                    child: DropdownButtonFormField(
+                      value: dropdownStatus.value,
+                      items: List.generate(
+                          8,
+                          (index) => DropdownMenuItem(
+                              child: Text(
+                                  getDropDownText(
+                                      index, profileStatuses.elementAt(index)),
+                                  style: TextStyle(
+                                      color:
+                                          profileStatuses.elementAt(index) != 2
+                                              ? Colors.red
+                                              : Colors.white)),
+                              value: index)),
+                      onChanged: (int? value) {
+                        dropdownStatus.value = value ?? 0;
+                      },
+                      style: const TextStyle(color: Colors.white),
+                      dropdownColor: Colors.blueAccent,
+                      iconEnabledColor: Colors.white,
+                      icon: const Icon(Icons.arrow_drop_down),
+                      decoration: InputDecoration(
+                        enabledBorder: OutlineInputBorder(
+                          borderSide:
+                              const BorderSide(color: Colors.black, width: 1.4),
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                        border: OutlineInputBorder(
+                          borderSide:
+                              const BorderSide(color: Colors.blue, width: 2),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        filled: true,
+                        fillColor: Colors.blueAccent,
+                        isDense: true,
+                        contentPadding: const EdgeInsets.all(8.0),
                       ),
-                      border: OutlineInputBorder(
-                        borderSide:
-                            const BorderSide(color: Colors.blue, width: 2),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      filled: true,
-                      fillColor: Colors.blueAccent,
-                      isDense: true,
-                      contentPadding: const EdgeInsets.all(8.0),
                     ),
                   ),
                 ),
                 const SizedBox(
                   width: 8,
                 ),
-                const Text(
-                  "<-- Select a Sequence From the Dropwdown Menu",
-                  style: TextStyle(
-                    color: Colors.white,
+                Visibility(
+                  child: const Text(
+                    "<-- Select a Sequence From the Dropwdown Menu",
+                    style: TextStyle(
+                      color: Colors.white,
+                    ),
                   ),
+                  visible: !sequenceStarted,
                 ),
                 const Spacer(),
                 ElevatedButton(
-                  onPressed: ((!canStartSequence.value && !sequenceStarted) ||
-                          (profileStatuses.elementAt(dropdownStatus.value) !=
-                              2))
-                      ? null
-                      : () {
+                  onPressed: ((canStartSequence.value && !sequenceStarted) &&
+                              (profileStatuses
+                                      .elementAt(dropdownStatus.value) ==
+                                  2)) ||
+                          (sequenceStarted)
+                      ? () {
                           Future.delayed(Duration.zero, () async {
                             cApi.setSequenceStarted(sequenceNumber,
                                 dropdownStatus.value, !sequenceStarted);
                           });
-                        },
+                        }
+                      : null,
                   child: Text(
                       sequenceStarted ? "Stop Sequence" : "Start Sequence"),
                   style: ElevatedButton.styleFrom(
