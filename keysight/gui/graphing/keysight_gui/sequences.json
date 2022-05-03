@@ -1,38 +1,6 @@
 {
     "api": "1",
     "sequences": {
-        "jim": {
-            "serial_number": "",
-            "comments": ""
-        },
-        "aaa": {
-            "serial_number": "",
-            "comments": "",
-            "steps": {
-                "0": {
-                    "mode": "0",
-                    "seconds": "1",
-                    "current": "0.10000000000000001",
-                    "voltage": "2",
-                    "tests": {
-                        "0": {
-                            "test_type": "0",
-                            "test_action": "0",
-                            "value": "2",
-                            "time_type": "0",
-                            "time_limit": "20"
-                        },
-                        "1": {
-                            "test_type": "1",
-                            "test_action": "0",
-                            "value": "2",
-                            "time_type": "0",
-                            "time_limit": "20"
-                        }
-                    }
-                }
-            }
-        },
         "Life_4_2_EPCV_HighD_T1": {
             "serial_number": "",
             "comments": "4.2V EOCV 5A discharge 2.5A charge",
@@ -68,6 +36,10 @@
                     "voltage": "2"
                 }
             }
+        },
+        "bad_sequence": {
+            "serial_number": "",
+            "comments": ""
         }
     }
 }

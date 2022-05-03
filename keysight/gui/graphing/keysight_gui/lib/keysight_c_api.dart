@@ -780,3 +780,9 @@ final List<List<String>> cellsDefaultNa =
     List.generate(8, (i) => List.generate(32, (k) => "N/A"));
 final List<List<int>> cellsDefaultNbr =
     List.generate(8, (i) => List.generate(32, (k) => 0));
+
+class ChartData {
+  ChartData(this.x, this.y);
+  final int? x;
+  final double? y;
+}

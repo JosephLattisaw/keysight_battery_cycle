@@ -143,10 +143,12 @@ class TestTabbedWidget extends HookWidget {
                   visible: !sequenceStarted,
                   child: IntrinsicWidth(
                     child: DropdownButtonFormField(
-                      value: dropdownStatus.value,
+                      value: 0,
                       items: [
-                        DropdownMenuItem(child: Text("Normal"), value: 0),
-                        DropdownMenuItem(child: Text("Lifecycle"), value: 1)
+                        DropdownMenuItem(
+                            child: Text("Acceptance Test"), value: 0),
+                        DropdownMenuItem(
+                            child: Text("Lifecycle Test"), value: 1)
                       ],
                       onChanged: (int? value) {},
                       style: const TextStyle(color: Colors.white),
@@ -177,7 +179,7 @@ class TestTabbedWidget extends HookWidget {
                 ),
                 Visibility(
                   child: const Text(
-                    "<-- Select a Sequence & Data Logging Format From the Dropdown Menu",
+                    "<-- Select a Sequence & Test Type From the Dropdown Menu",
                     style: TextStyle(
                       color: Colors.white,
                     ),
