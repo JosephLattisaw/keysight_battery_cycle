@@ -295,6 +295,7 @@ bool Keysight::detect_cards_at_boot() {
             auto s_vec = comma_delimiter(s);
 
             for (auto i : s_vec) {
+                LOG_OUT << "stoi-ing" << i;
                 result.push_back(std::stoi(i));
             }
 
@@ -565,10 +566,14 @@ std::vector<int> Keysight::get_catalog() {
 
             LOG_OUT << "get_catalog: " << catalog;
             auto values = comma_delimiter(catalog);
+
             for (const auto &i : values) {
-                auto val = std::stoi(i) - 1;
-                LOG_OUT << "valid value: " << val;
-                result.push_back(val);
+                try {
+                    auto val = std::stoi(i) - 1;
+                    result.push_back(val);
+                } catch (...) {
+                    // do nothing
+                }
             }
         } else {
             disconnect();
@@ -1065,6 +1070,14 @@ void Keysight::load_sequence(std::string name, int slot, sequence_step_vector st
         if (slot > 3) current_profile_statuses[slot] = 2;
         profile_status_callback(current_profile_statuses);
 #endif
+        auto clear_str = "SEQ:CLE " + std::to_string(slot + 1) + "\n";
+        auto status = viPrintf(session, clear_str.c_str());
+        auto res = keysight::verify_vi_status(session, status, "sending sequence clear", "There was a problem cearing sequence: ");
+        if (!res) {
+            disconnect();
+            return;
+        }
+
         for (auto i = 0; i < steps.size(); i++) {
             auto step = steps.at(i);
             auto mode_value = step.at(SequenceTypes::sequence_step_access_type::MODE);
@@ -1088,8 +1101,13 @@ void Keysight::load_sequence(std::string name, int slot, sequence_step_vector st
 
             LOG_OUT << "step command: " << s;
 #ifndef SOFTWARE_ONLY
-            auto status = viPrintf(session, s.c_str());
-            auto res = keysight::verify_vi_status(session, status, "sending step", "There was a problem sending step error code: ");
+
+            // LOG_OUT << "clear command: " << clear_str;
+            //
+            //
+
+            status = viPrintf(session, s.c_str());
+            res = keysight::verify_vi_status(session, status, "sending step", "There was a problem sending step error code: ");
 
             if (!res) {
                 disconnect();
