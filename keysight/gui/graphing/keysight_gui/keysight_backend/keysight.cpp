@@ -18,7 +18,7 @@ using namespace keysight;
 
 Keysight::Keysight(boost::asio::io_service &io_service, ActiveCardsCallback ac_cb, ConnectionStatusCallback conn_cb, PortDoubleCallback pd_cb,
                    PortUint16Callback pu16_cb, LoadedProfilesCallback lp_cb, ProfilesStatusCallback ps_cb, ProfilesStatusCallback ss_cb,
-                   TimeStatusCallback ts_cb, ProfilesStatusCallback cyc_cb)
+                   TimeStatusCallback ts_cb, ProfilesStatusCallback cyc_cb, TimeStatusCallback tt_cb)
     : io_service(io_service),
       cell_status_timer(io_service),
       active_cards_callback{ac_cb},
@@ -29,10 +29,13 @@ Keysight::Keysight(boost::asio::io_service &io_service, ActiveCardsCallback ac_c
       profile_status_callback{ps_cb},
       slot_status_callback{ss_cb},
       time_status_callback{ts_cb},
-      cycles_status_callback{cyc_cb} {
+      cycles_status_callback{cyc_cb},
+      total_time_callback{tt_cb} {
     currently_loaded_profiles.fill("");
     current_profile_statuses.fill(0);
     current_seq_uptime.fill(0.0);
+    total_seq_uptime.fill(0.0);
+    total_seq_uptime_offset.fill(0.0);
     cycles_count.fill(0);
 }
 
@@ -902,6 +905,7 @@ bool Keysight::check_cells_sequence_rollover_and_failures() {
                             cells_slots_being_run_map.find(i.first) != cells_slots_being_run_map.end()) {
                             auto c = cells_being_run_map.at(i.first);
                             auto slot = cells_slots_being_run_map.at(i.first);
+                            total_seq_uptime_offset[i.first] += current_seq_uptime[i.first];
                             start_sequence(i.first, slot, c, true);
                             cycles_count[i.first]++;
                         }
@@ -951,6 +955,7 @@ bool Keysight::get_cells_running_uptime() {
                         if (current_time > greatest_time) greatest_time = current_time;
                     }
                     current_seq_uptime[i.first] = greatest_time;
+                    total_seq_uptime[i.first] = greatest_time + total_seq_uptime_offset[i.first];
 
                 } else
                     return false;
@@ -964,6 +969,7 @@ bool Keysight::get_cells_running_uptime() {
 #endif
     }
     time_status_callback(current_seq_uptime);
+    total_time_callback(total_seq_uptime);
     return true;
 }
 

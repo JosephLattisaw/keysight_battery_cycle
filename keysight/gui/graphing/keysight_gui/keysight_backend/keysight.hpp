@@ -8,14 +8,14 @@
 
 #include "types.hpp"
 
-//#define SOFTWARE_ONLY 1
+#define SOFTWARE_ONLY 1
 
 class Keysight {
 public:
     Keysight(boost::asio::io_service &io_service, ActiveCardsCallback active_cards_callback, ConnectionStatusCallback connection_status_callback,
              PortDoubleCallback port_double_callback, PortUint16Callback port_uint16_callback, LoadedProfilesCallback loaded_profiles_callback,
              ProfilesStatusCallback profile_status_callback, ProfilesStatusCallback slot_status_callback, TimeStatusCallback time_status_callback,
-             ProfilesStatusCallback cycles_status_callback);
+             ProfilesStatusCallback cycles_status_callback, TimeStatusCallback total_time_callback);
     ~Keysight();
 
     void connect();
@@ -94,6 +94,7 @@ private:
     ProfilesStatusCallback profile_status_callback;
     ProfilesStatusCallback slot_status_callback;
     TimeStatusCallback time_status_callback;
+    TimeStatusCallback total_time_callback;
     ProfilesStatusCallback cycles_status_callback;
 
     std::vector<std::vector<std::string>> last_valid_verbose_response;
@@ -104,6 +105,8 @@ private:
     profile_status_type slot_status;
     profile_status_type cycles_count;
     uptime_time_type current_seq_uptime;
+    uptime_time_type total_seq_uptime;
+    uptime_time_type total_seq_uptime_offset;
 
     const std::string VISA_ADDRESS_BT2203A = "USB0::0x008D::0x3502::MY58000516::0::INSTR";  // usb address of battery cycler
 

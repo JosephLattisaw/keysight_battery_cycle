@@ -215,6 +215,15 @@ class KeysightCAPI extends ChangeNotifier {
 
     int cellTimesNativePort = cellTimesPort.sendPort.nativePort;
 
+    ReceivePort cellTotalTimesPort = ReceivePort()
+      ..listen((data) {
+        timeTotalStatuses = List<double>.from(data);
+
+        notifyListeners();
+      });
+
+    int cellTotalTimesNativePort = cellTotalTimesPort.sendPort.nativePort;
+
     ReceivePort cyclesStatusPort = ReceivePort()
       ..listen((data) {
         cycleStatuses = List<int>.from(data);
@@ -428,7 +437,8 @@ class KeysightCAPI extends ChangeNotifier {
         profileStatusesNativePort,
         slotStatusesNativePort,
         cellTimesNativePort,
-        cyclesStatusNativePort);
+        cyclesStatusNativePort,
+        cellTotalTimesNativePort);
     _runService();
 
     final sequences = getSequences();
@@ -530,6 +540,7 @@ class KeysightCAPI extends ChangeNotifier {
   List<int> profilesStatuses = List<int>.filled(8, 0);
   List<int> slotStatuses = List<int>.filled(8, 0);
   List<double> timeStatuses = List<double>.generate(8, (index) => 0.0);
+  List<double> timeTotalStatuses = List<double>.generate(8, (index) => 0.0);
   List<int> cycleStatuses = List<int>.generate(8, (index) => 0);
 
   final List<bool> sequencesStarted = List.generate(8, (index) => false);
@@ -701,7 +712,8 @@ typedef CreateBackendFFI = ffi.Void Function(
     ffi.Int64 profileStatusesPort,
     ffi.Int64 slotStatusesPort,
     ffi.Int64 cellTimesPort,
-    ffi.Int64 cyclesStatusPort);
+    ffi.Int64 cyclesStatusPort,
+    ffi.Int64 cellTotalTimesPort);
 
 typedef CreateBackendC = void Function(
     int usingDart,
@@ -719,7 +731,8 @@ typedef CreateBackendC = void Function(
     int profileStatusesPort,
     int slotStatusesPort,
     int cellTimesPort,
-    int cyclesStatusPort);
+    int cyclesStatusPort,
+    int cellTotalTimesPort);
 
 //start save sequence
 typedef StartSaveSequenceFFI = ffi.Void Function(ffi.Pointer<Utf8> name,

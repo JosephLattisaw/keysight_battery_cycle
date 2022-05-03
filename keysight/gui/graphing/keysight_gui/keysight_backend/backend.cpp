@@ -10,7 +10,7 @@
 
 Backend::Backend(boost::asio::io_service &io_service, ActiveCardsCallback ac_cb, ConnectionStatusCallback conn_cb, PortDoubleCallback pd_cb,
                  PortUint16Callback pu16_cb, LoadedProfilesCallback lp_cb, ProfilesStatusCallback ps_cb, ProfilesStatusCallback ss_cb,
-                 TimeStatusCallback ts_cb, ProfilesStatusCallback cyc_cb)
+                 TimeStatusCallback ts_cb, ProfilesStatusCallback cyc_cb, TimeStatusCallback tt_cb)
     : io_service(io_service),
       active_cards_callback{ac_cb},
       connection_status_callback{conn_cb},
@@ -20,7 +20,8 @@ Backend::Backend(boost::asio::io_service &io_service, ActiveCardsCallback ac_cb,
       profiles_status_callback{ps_cb},
       slot_status_callback{ss_cb},
       time_status_callback{ts_cb},
-      cycles_status_callback{cyc_cb} {
+      cycles_status_callback{cyc_cb},
+      total_time_callback{tt_cb} {
     sequence_parser = std::make_shared<SequenceParser>();
 
     // starting thread to start keysight stuff
@@ -54,7 +55,8 @@ void Backend::worker_thread() {
         [&](profile_status_type statuses) { io_service.post(std::bind(&Backend::profile_statuses_request, this, statuses)); },
         [&](profile_status_type statuses) { io_service.post(std::bind(&Backend::slot_statuses_request, this, statuses)); },
         [&](uptime_time_type statuses) { io_service.post(std::bind(&Backend::time_statuses_request, this, statuses)); },
-        [&](profile_status_type statuses) { io_service.post(std::bind(&Backend::cycle_statuses_request, this, statuses)); });
+        [&](profile_status_type statuses) { io_service.post(std::bind(&Backend::cycle_statuses_request, this, statuses)); },
+        [&](uptime_time_type statuses) { io_service.post(std::bind(&Backend::total_time_statuses_request, this, statuses)); });
 
     io_service.post(std::bind(&Backend::keysight_thread_is_up, this));
 
@@ -81,6 +83,8 @@ void Backend::loaded_profiles_request(loaded_profile_type profiles) { loaded_pro
 void Backend::profile_statuses_request(profile_status_type statuses) { profiles_status_callback(statuses); };
 
 void Backend::time_statuses_request(uptime_time_type statuses) { time_status_callback(statuses); };
+
+void Backend::total_time_statuses_request(uptime_time_type statuses) { total_time_callback(statuses); };
 
 void Backend::slot_statuses_request(profile_status_type statuses) { slot_status_callback(statuses); };
 

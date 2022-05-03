@@ -83,7 +83,7 @@ class TestTabbedWidget extends HookWidget {
                   TestSequenceMeasurementsTab(
                     sequenceNumber: sequenceNumber,
                   ),
-                  const TestSequenceChartTab(),
+                  TestSequenceChartTab(),
                 ],
               ),
             ),
@@ -136,12 +136,48 @@ class TestTabbedWidget extends HookWidget {
                     ),
                   ),
                 ),
+                SizedBox(
+                  width: 8,
+                ),
+                Visibility(
+                  visible: !sequenceStarted,
+                  child: IntrinsicWidth(
+                    child: DropdownButtonFormField(
+                      value: dropdownStatus.value,
+                      items: [
+                        DropdownMenuItem(child: Text("Normal"), value: 0),
+                        DropdownMenuItem(child: Text("Lifecycle"), value: 1)
+                      ],
+                      onChanged: (int? value) {},
+                      style: const TextStyle(color: Colors.white),
+                      dropdownColor: Colors.blueAccent,
+                      iconEnabledColor: Colors.white,
+                      icon: const Icon(Icons.arrow_drop_down),
+                      decoration: InputDecoration(
+                        enabledBorder: OutlineInputBorder(
+                          borderSide:
+                              const BorderSide(color: Colors.black, width: 1.4),
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                        border: OutlineInputBorder(
+                          borderSide:
+                              const BorderSide(color: Colors.blue, width: 2),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        filled: true,
+                        fillColor: Colors.blueAccent,
+                        isDense: true,
+                        contentPadding: const EdgeInsets.all(8.0),
+                      ),
+                    ),
+                  ),
+                ),
                 const SizedBox(
                   width: 8,
                 ),
                 Visibility(
                   child: const Text(
-                    "<-- Select a Sequence From the Dropdown Menu",
+                    "<-- Select a Sequence & Data Logging Format From the Dropdown Menu",
                     style: TextStyle(
                       color: Colors.white,
                     ),
