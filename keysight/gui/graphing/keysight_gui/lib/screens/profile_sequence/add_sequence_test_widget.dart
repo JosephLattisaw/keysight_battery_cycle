@@ -299,7 +299,7 @@ class AddSequenceTestWidget extends HookWidget {
                                       IntrinsicWidth(
                                         child: SpinBox(
                                           value: value.value,
-                                          min: 2.0,
+                                          min: 0.0,
                                           max: 4.5,
                                           decimals: 2,
                                           step: 0.1,
