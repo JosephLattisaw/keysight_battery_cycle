@@ -178,11 +178,8 @@ void SequenceParser::finish_save_sequence() {
         }
     }
 
-    char tmp[66535];
-    getcwd(tmp, 65535);
-
     boost::property_tree::json_parser::write_json("sequences.json", property_tree);
-    LOG_OUT << "finished writing sequence: " << tmp;
+    LOG_OUT << "finished writing sequence: ";
 }
 
 void SequenceParser::delete_key(const std::string &name, std::map<std::string, std::any> &map) const {
