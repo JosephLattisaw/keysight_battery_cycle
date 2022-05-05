@@ -13,6 +13,12 @@
 #define LOG_OUT LogOut("keysight backend")
 #define LOG_ERR LogOut("keysight backend")
 
+#if defined(_WIN32)
+#define EXPORT __declspec(dllexport)
+#else
+#define EXPORT
+#endif
+
 using work_guard_type = boost::asio::executor_work_guard<boost::asio::io_context::executor_type>;
 
 namespace {
@@ -103,31 +109,31 @@ extern ViSession session;
 }  // namespace keysight
 
 extern "C" {
-DART_EXPORT intptr_t InitializeDartApi(void *data) { return Dart_InitializeApiDL(data); }
+EXPORT DART_EXPORT intptr_t InitializeDartApi(void *data) { return Dart_InitializeApiDL(data); }
 
 // saving a sequence
-void start_save_sequence(const char *name, const char *serial_number, const char *comments) {
+EXPORT void start_save_sequence(const char *name, const char *serial_number, const char *comments) {
     if (backend) {
         backend->sequence_parser->start_save_sequence(name, serial_number, comments);
     } else
         print_backend_doesnt_exist_error();
 }
 
-void add_save_sequence_step(int mode, int seconds, double current, double voltage) {
+EXPORT void add_save_sequence_step(int mode, int seconds, double current, double voltage) {
     if (backend) {
         backend->sequence_parser->add_save_sequence_step(mode, seconds, current, voltage);
     } else
         print_backend_doesnt_exist_error();
 }
 
-void add_save_sequence_test(int test_type, int test_action, double value, int time_type, int time_limit) {
+EXPORT void add_save_sequence_test(int test_type, int test_action, double value, int time_type, int time_limit) {
     if (backend) {
         backend->sequence_parser->add_save_sequence_test(test_type, test_action, value, time_type, time_limit);
     } else
         print_backend_doesnt_exist_error();
 }
 
-void finish_save_sequence() {
+EXPORT void finish_save_sequence() {
     std::thread::id this_id = std::this_thread::get_id();
 
     if (backend) {
@@ -136,12 +142,12 @@ void finish_save_sequence() {
         print_backend_doesnt_exist_error();
 }
 
-void create_backend(bool using_dart = false, std::int64_t load_sequences_port = 0, std::int64_t fin_load_sequences_port = 0,
-                    std::int64_t load_steps_port = 0, std::int64_t load_tests_port = 0, std::int64_t active_cards_port = 0,
-                    std::int64_t keysight_connection_port = 0, std::int64_t keysight_double_port = 0, std::int64_t cell_state_port = 0,
-                    std::int64_t cell_status_port = 0, std::int64_t keysight_uint16_port = 0, std::int64_t loaded_profiles_port = 0,
-                    std::int64_t profile_statuses_port = 0, std::int64_t slot_statuses_port = 0, std::int64_t time_statuses_port = 0,
-                    std::int64_t cycle_statuses_port = 0, std::int64_t total_time_statuses_port = 0) {
+EXPORT void create_backend(bool using_dart = false, std::int64_t load_sequences_port = 0, std::int64_t fin_load_sequences_port = 0,
+                           std::int64_t load_steps_port = 0, std::int64_t load_tests_port = 0, std::int64_t active_cards_port = 0,
+                           std::int64_t keysight_connection_port = 0, std::int64_t keysight_double_port = 0, std::int64_t cell_state_port = 0,
+                           std::int64_t cell_status_port = 0, std::int64_t keysight_uint16_port = 0, std::int64_t loaded_profiles_port = 0,
+                           std::int64_t profile_statuses_port = 0, std::int64_t slot_statuses_port = 0, std::int64_t time_statuses_port = 0,
+                           std::int64_t cycle_statuses_port = 0, std::int64_t total_time_statuses_port = 0) {
     if (!backend)
         backend = std::make_shared<Backend>(
             io_service,
@@ -228,7 +234,7 @@ void create_backend(bool using_dart = false, std::int64_t load_sequences_port = 
         print_backend_doesnt_exist_error();
 }
 
-void sequence_remove(const char *name) {
+EXPORT void sequence_remove(const char *name) {
     if (backend) {
         LOG_OUT << "seq remove works";
         backend->sequence_parser->delete_sequence(name);
@@ -236,7 +242,7 @@ void sequence_remove(const char *name) {
         print_backend_doesnt_exist_error();
 }
 
-void load_profile(const char *name, std::uint32_t slot) {
+EXPORT void load_profile(const char *name, std::uint32_t slot) {
     LOG_OUT << "load profile called: " << name << ", slot: " << slot;
     if (backend) {
         auto sequences = backend->sequence_parser->load_all_sequences();
@@ -257,17 +263,17 @@ void load_profile(const char *name, std::uint32_t slot) {
     }
 }
 
-void start_sequence(std::uint32_t test, std::uint32_t slot, bool successively) {
+EXPORT void start_sequence(std::uint32_t test, std::uint32_t slot, bool successively) {
     LOG_OUT << "load sequence called on: " << test << ", " << slot;
     if (backend) backend->start_sequence(test, slot, selected_cells, successively);
 }
 
-void stop_sequence(std::uint32_t test, std::uint32_t slot) {
+EXPORT void stop_sequence(std::uint32_t test, std::uint32_t slot) {
     LOG_OUT << "stop sequence called on: " << test << ", " << slot;
     if (backend) backend->stop_sequence(test, slot, selected_cells);
 }
 
-void run_service() {
+EXPORT void run_service() {
     std::thread t([&] {
         work_guard_type work_guard(io_service.get_executor());
         io_service.run();
@@ -275,26 +281,26 @@ void run_service() {
     t.detach();
 }
 
-void connect_keysight() {
+EXPORT void connect_keysight() {
     if (backend)
         backend->connect_keysight();
     else
         print_backend_doesnt_exist_error();
 }
 
-void disconnect_keysight() {
+EXPORT void disconnect_keysight() {
     if (backend)
         backend->disconnect_keysight();
     else
         print_backend_doesnt_exist_error();
 }
 
-void clear_cells() {
+EXPORT void clear_cells() {
     LOG_OUT << "clear cells called";
     selected_cells.clear();
 }
 
-void select_cell(std::uint32_t cell) {
+EXPORT void select_cell(std::uint32_t cell) {
     LOG_OUT << "select cell called: " << cell;
     selected_cells.push_back(cell);
 }
@@ -329,7 +335,7 @@ struct Sequences {
     std::uint32_t size;
 };
 
-struct Sequences get_sequences() {
+EXPORT struct Sequences get_sequences() {
     std::cout << "get_sequences()" << std::endl;
     struct Sequences sequences;
 
