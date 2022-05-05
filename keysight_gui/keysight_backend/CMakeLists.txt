@@ -6,36 +6,37 @@ enable_testing()
 
 find_package(Boost 1.74.0 REQUIRED)
 
-include_directories(${Boost_INCLUDE_DIRS}) 
+if (WIN32)
+set(visa_library_location "C:/Program Files/IVI Foundation/VISA/Win64/ktvisa/Lib_x64/msc")
+set(visa_include_directory "C:/Program Files/IVI Foundation/VISA/Win64/Include")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++17")
+set(external_libraries "")
+else()
+set(visa_library_location "/opt/keysight/iolibs")
+set(visa_include_directory "/opt/keysight/iolibs/include")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std:c++17")
+set(external_libraries pthread -lrt)
+endif()
 
 find_library(VISA_LIBRARY
     NAMES ktvisa32
-    HINTS "/opt/keysight/iolibs" "C:/Program Files/IVI Foundation/VISA/Win64/ktvisa/Lib_x64/msc"
+    HINTS ${visa_library_location}
 )
 
 if(NOT VISA_LIBRARY)
     message(FATAL_ERROR "could not find visa library")
-ELSE()
-
-IF (WIN32)
-include_directories("C:/Program Files/IVI Foundation/VISA/Win64/Include")
-ENDIF()
-
 endif()
 
-IF (WIN32)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++17")
-ELSE()
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std:c++17")
-ENDIF()
+include_directories(${Boost_INCLUDE_DIRS}) 
+include_directories(${visa_include_directory})
 
 set(keysight_backend_SRC include/dart_api_dl.c keysight_backend.cpp backend.cpp sequence_parser.cpp logger.cpp common.cpp keysight.cpp)
 
 add_library(keysight_backend SHARED ${keysight_backend_SRC})
-target_link_libraries(keysight_backend ${VISA_LIBRARY} ${Boost_LIBRARIES} pthread -lrt)
+target_link_libraries(keysight_backend ${VISA_LIBRARY} ${Boost_LIBRARIES} ${external_libraries})
 
 add_executable(keysight_backend_test ${keysight_backend_SRC})
-target_link_libraries(keysight_backend_test ${VISA_LIBRARY} ${Boost_LIBRARIES} pthread -lrt)
+target_link_libraries(keysight_backend_test ${VISA_LIBRARY} ${Boost_LIBRARIES} ${external_libraries})
 
 install(TARGETS keysight_backend LIBRARY DESTINATION "${INSTALL_BUNDLE_LIB_DIR}")
 
