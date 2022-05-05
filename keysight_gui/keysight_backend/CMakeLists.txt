@@ -34,7 +34,7 @@ link_directories(${Boost_LIBRARY_DIRS})
 set(keysight_backend_SRC include/dart_api_dl.c keysight_backend.cpp backend.cpp sequence_parser.cpp logger.cpp common.cpp keysight.cpp)
 
 add_library(keysight_backend SHARED ${keysight_backend_SRC})
-target_link_libraries(keysight_backend ${VISA_LIBRARY} ${Boost_LIBRARIES} ${external_libraries})
+target_link_libraries(keysight_backend ${VISA_LIBRARY} ${external_libraries})
 
 add_executable(keysight_backend_test ${keysight_backend_SRC})
 target_link_libraries(keysight_backend_test ${VISA_LIBRARY} ${external_libraries})
