@@ -109,7 +109,7 @@ extern ViSession session;
 }  // namespace keysight
 
 extern "C" {
-EXPORT DART_EXPORT intptr_t InitializeDartApi(void *data) { return Dart_InitializeApiDL(data); }
+EXPORT intptr_t InitializeDartApi(void *data) { return Dart_InitializeApiDL(data); }
 
 // saving a sequence
 EXPORT void start_save_sequence(const char *name, const char *serial_number, const char *comments) {
