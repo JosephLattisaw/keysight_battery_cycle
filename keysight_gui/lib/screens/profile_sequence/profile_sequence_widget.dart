@@ -332,6 +332,13 @@ class SequenceBuilderKeepAliveClient extends StatefulWidget {
     table.add(step);
   }
 
+  void editTableStep(int index, List<dynamic> step) {
+    table[index][0] = step.elementAt(0);
+    table[index][1] = step.elementAt(1);
+    table[index][2] = step.elementAt(2);
+    table[index][3] = step.elementAt(3);
+  }
+
   List<int> getTableIndexes(int index) {
     List<int> result = List.filled(2, 0, growable: false);
 
@@ -403,6 +410,13 @@ class _SequenceBuilderKeepAliveClientState
     });
   }
 
+  void editTableStep(int index, List<dynamic> step) {
+    setState(() {
+      widget.editTableStep(index, step);
+      widget.onChanged(widget.pageIndex);
+    });
+  }
+
   void addTableTest(List<dynamic> test) {
     setState(() {
       widget.addTableTest(test, dataTableSelectedIndex);
@@ -441,6 +455,18 @@ class _SequenceBuilderKeepAliveClientState
     } else if (mapping.elementAt(0) < widget.table.length - 1) {
       result = true;
     } else {
+      result = false;
+    }
+
+    return result;
+  }
+
+  bool isTable() {
+    bool result = true;
+
+    List<int> mapping = widget.getTableIndexes(dataTableSelectedIndex);
+
+    if (mapping.elementAt(1) >= 0) {
       result = false;
     }
 
@@ -619,7 +645,43 @@ class _SequenceBuilderKeepAliveClientState
                 ),
                 const SizedBox(width: 4),
                 ElevatedButton(
-                  onPressed: null,
+                  onPressed: (dataTableSelectedIndex >= 0)
+                      ? () {
+                          if (isTable()) {
+                            List<int> mapping =
+                                widget.getTableIndexes(dataTableSelectedIndex);
+                            final table =
+                                widget.table.elementAt(mapping.elementAt(0));
+
+                            final mode = table.elementAt(0);
+                            final seconds = table.elementAt(1);
+                            final current = table.elementAt(2);
+                            final voltage = table.elementAt(3);
+
+                            print("edit: $table");
+
+                            RouterUtility.routerUtility(
+                                context,
+                                AddSequenceStepWidget(
+                                  editing: true,
+                                  initialMode: mode,
+                                  initialDurationSeconds: seconds,
+                                  initialCurrentLimit: current,
+                                  initialVoltageLimit: voltage,
+                                  onSave: (int mode, int seconds,
+                                      double current, double voltage) {
+                                    editTableStep(
+                                        mapping.elementAt(0), <dynamic>[
+                                      mode,
+                                      seconds,
+                                      current,
+                                      voltage
+                                    ]);
+                                  },
+                                ));
+                          }
+                        }
+                      : null,
                   child: const Text("Edit"),
                   style: ElevatedButton.styleFrom(
                     onSurface: Colors.grey,

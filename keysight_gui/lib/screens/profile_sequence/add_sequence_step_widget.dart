@@ -5,18 +5,31 @@ import 'package:flutter_spinbox/flutter_spinbox.dart';
 import 'package:keysight_gui/screens/profile_sequence/common_profile_sequence.dart';
 
 class AddSequenceStepWidget extends HookWidget {
-  const AddSequenceStepWidget({Key? key, required this.onSave})
+  const AddSequenceStepWidget(
+      {Key? key,
+      required this.onSave,
+      this.editing = false,
+      this.initialMode = 0,
+      this.initialDurationSeconds = 1,
+      this.initialCurrentLimit = 0.1,
+      this.initialVoltageLimit = 2.0})
       : super(key: key);
 
   final void Function(int mode, int seconds, double current, double voltage)
       onSave;
 
+  final int initialMode;
+  final int initialDurationSeconds;
+  final double initialCurrentLimit;
+  final double initialVoltageLimit;
+  final bool editing;
+
   @override
   Widget build(BuildContext context) {
-    final modeSelection = useState(0);
-    final durationSeconds = useState(1);
-    final currentLimit = useState(0.1);
-    final voltageLimit = useState(2.0);
+    final modeSelection = useState(initialMode);
+    final durationSeconds = useState(initialDurationSeconds);
+    final currentLimit = useState(initialCurrentLimit);
+    final voltageLimit = useState(initialVoltageLimit);
 
     return Scaffold(
       appBar: PreferredSize(
@@ -32,10 +45,12 @@ class AddSequenceStepWidget extends HookWidget {
           children: <Widget>[
             Container(
               color: Colors.blue,
-              child: const Padding(
+              child: Padding(
                 padding: EdgeInsets.all(16.0),
                 child: Text(
-                  'Add a Step to a Profile Sequence',
+                  editing
+                      ? 'Edit a Step to a Profile Sequence'
+                      : 'Add a Step to a Profile Sequence',
                   textAlign: TextAlign.left,
                   style: TextStyle(
                     color: Colors.black,
