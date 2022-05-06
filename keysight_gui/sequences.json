@@ -94,17 +94,17 @@
             "comments": "",
             "steps": {
                 "0": {
-                    "mode": "1",
+                    "mode": "2",
                     "seconds": "4500",
                     "current": "3.2000000000000002",
                     "voltage": "2.7000000000000002",
                     "tests": {
                         "0": {
-                            "test_type": "1",
-                            "test_action": "1",
-                            "value": "2.7999999999999998",
-                            "time_type": "2",
-                            "time_limit": "4500"
+                            "test_type": "2",
+                            "test_action": "0",
+                            "value": "3.1000000000000001",
+                            "time_type": "1",
+                            "time_limit": "4502"
                         }
                     }
                 },

@@ -5,7 +5,16 @@ import 'package:flutter_spinbox/flutter_spinbox.dart';
 import 'package:keysight_gui/screens/profile_sequence/common_profile_sequence.dart';
 
 class AddSequenceTestWidget extends HookWidget {
-  AddSequenceTestWidget({Key? key, required this.onSave}) : super(key: key) {
+  AddSequenceTestWidget(
+      {Key? key,
+      required this.onSave,
+      this.editing = false,
+      this.initialTestType = 0,
+      this.initialTestAction = 0,
+      this.initialValue = 2.0,
+      this.initialTimeType = 0,
+      this.initialTimeLimit = 20})
+      : super(key: key) {
     for (var element in testTypeDescription) {
       assert(element.length == 2);
     }
@@ -19,16 +28,23 @@ class AddSequenceTestWidget extends HookWidget {
     }
   }
 
+  final bool editing;
+  final int initialTestType;
+  final int initialTestAction;
+  final double initialValue;
+  final int initialTimeType;
+  final int initialTimeLimit;
+
   final void Function(int testType, int testAction, double value, int timeType,
       int timeLimit) onSave;
 
   @override
   Widget build(BuildContext context) {
-    final testType = useState(0);
-    final testAction = useState(0);
-    final value = useState(2.0);
-    final timeType = useState(0);
-    final timeLimit = useState(20);
+    final testType = useState(initialTestType);
+    final testAction = useState(initialTestAction);
+    final value = useState(initialValue);
+    final timeType = useState(initialTimeType);
+    final timeLimit = useState(initialTimeLimit);
 
     return Scaffold(
       appBar: PreferredSize(
@@ -44,10 +60,12 @@ class AddSequenceTestWidget extends HookWidget {
           children: <Widget>[
             Container(
               color: Colors.blue,
-              child: const Padding(
+              child: Padding(
                 padding: EdgeInsets.all(16.0),
                 child: Text(
-                  'Add a Test to a Profile Sequence Step',
+                  editing
+                      ? 'Edit a Test to a Profile Sequence Step'
+                      : 'Add a Test to a Profile Sequence Step',
                   textAlign: TextAlign.left,
                   style: TextStyle(
                     color: Colors.black,

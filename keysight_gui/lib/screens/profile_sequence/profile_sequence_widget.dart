@@ -339,6 +339,10 @@ class SequenceBuilderKeepAliveClient extends StatefulWidget {
     table[index][3] = step.elementAt(3);
   }
 
+  void editTableTest(int tableIndex, int testIndex, List<dynamic> test) {
+    table[tableIndex][4][testIndex] = test;
+  }
+
   List<int> getTableIndexes(int index) {
     List<int> result = List.filled(2, 0, growable: false);
 
@@ -417,9 +421,17 @@ class _SequenceBuilderKeepAliveClientState
     });
   }
 
+  void editTableTest(int tableIndex, int testIndex, List<dynamic> test) {
+    setState(() {
+      widget.editTableTest(tableIndex, testIndex, test);
+      widget.onChanged(widget.pageIndex);
+    });
+  }
+
   void addTableTest(List<dynamic> test) {
     setState(() {
       widget.addTableTest(test, dataTableSelectedIndex);
+      widget.onChanged(widget.pageIndex);
     });
   }
 
@@ -647,12 +659,12 @@ class _SequenceBuilderKeepAliveClientState
                 ElevatedButton(
                   onPressed: (dataTableSelectedIndex >= 0)
                       ? () {
-                          if (isTable()) {
-                            List<int> mapping =
-                                widget.getTableIndexes(dataTableSelectedIndex);
-                            final table =
-                                widget.table.elementAt(mapping.elementAt(0));
+                          List<int> mapping =
+                              widget.getTableIndexes(dataTableSelectedIndex);
+                          final table =
+                              widget.table.elementAt(mapping.elementAt(0));
 
+                          if (isTable()) {
                             final mode = table.elementAt(0);
                             final seconds = table.elementAt(1);
                             final current = table.elementAt(2);
@@ -676,6 +688,41 @@ class _SequenceBuilderKeepAliveClientState
                                       seconds,
                                       current,
                                       voltage
+                                    ]);
+                                  },
+                                ));
+                          } else {
+                            final test = table
+                                .elementAt(4)
+                                .elementAt(mapping.elementAt(1));
+
+                            final testType = test.elementAt(0);
+                            final testAction = test.elementAt(1);
+                            final value = test.elementAt(2);
+                            final timeType = test.elementAt(3);
+                            final timeLimit = test.elementAt(4);
+
+                            RouterUtility.routerUtility(
+                                context,
+                                AddSequenceTestWidget(
+                                  editing: true,
+                                  initialTestAction: testAction,
+                                  initialTestType: testType,
+                                  initialTimeLimit: timeLimit,
+                                  initialTimeType: timeType,
+                                  initialValue: value,
+                                  onSave: (int testType,
+                                      int testAction,
+                                      double value,
+                                      int timeType,
+                                      int timeLimit) {
+                                    editTableTest(mapping.elementAt(0),
+                                        mapping.elementAt(1), <dynamic>[
+                                      testType,
+                                      testAction,
+                                      value,
+                                      timeType,
+                                      timeLimit
                                     ]);
                                   },
                                 ));
