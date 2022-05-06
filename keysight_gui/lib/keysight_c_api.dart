@@ -97,15 +97,13 @@ class KeysightCAPI extends ChangeNotifier {
 
     File exeFile = File(Platform.resolvedExecutable);
 
-    String _libraryName = "";
+    String libPath;
 
     if (Platform.isLinux) {
-      _libraryName = '/lib/libkeysight_backend.so';
+      libPath = "${dirname(exeFile.path)}/lib/libkeysight_backend.so";
     } else {
-      _libraryName = "keysight_backend.dll";
+      libPath = "${dirname(exeFile.path)}\\keysight_backend.dll";
     }
-
-    String libPath = "${dirname(exeFile.path)}\\$_libraryName";
 
     print("attempting to open library name: $libPath");
     final lib = ffi.DynamicLibrary.open(libPath);
