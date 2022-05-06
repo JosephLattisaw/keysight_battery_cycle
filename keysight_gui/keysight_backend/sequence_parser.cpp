@@ -119,7 +119,7 @@ void SequenceParser::finish_save_sequence() {
     property_tree.put("api", 1.0);
 
     // delete the node (because we are overwriting it)
-    // auto seq_tree
+    // if it exists
     auto seq_ptr = property_tree.get_child_optional("sequences");
     if (seq_ptr.get_ptr()) {
         seq_ptr->erase(last_started_saved_sequence);
