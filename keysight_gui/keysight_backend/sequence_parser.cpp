@@ -119,8 +119,11 @@ void SequenceParser::finish_save_sequence() {
     property_tree.put("api", 1.0);
 
     // delete the node (because we are overwriting it)
-    property_tree.get_child("sequences").erase(last_started_saved_sequence);
-
+    // auto seq_tree
+    auto seq_ptr = property_tree.get_child_optional("sequences");
+    if (seq_ptr.get_ptr()) {
+        seq_ptr->erase(last_started_saved_sequence);
+    }
     // first we're going to get the sequences info
     auto info = std::any_cast<sequence_info_type>(sequences_info.at(last_started_saved_sequence));
 
@@ -178,7 +181,13 @@ void SequenceParser::finish_save_sequence() {
         }
     }
 
-    boost::property_tree::json_parser::write_json("sequences.json", property_tree);
+    try {
+        boost::property_tree::json_parser::write_json("sequences.json", property_tree);
+    } catch (const boost::property_tree::json_parser::json_parser_error &e) {
+        LOG_ERR << e.what();
+        return;
+    }
+
     LOG_OUT << "finished writing sequence: ";
 }
 
