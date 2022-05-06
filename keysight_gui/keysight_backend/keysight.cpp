@@ -831,7 +831,41 @@ void Keysight::start_logging(std::uint32_t test, std::vector<std::uint32_t> cell
         auto c = new std::ofstream;
         logging_files.at(test) = c;
         logging_files.at(test)->open("test" + std::to_string(test) + ".csv", std::ios::out | std::ios::app);
-        *logging_files.at(test) << "Cell Number, Voltage (V), Current (A), Capacity (aH), Capacity (Wh), Timestamp\n";
+
+        std::string s_commas;
+        for (const auto &i : cells) {
+            s_commas += ",";
+        }
+
+        *logging_files.at(test) << ",,Voltage(V)" << s_commas << ",Current (A)" << s_commas << ",Capacity (aH)" << s_commas << ",Capacity (Wh)\n";
+
+        //*logging_files.at(test) << "Cell Number, Voltage (V), Current (A), Capacity (aH), Capacity (Wh), Timestamp\n";
+        *logging_files.at(test) << "Timestamp,Elapsed Time,";
+
+        for (const auto &i : cells) {
+            *logging_files.at(test) << "cell " << i << ",";
+        }
+
+        *logging_files.at(test) << ",";
+
+        for (const auto &i : cells) {
+            *logging_files.at(test) << "cell " << i << ",";
+        }
+
+        *logging_files.at(test) << ",";
+
+        for (const auto &i : cells) {
+            *logging_files.at(test) << "cell " << i << ",";
+        }
+
+        *logging_files.at(test) << ",";
+
+        for (const auto &i : cells) {
+            *logging_files.at(test) << "cell " << i << ",";
+        }
+
+        *logging_files.at(test) << "\n";
+
         logging_files.at(test)->flush();
 
         for (const auto &i : cells) {
@@ -929,13 +963,19 @@ void Keysight::log_data(std::uint32_t slot, std::vector<std::uint32_t> cells) {
             s += std::to_string(i) + ",";
         }
 
+        s += ",";
+
         for (const auto &i : currents) {
             s += std::to_string(i) + ",";
         }
 
+        s += ",";
+
         for (const auto &i : cell_cap_ahrs) {
             s += std::to_string(i) + ",";
         }
+
+        s += ",";
 
         for (const auto &i : cell_cap_whrs) {
             s += std::to_string(i) + ",";
