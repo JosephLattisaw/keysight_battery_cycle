@@ -8,7 +8,7 @@
 
 #include "types.hpp"
 
-//#define SOFTWARE_ONLY 1
+#define SOFTWARE_ONLY 1
 
 class Keysight {
 public:
@@ -57,12 +57,14 @@ private:
     // polling
     void start_polling_cell_status();
 
-    void start_logging(std::vector<std::uint32_t> cells);
-    void stop_logging(std::vector<std::uint32_t> cells);
+    void start_logging(std::uint32_t test, std::vector<std::uint32_t> cells);
+    void stop_logging(std::uint32_t test, std::vector<std::uint32_t> cells);
     void log_data(std::uint32_t cell, std::uint32_t slot, double volts, double current, double cap_ahr, double cap_whr);
+    void log_data(std::uint32_t test, std::vector<std::uint32_t> cells);
 
     std::map<std::uint32_t, std::uint32_t> logging_map;
-    std::vector<std::ofstream *> logging_files;
+    // std::vector<std::ofstream *> logging_files;
+    std::array<std::ofstream *, 8> logging_files;
 
     void update_connection_status(bool flag);
 
