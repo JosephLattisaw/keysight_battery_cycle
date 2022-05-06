@@ -67,7 +67,7 @@ class TestTabbedWidget extends HookWidget {
                 useShadow: false,
                 tabs: const [
                   Text("Channels / Cells"),
-                  Text("Measurements"),
+                  Text("Live Measurements"),
                   Text("Chart"),
                 ],
                 tabWidgets: [

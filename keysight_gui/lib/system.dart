@@ -96,7 +96,7 @@ class SystemPage extends StatelessWidget {
         useShadow: false,
         tabs: const [
           Text("Test Status"),
-          Text("Measurements"),
+          Text("Live Measurements"),
           Text("Chart"),
         ],
         tabWidgets: [
