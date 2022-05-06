@@ -1069,7 +1069,7 @@ void Keysight::load_sequence(std::string name, int slot, sequence_step_vector st
         current_profile_statuses[slot] = 1;
         if (slot > 3) current_profile_statuses[slot] = 2;
         profile_status_callback(current_profile_statuses);
-#endif
+#else
         auto clear_str = "SEQ:CLE " + std::to_string(slot + 1) + "\n";
         auto status = viPrintf(session, clear_str.c_str());
         auto res = keysight::verify_vi_status(session, status, "sending sequence clear", "There was a problem cearing sequence: ");
@@ -1077,7 +1077,7 @@ void Keysight::load_sequence(std::string name, int slot, sequence_step_vector st
             disconnect();
             return;
         }
-
+#endif
         for (auto i = 0; i < steps.size(); i++) {
             auto step = steps.at(i);
             auto mode_value = step.at(SequenceTypes::sequence_step_access_type::MODE);
