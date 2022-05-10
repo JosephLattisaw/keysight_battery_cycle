@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:keysight_gui/application_bar.dart';
+import 'package:keysight_gui/keysight_c_api.dart';
 import 'package:keysight_gui/load_sequences.dart';
 import 'package:keysight_gui/system.dart';
 import 'package:keysight_gui/tab_widget.dart';
@@ -9,6 +10,7 @@ import 'package:keysight_gui/screens/profile_sequence/profile_sequence_widget.da
 import 'package:keysight_gui/screens/measurements/measurement_widget.dart';
 import 'package:keysight_gui/screens/test/test_widget.dart';
 import 'package:keysight_gui/expandable_table.dart';
+import 'package:provider/provider.dart';
 
 class HomePage extends HookWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -18,6 +20,9 @@ class HomePage extends HookWidget {
     final ticker = useSingleTickerProvider();
     final tabController =
         useMemoized(() => TabController(length: 4, vsync: ticker));
+
+    final keysightConnectionStatus =
+        context.select((KeysightCAPI k) => k.keysightConnectionStatus);
 
     useEffect(() {
       return tabController.dispose;
@@ -44,9 +49,13 @@ class HomePage extends HookWidget {
                 child: Row(
                   children: [
                     Text(
-                      "Disconnected from Keysight",
+                      keysightConnectionStatus
+                          ? "Keysight Connected"
+                          : "Keysight Disconnected",
                       style: TextStyle(
-                        color: Colors.red,
+                        color: keysightConnectionStatus
+                            ? Colors.green
+                            : Colors.red,
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),
