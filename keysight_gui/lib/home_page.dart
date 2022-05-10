@@ -35,20 +35,34 @@ class HomePage extends HookWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Align(
-                alignment: Alignment.centerRight,
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 8.0, right: 8.0),
-                  child: ElevatedButton(
-                    onPressed: () {},
-                    child: const Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: Text("Emergency Shutoff"),
+              Padding(
+                padding: const EdgeInsets.only(
+                  left: 8.0,
+                  right: 8.0,
+                  top: 8.0,
+                ),
+                child: Row(
+                  children: [
+                    Text(
+                      "Disconnected from Keysight",
+                      style: TextStyle(
+                        color: Colors.red,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                    style: ElevatedButton.styleFrom(
-                      primary: Colors.red,
+                    Spacer(),
+                    ElevatedButton(
+                      onPressed: () {},
+                      child: const Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: Text("Emergency Shutoff"),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        primary: Colors.red,
+                      ),
                     ),
-                  ),
+                  ],
                 ),
               ),
               Expanded(
