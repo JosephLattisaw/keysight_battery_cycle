@@ -79,26 +79,21 @@ class HomePage extends HookWidget {
                   padding: const EdgeInsets.all(8.0),
                   child: TabWidget(
                     tabs: const [
-                      Text("Instrument Connection"),
-                      Text("Create/Edit Profile Sequences"),
+                      Text("Instrument Connection",
+                          style: TextStyle(color: null)),
+                      Text("System Safety Limits"),
+                      Text("Create/Edit Profile Sequences",
+                          textAlign: TextAlign.center),
                       Text("Load Sequences"),
                       Text("Test Management"),
-                      //Text("Measurements"),
-                      //Text("System"),
-
                       Text("System Telemetry"),
                     ],
                     tabWidgets: [
                       const InstrumentWidget(),
+                      Container(),
                       const ProfileSequenceWidget(),
                       LoadSequences(),
                       const TestWidget(),
-
-                      /*MeasurementWidget(
-                        key: UniqueKey(),
-                      ),*/
-                      //JoeHomePage(),
-
                       SystemPage(),
                     ],
                   ),
