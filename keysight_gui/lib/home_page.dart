@@ -50,8 +50,8 @@ class HomePage extends HookWidget {
                   children: [
                     Text(
                       keysightConnectionStatus
-                          ? "Keysight Connected"
-                          : "Keysight Disconnected",
+                          ? "Status: Connected"
+                          : "Status: Disconnected",
                       style: TextStyle(
                         color: keysightConnectionStatus
                             ? Colors.green
