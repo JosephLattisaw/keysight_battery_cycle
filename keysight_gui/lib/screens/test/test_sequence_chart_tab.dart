@@ -13,10 +13,8 @@ class TestSequenceChartTab extends HookWidget {
 
   late ValueNotifier<int> ctr;
 
-  void _updateDataSource(Timer timer) {
-    var random = Random();
-    chartData.add(_ChartData(count, 10 + random.nextInt(100 - 10).toDouble()));
-    if (chartData.length == 40) {
+  void _updateDataSource() {
+    if (chartData.length == 3600) {
       chartData.removeAt(0);
       for (int i = 0; i < csc.length; i++) {
         csc.elementAt(i)?.updateDataSource(
@@ -34,8 +32,25 @@ class TestSequenceChartTab extends HookWidget {
     count += 1;
   }
 
+  void _updateData() {
+    var random = Random();
+    chartData.add(_ChartData(count, 10 + random.nextInt(100 - 10).toDouble()));
+    count += 1;
+  }
+
+  Future<void> _updateDataSourceAsync() async {
+    await Future.delayed(Duration(seconds: 60));
+    print("future was called");
+    _updateDataSource();
+    _updateDataSourceAsync();
+    return;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final future = useMemoized(_updateDataSourceAsync);
+    final snapshot = useFuture(future);
+
     _trackballBehavior = TrackballBehavior(
       enable: true,
       // Displays the trackball on single tap
@@ -45,10 +60,6 @@ class TestSequenceChartTab extends HookWidget {
 
     _zoomPanBehavior =
         ZoomPanBehavior(enableMouseWheelZooming: true, enablePanning: true);
-
-    _timer?.cancel();
-    _timer =
-        Timer.periodic(const Duration(milliseconds: 1000), _updateDataSource);
 
     ctr = useState(0);
 
@@ -62,7 +73,7 @@ class TestSequenceChartTab extends HookWidget {
         position: LegendPosition.bottom,
       ),
       series: List<FastLineSeries<_ChartData, int>>.generate(
-        1,
+        256,
         (index) => FastLineSeries(
           onRendererCreated: (controller) => csc[index] = controller,
           dataSource: chartData,
@@ -82,11 +93,14 @@ class _ChartData {
   final double? y;
 }
 
-int count = 19;
+int count = 3580;
 
-List<ChartSeriesController?> csc = List.generate(1, (index) => null);
-Timer? _timer;
+List<ChartSeriesController?> csc = List.generate(256, (index) => null);
 
+List<_ChartData> chartData =
+    List<_ChartData>.generate(3580, (index) => _ChartData(index, 42));
+
+/*
 List<_ChartData> chartData = <_ChartData>[
   _ChartData(0, 42),
   _ChartData(1, 47),
@@ -108,3 +122,4 @@ List<_ChartData> chartData = <_ChartData>[
   _ChartData(17, 72),
   _ChartData(18, 94),
 ];
+*/

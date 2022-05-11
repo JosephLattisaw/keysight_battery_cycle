@@ -522,6 +522,8 @@ class _SequenceBuilderKeepAliveClientState
       } else {
         widget.table = List.from(widget.table)..removeAt(mapping.elementAt(0));
       }
+
+      widget.onChanged(widget.pageIndex);
     });
   }
 
