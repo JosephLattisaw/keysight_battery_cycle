@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:keysight_gui/application_bar.dart';
@@ -14,7 +16,17 @@ import 'package:keysight_gui/expandable_table.dart';
 import 'package:provider/provider.dart';
 
 class HomePage extends HookWidget {
-  const HomePage({Key? key}) : super(key: key);
+  HomePage({Key? key}) : super(key: key);
+
+  bool amberAlertShown = false;
+  bool amberAlertReady = true;
+  bool criticalAlertShown = false;
+
+  Timer? timer;
+
+  void updateTimer() {
+    amberAlertReady = true;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,6 +36,69 @@ class HomePage extends HookWidget {
 
     final keysightConnectionStatus =
         context.select((KeysightCAPI k) => k.keysightConnectionStatus);
+
+    final backend = Provider.of<KeysightCAPI>(context, listen: false);
+
+    useMemoized(() {
+      backend.limitHit = (bool critical) {
+        if (!criticalAlertShown &&
+            ((!amberAlertShown && amberAlertReady) || critical)) {
+          critical ? (criticalAlertShown = true) : (amberAlertShown = true);
+
+          if (critical && amberAlertShown) {
+            amberAlertShown = false;
+            Navigator.pop(context);
+          }
+
+          showModalBottomSheet<void>(
+            isDismissible: false,
+            context: context,
+            builder: (BuildContext context) {
+              return Container(
+                height: 200,
+                color: critical ? Colors.red : Colors.amber,
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Text(
+                        critical
+                            ? "HARD LIMIT WAS REACHED, TEST WAS STOPPED\nPLEASE CHECK TEST!"
+                            : 'SOFT LIMIT WAS HIT PLEASE CHECK TEST!',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16.0,
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 16,
+                      ),
+                      ElevatedButton(
+                        child: const Text('Continue'),
+                        onPressed: () {
+                          if (amberAlertShown && amberAlertReady) {
+                            amberAlertReady = false;
+                            timer =
+                                Timer(const Duration(seconds: 20), updateTimer);
+                          }
+
+                          critical
+                              ? (criticalAlertShown = false)
+                              : (amberAlertShown = false);
+
+                          Navigator.pop(context);
+                        },
+                      )
+                    ],
+                  ),
+                ),
+              );
+            },
+          );
+        }
+      };
+    });
 
     useEffect(() {
       return tabController.dispose;

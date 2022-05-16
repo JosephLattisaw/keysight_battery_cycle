@@ -26,7 +26,7 @@ class MyApp extends StatelessWidget {
             primarySwatch: Colors.blue,
             scaffoldBackgroundColor:
                 Color(Colors.black.value).withOpacity(0.86)),
-        home: const HomePage(),
+        home: HomePage(),
       ),
     );
   }

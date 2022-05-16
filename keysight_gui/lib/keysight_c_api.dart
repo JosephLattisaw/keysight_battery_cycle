@@ -91,6 +91,7 @@ class Sequences extends ffi.Struct {
 }
 
 class KeysightCAPI extends ChangeNotifier {
+  void Function(bool critical)? limitHit;
   KeysightCAPI() {
     print("resolved exec path1: ${Platform.resolvedExecutable}");
     keysightCAPI = this;
@@ -435,6 +436,11 @@ class KeysightCAPI extends ChangeNotifier {
           maxYellowVoltage = data.elementAt(2).toDouble();
           maxRedVoltage = data.elementAt(3).toDouble();
           maxRedCurrent = data.elementAt(4).toDouble();
+
+          notifyListeners();
+          limitHit?.call(false);
+          limitHit?.call(false);
+          limitHit?.call(false);
         }
       });
 
