@@ -10,7 +10,7 @@
 
 Backend::Backend(boost::asio::io_service &io_service, ActiveCardsCallback ac_cb, ConnectionStatusCallback conn_cb, PortDoubleCallback pd_cb,
                  PortUint16Callback pu16_cb, LoadedProfilesCallback lp_cb, ProfilesStatusCallback ps_cb, ProfilesStatusCallback ss_cb,
-                 TimeStatusCallback ts_cb, ProfilesStatusCallback cyc_cb, TimeStatusCallback tt_cb)
+                 TimeStatusCallback ts_cb, ProfilesStatusCallback cyc_cb, TimeStatusCallback tt_cb, LoadSafetiesCallback ls_cb)
     : io_service(io_service),
       active_cards_callback{ac_cb},
       connection_status_callback{conn_cb},
@@ -21,8 +21,14 @@ Backend::Backend(boost::asio::io_service &io_service, ActiveCardsCallback ac_cb,
       slot_status_callback{ss_cb},
       time_status_callback{ts_cb},
       cycles_status_callback{cyc_cb},
-      total_time_callback{tt_cb} {
+      total_time_callback{tt_cb},
+      load_safeties_callback{ls_cb} {
     sequence_parser = std::make_shared<SequenceParser>();
+
+    safety_limits = std::make_shared<SafetyLimits>([&](std::array<double, 5> safeties) {
+        keysight_service.post(std::bind(&Keysight::set_safety_limits, keysight, 0, 1, 2, 3, 4));
+        load_safeties_callback(safeties);
+    });
 
     // starting thread to start keysight stuff
     keysight_thread = std::thread(std::bind(&Backend::worker_thread, this));

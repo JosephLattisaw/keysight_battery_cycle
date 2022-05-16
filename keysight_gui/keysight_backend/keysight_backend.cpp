@@ -142,12 +142,18 @@ EXPORT void finish_save_sequence() {
         print_backend_doesnt_exist_error();
 }
 
+EXPORT void set_safety_limits(double min_yellow_voltage, double min_red_voltage, double max_yellow_voltage, double max_red_voltage,
+                              double max_red_current) {
+    backend->safety_limits->set_safety_limits(min_yellow_voltage, min_red_voltage, max_yellow_voltage, max_red_voltage, max_red_current);
+}
+
 EXPORT void create_backend(bool using_dart = false, std::int64_t load_sequences_port = 0, std::int64_t fin_load_sequences_port = 0,
                            std::int64_t load_steps_port = 0, std::int64_t load_tests_port = 0, std::int64_t active_cards_port = 0,
                            std::int64_t keysight_connection_port = 0, std::int64_t keysight_double_port = 0, std::int64_t cell_state_port = 0,
                            std::int64_t cell_status_port = 0, std::int64_t keysight_uint16_port = 0, std::int64_t loaded_profiles_port = 0,
                            std::int64_t profile_statuses_port = 0, std::int64_t slot_statuses_port = 0, std::int64_t time_statuses_port = 0,
-                           std::int64_t cycle_statuses_port = 0, std::int64_t total_time_statuses_port = 0) {
+                           std::int64_t cycle_statuses_port = 0, std::int64_t total_time_statuses_port = 0,
+                           std::int64_t load_safeties_callback_port = 0) {
     if (!backend)
         backend = std::make_shared<Backend>(
             io_service,
@@ -228,6 +234,12 @@ EXPORT void create_backend(bool using_dart = false, std::int64_t load_sequences_
                     std::vector<double> data;
                     for (auto i : statuses) data.push_back(i);
                     post_data_object(total_time_statuses_port, data);
+                }
+            },
+            [&, using_dart, load_safeties_callback_port](std::array<double, 5> safeties) {
+                if (using_dart) {
+                    std::vector<double> data(safeties.begin(), safeties.end());
+                    post_data_object(load_safeties_callback_port, data);
                 }
             });
     else

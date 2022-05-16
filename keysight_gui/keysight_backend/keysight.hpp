@@ -25,6 +25,9 @@ public:
     void start_sequence(std::uint32_t test, std::uint32_t slot, std::vector<std::uint32_t> cells, bool successfully);
     void stop_sequence(std::uint32_t test, std::uint32_t slot, std::vector<std::uint32_t> cells);
 
+    void set_safety_limits(double min_yellow_voltage, double min_red_voltage, double max_yellow_voltage, double max_red_voltage,
+                           double max_red_current);
+
 private:
     // opening visa sessions
     bool open_instrument();
@@ -109,6 +112,12 @@ private:
     uptime_time_type current_seq_uptime;
     uptime_time_type total_seq_uptime;
     uptime_time_type total_seq_uptime_offset;
+
+    double min_yellow_voltage = 2.6;
+    double max_yellow_voltage = 4.21;
+    double min_red_voltage = 2.4;
+    double max_red_voltage = 4.22;
+    double max_red_current = 6;
 
     const std::string VISA_ADDRESS_BT2203A = "USB0::0x008D::0x3502::MY58000516::0::INSTR";  // usb address of battery cycler
 

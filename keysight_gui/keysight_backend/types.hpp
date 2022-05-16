@@ -1,6 +1,7 @@
 #ifndef BACKEND_TYPES_HPP
 #define BACKEND_TYPES_HPP
 
+#include <any>
 #include <array>
 #include <map>
 #include <vector>
@@ -86,5 +87,7 @@ using PortUint16Callback = std::function<void(PortTypes::port_uint16_data_type, 
 using LoadedProfilesCallback = std::function<void(loaded_profile_type)>;
 using ProfilesStatusCallback = std::function<void(profile_status_type)>;
 using TimeStatusCallback = std::function<void(uptime_time_type)>;
+
+using LoadSafetiesCallback = std::function<void(std::array<double, 5>)>;
 
 #endif
