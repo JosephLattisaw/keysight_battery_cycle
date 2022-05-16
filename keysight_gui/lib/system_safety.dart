@@ -1,10 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_spinbox/flutter_spinbox.dart';
+import 'package:keysight_gui/keysight_c_api.dart';
+import 'package:provider/provider.dart';
 
-class SystemSafety extends StatelessWidget {
+class SystemSafety extends HookWidget {
+  double minYellowVoltage = 0;
+  double minRedVoltage = 0;
+  double maxYellowVoltage = 0;
+  double maxRedVoltage = 0;
+  double maxRedCurrent = 0;
+
   @override
   Widget build(BuildContext context) {
+    final backend = Provider.of<KeysightCAPI>(context, listen: false);
+    minYellowVoltage = backend.minYellowVoltage;
+    minRedVoltage = backend.minRedVoltage;
+    maxYellowVoltage = backend.maxYellowVoltage;
+    maxRedVoltage = backend.maxRedVoltage;
+    maxRedCurrent = backend.maxRedCurrent;
+
     return Column(
       children: [
         Row(
@@ -77,12 +92,14 @@ class SystemSafety extends StatelessWidget {
                                 const SizedBox(height: 8),
                                 IntrinsicWidth(
                                   child: SpinBox(
-                                    value: 2.6,
+                                    value: minYellowVoltage,
                                     min: 0,
                                     max: 10,
                                     step: 0.1,
                                     decimals: 2,
-                                    onChanged: (value) {},
+                                    onChanged: (value) {
+                                      minYellowVoltage = value;
+                                    },
                                     incrementIcon: const Icon(
                                       Icons.add,
                                       color: Colors.black,
@@ -111,12 +128,14 @@ class SystemSafety extends StatelessWidget {
                                 const SizedBox(height: 8),
                                 IntrinsicWidth(
                                   child: SpinBox(
-                                    value: 2.4,
+                                    value: minRedVoltage,
                                     min: 0.00,
                                     max: 10.00,
                                     step: 0.1,
                                     decimals: 2,
-                                    onChanged: (value) {},
+                                    onChanged: (value) {
+                                      minRedVoltage = value;
+                                    },
                                     incrementIcon: const Icon(
                                       Icons.add,
                                       color: Colors.black,
@@ -197,12 +216,14 @@ class SystemSafety extends StatelessWidget {
                                 const SizedBox(height: 8),
                                 IntrinsicWidth(
                                   child: SpinBox(
-                                    value: 4.21,
+                                    value: maxYellowVoltage,
                                     min: 0.0,
                                     max: 10.0,
                                     decimals: 2,
                                     step: 0.1,
-                                    onChanged: (value) {},
+                                    onChanged: (value) {
+                                      maxYellowVoltage = value;
+                                    },
                                     incrementIcon: const Icon(
                                       Icons.add,
                                       color: Colors.black,
@@ -231,12 +252,14 @@ class SystemSafety extends StatelessWidget {
                                 const SizedBox(height: 8),
                                 IntrinsicWidth(
                                   child: SpinBox(
-                                    value: 4.22,
+                                    value: maxRedVoltage,
                                     min: 0.0,
                                     max: 10.0,
                                     decimals: 2,
                                     step: 0.1,
-                                    onChanged: (value) {},
+                                    onChanged: (value) {
+                                      maxRedVoltage = value;
+                                    },
                                     incrementIcon: const Icon(
                                       Icons.add,
                                       color: Colors.black,
@@ -320,12 +343,14 @@ class SystemSafety extends StatelessWidget {
                             const SizedBox(height: 8),
                             IntrinsicWidth(
                               child: SpinBox(
-                                value: 6.00,
+                                value: maxRedCurrent,
                                 min: 0.0,
                                 max: 10.0,
                                 decimals: 2,
                                 step: 0.1,
-                                onChanged: (value) {},
+                                onChanged: (value) {
+                                  maxRedCurrent = value;
+                                },
                                 incrementIcon: const Icon(
                                   Icons.add,
                                   color: Colors.black,
@@ -373,19 +398,18 @@ class SystemSafety extends StatelessWidget {
                 children: [
                   ElevatedButton(
                     onPressed: () {
-                      Navigator.of(context).maybePop();
+                      backend.setSafetyLimits(minYellowVoltage, minRedVoltage,
+                          maxYellowVoltage, maxRedVoltage, maxRedCurrent);
                     },
                     child: const Text("Save"),
                     style: ElevatedButton.styleFrom(primary: Colors.green),
                   ),
-                  const SizedBox(width: 8),
+                  /*const SizedBox(width: 8),
                   ElevatedButton(
-                    onPressed: () {
-                      Navigator.of(context).maybePop();
-                    },
+                    onPressed: () {},
                     child: const Text("Reset to Default"),
                     style: ElevatedButton.styleFrom(primary: Colors.blue),
-                  ),
+                  ),*/
                 ],
               ),
               const SizedBox(height: 16),

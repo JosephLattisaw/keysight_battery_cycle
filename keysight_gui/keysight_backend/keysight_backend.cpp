@@ -144,7 +144,15 @@ EXPORT void finish_save_sequence() {
 
 EXPORT void set_safety_limits(double min_yellow_voltage, double min_red_voltage, double max_yellow_voltage, double max_red_voltage,
                               double max_red_current) {
-    backend->safety_limits->set_safety_limits(min_yellow_voltage, min_red_voltage, max_yellow_voltage, max_red_voltage, max_red_current);
+    if (backend) {
+        backend->safety_limits->set_safety_limits(min_yellow_voltage, min_red_voltage, max_yellow_voltage, max_red_voltage, max_red_current);
+    }
+}
+
+EXPORT void load_safety_limits() {
+    if (backend) {
+        backend->safety_limits->load_safety_limits();
+    }
 }
 
 EXPORT void create_backend(bool using_dart = false, std::int64_t load_sequences_port = 0, std::int64_t fin_load_sequences_port = 0,

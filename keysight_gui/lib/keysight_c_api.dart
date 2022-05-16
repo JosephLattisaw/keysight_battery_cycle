@@ -174,6 +174,10 @@ class KeysightCAPI extends ChangeNotifier {
         .lookup<ffi.NativeFunction<SelectCellFFI>>("select_cell")
         .asFunction();
 
+    setSafetyLimits = lib
+        .lookup<ffi.NativeFunction<SetSafetyLimitsFFI>>("set_safety_limits")
+        .asFunction();
+
     ReceivePort loadSequencesPort = ReceivePort()
       ..listen((data) {
         print("seq received $data");
@@ -422,6 +426,20 @@ class KeysightCAPI extends ChangeNotifier {
 
     int keysightUint16NativePort = keysightUint16Port.sendPort.nativePort;
 
+    ReceivePort safetiesPort = ReceivePort()
+      ..listen((data) {
+        print("received safeties data $data");
+        if (data.length == 5) {
+          minYellowVoltage = data.elementAt(0).toDouble();
+          minRedVoltage = data.elementAt(1).toDouble();
+          maxYellowVoltage = data.elementAt(2).toDouble();
+          maxRedVoltage = data.elementAt(3).toDouble();
+          maxRedCurrent = data.elementAt(4).toDouble();
+        }
+      });
+
+    int safetiesNativePort = safetiesPort.sendPort.nativePort;
+
     int keysightConnectionNativePort =
         keysightConnectionPort.sendPort.nativePort;
 
@@ -446,7 +464,8 @@ class KeysightCAPI extends ChangeNotifier {
         slotStatusesNativePort,
         cellTimesNativePort,
         cyclesStatusNativePort,
-        cellTotalTimesNativePort);
+        cellTotalTimesNativePort,
+        safetiesNativePort);
     _runService();
 
     final sequences = getSequences();
@@ -689,6 +708,13 @@ class KeysightCAPI extends ChangeNotifier {
   late SequencesC getSequences;
   late SelectCellC selectCell;
   late VoidFunctionC clearCells;
+  late SetSafetyLimitsC setSafetyLimits;
+
+  double minYellowVoltage = 0.0;
+  double minRedVoltage = 0.0;
+  double maxYellowVoltage = 0.0;
+  double maxRedVoltage = 0.0;
+  double maxRedCurrent = 0.0;
 }
 
 KeysightCAPI? keysightCAPI;
@@ -719,7 +745,8 @@ typedef CreateBackendFFI = ffi.Void Function(
     ffi.Int64 slotStatusesPort,
     ffi.Int64 cellTimesPort,
     ffi.Int64 cyclesStatusPort,
-    ffi.Int64 cellTotalTimesPort);
+    ffi.Int64 cellTotalTimesPort,
+    ffi.Int64 safetiesPort);
 
 typedef CreateBackendC = void Function(
     int usingDart,
@@ -738,7 +765,8 @@ typedef CreateBackendC = void Function(
     int slotStatusesPort,
     int cellTimesPort,
     int cyclesStatusPort,
-    int cellTotalTimesPort);
+    int cellTotalTimesPort,
+    int safetiesPort);
 
 //start save sequence
 typedef StartSaveSequenceFFI = ffi.Void Function(ffi.Pointer<Utf8> name,
@@ -751,6 +779,21 @@ typedef AddSaveSequenceStepFFI = ffi.Void Function(
     ffi.Int32 mode, ffi.Int32 seconds, ffi.Double current, ffi.Double voltage);
 typedef AddSaveSequenceStepC = void Function(
     int mode, int seconds, double current, double voltage);
+
+//set safety limits
+typedef SetSafetyLimitsFFI = ffi.Void Function(
+    ffi.Double min_yellow_voltage,
+    ffi.Double min_red_voltage,
+    ffi.Double max_yellow_voltage,
+    ffi.Double max_red_voltage,
+    ffi.Double max_red_current);
+
+typedef SetSafetyLimitsC = void Function(
+    double min_yellow_voltage,
+    double min_red_voltage,
+    double max_yellow_voltage,
+    double max_red_voltage,
+    double max_red_current);
 
 //add save sequence test
 typedef AddSaveSequenceTestFFI = ffi.Void Function(

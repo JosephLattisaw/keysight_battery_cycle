@@ -25,11 +25,6 @@ Backend::Backend(boost::asio::io_service &io_service, ActiveCardsCallback ac_cb,
       load_safeties_callback{ls_cb} {
     sequence_parser = std::make_shared<SequenceParser>();
 
-    safety_limits = std::make_shared<SafetyLimits>([&](std::array<double, 5> safeties) {
-        keysight_service.post(std::bind(&Keysight::set_safety_limits, keysight, 0, 1, 2, 3, 4));
-        load_safeties_callback(safeties);
-    });
-
     // starting thread to start keysight stuff
     keysight_thread = std::thread(std::bind(&Backend::worker_thread, this));
 }
@@ -96,8 +91,11 @@ void Backend::slot_statuses_request(profile_status_type statuses) { slot_status_
 
 void Backend::cycle_statuses_request(profile_status_type statuses) { cycles_status_callback(statuses); };
 
-// TODO this should have some sort of conditional variable to wait for thread instead of this post thing
-void Backend::keysight_thread_is_up() {  // ysight_service.post(std::bind(&Keysight::connect, keysight));
+void Backend::keysight_thread_is_up() {
+    safety_limits = std::make_shared<SafetyLimits>([&](std::array<double, 5> safeties) {
+        keysight_service.post(std::bind(&Keysight::set_safety_limits, keysight, 0, 1, 2, 3, 4));
+        load_safeties_callback(safeties);
+    });
 }
 
 void Backend::connect_keysight() { keysight_service.post(std::bind(&Keysight::connect, keysight)); }

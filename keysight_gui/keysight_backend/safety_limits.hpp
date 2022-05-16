@@ -16,6 +16,7 @@ public:
                            double max_red_current);
 
 private:
+    void save_default_if_no_file();
     void load_safety_value(boost::property_tree::ptree &tree, double &value, std::string key);
 
     double min_yellow_voltage = 2.6;
