@@ -29,7 +29,6 @@ class TestSequenceChartTab extends HookWidget {
         );
       }
     }
-    count += 1;
   }
 
   void _updateData() {
@@ -45,6 +44,8 @@ class TestSequenceChartTab extends HookWidget {
     _updateDataSourceAsync();
     return;
   }
+
+  Future<void> _updateDataAsync() async {}
 
   @override
   Widget build(BuildContext context) {
