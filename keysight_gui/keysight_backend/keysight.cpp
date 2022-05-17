@@ -968,7 +968,7 @@ void Keysight::log_data(std::uint32_t test, std::vector<std::uint32_t> cells) {
     }
 
     for (const auto &i : currents) {
-        if (i > max_red_current) {
+        if (std::abs(i) > max_red_current) {
             stop_sequence(test, 0, cells);
             limit_crossed_callback(1, test);
             return;
