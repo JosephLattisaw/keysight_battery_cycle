@@ -15,7 +15,7 @@ public:
     Keysight(boost::asio::io_service &io_service, ActiveCardsCallback active_cards_callback, ConnectionStatusCallback connection_status_callback,
              PortDoubleCallback port_double_callback, PortUint16Callback port_uint16_callback, LoadedProfilesCallback loaded_profiles_callback,
              ProfilesStatusCallback profile_status_callback, ProfilesStatusCallback slot_status_callback, TimeStatusCallback time_status_callback,
-             ProfilesStatusCallback cycles_status_callback, TimeStatusCallback total_time_callback);
+             ProfilesStatusCallback cycles_status_callback, TimeStatusCallback total_time_callback, LimitCrossedCallback limit_crossed_callback);
     ~Keysight();
 
     void connect();
@@ -62,11 +62,8 @@ private:
 
     void start_logging(std::uint32_t test, std::vector<std::uint32_t> cells);
     void stop_logging(std::uint32_t test, std::vector<std::uint32_t> cells);
-    void log_data(std::uint32_t cell, std::uint32_t slot, double volts, double current, double cap_ahr, double cap_whr);
     void log_data(std::uint32_t test, std::vector<std::uint32_t> cells);
 
-    std::map<std::uint32_t, std::uint32_t> logging_map;
-    // std::vector<std::ofstream *> logging_files;
     std::array<std::ofstream *, 8> logging_files;
 
     void update_connection_status(bool flag);
@@ -101,6 +98,7 @@ private:
     TimeStatusCallback time_status_callback;
     TimeStatusCallback total_time_callback;
     ProfilesStatusCallback cycles_status_callback;
+    LimitCrossedCallback limit_crossed_callback;
 
     std::vector<std::vector<std::string>> last_valid_verbose_response;
 

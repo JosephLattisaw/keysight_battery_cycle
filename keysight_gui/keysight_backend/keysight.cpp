@@ -18,7 +18,7 @@ using namespace keysight;
 
 Keysight::Keysight(boost::asio::io_service &io_service, ActiveCardsCallback ac_cb, ConnectionStatusCallback conn_cb, PortDoubleCallback pd_cb,
                    PortUint16Callback pu16_cb, LoadedProfilesCallback lp_cb, ProfilesStatusCallback ps_cb, ProfilesStatusCallback ss_cb,
-                   TimeStatusCallback ts_cb, ProfilesStatusCallback cyc_cb, TimeStatusCallback tt_cb)
+                   TimeStatusCallback ts_cb, ProfilesStatusCallback cyc_cb, TimeStatusCallback tt_cb, LimitCrossedCallback lc_cb)
     : io_service(io_service),
       cell_status_timer(io_service),
       active_cards_callback{ac_cb},
@@ -30,7 +30,8 @@ Keysight::Keysight(boost::asio::io_service &io_service, ActiveCardsCallback ac_c
       slot_status_callback{ss_cb},
       time_status_callback{ts_cb},
       cycles_status_callback{cyc_cb},
-      total_time_callback{tt_cb} {
+      total_time_callback{tt_cb},
+      limit_crossed_callback{lc_cb} {
     currently_loaded_profiles.fill("");
     current_profile_statuses.fill(0);
     current_seq_uptime.fill(0.0);
@@ -445,17 +446,6 @@ bool Keysight::get_cell_status() {
                     steps.push_back(std::stoi(x.at(2)));
                     volts.push_back(std::stod(x.at(3)));
                     current.push_back(std::stod(x.at(4)));
-                    /*auto cell = ((i + 1) * 1000) + (k + 1);
-                    if (logging_map.find(cell) != logging_map.end()) {
-                        // we have an open file
-                        auto slot = logging_map.at(cell);
-
-                        // TODO some bounds checking
-                        auto cap_ahr = cell_cap_ahr_data.at(i).at(k);
-                        auto cap_whr = cell_cap_whr_data.at(i).at(k);
-
-                        log_data(cell, slot, volts.back(), current.back(), cap_ahr, cap_whr);
-                    }*/
                 } else {
                     LOG_ERR << "invalid response size";
                     return false;
@@ -867,46 +857,25 @@ void Keysight::start_logging(std::uint32_t test, std::vector<std::uint32_t> cell
         *logging_files.at(test) << "\n";
 
         logging_files.at(test)->flush();
-
-        for (const auto &i : cells) {
-            logging_map[i] = logging_files.size() - 1;
-        }
     }
 }
 
 void Keysight::stop_logging(std::uint32_t test, std::vector<std::uint32_t> cells) {
     auto x = logging_files.at(test);
-    x->close();
-    delete x;
-    logging_files.at(test) = nullptr;
-
-    logging_map.clear();
+    if (x != nullptr) {
+        x->close();
+        delete x;
+        logging_files.at(test) = nullptr;
+    }
 }
 
-void Keysight::log_data(std::uint32_t cell, std::uint32_t slot, double volts, double current, double cap_ahr, double cap_whr) {
-    LOG_OUT << "log data called on: " << cell << ", slot: " << slot;
-
-    std::time_t time = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-    // TODO some bounds checking
-    auto s1 = std::to_string(cell) + ", ";
-    auto s2 = std::to_string(volts) + ", ";
-    auto s3 = std::to_string(current) + ", ";
-    auto s4 = std::to_string(cap_ahr) + ", ";
-    auto s5 = std::to_string(cap_whr) + ",";
-    auto s6 = std::string(std::ctime(&time));
-    auto s = s1 + s2 + s3 + s4 + s5 + s6;
-
-    *logging_files.at(slot) << s;
-    logging_files.at(slot)->flush();
-}
-
-void Keysight::log_data(std::uint32_t slot, std::vector<std::uint32_t> cells) {
+void Keysight::log_data(std::uint32_t test, std::vector<std::uint32_t> cells) {
     std::time_t time = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
     auto timestamp = std::string(std::ctime(&time));
     timestamp.erase(std::remove(timestamp.begin(), timestamp.end(), '\r'), timestamp.end());
     timestamp.erase(std::remove(timestamp.begin(), timestamp.end(), '\n'), timestamp.end());
 
-    auto elapsed_time = total_seq_uptime.at(slot);
+    auto elapsed_time = total_seq_uptime.at(test);
     int seconds = static_cast<std::uint64_t>(elapsed_time) % 60;
     int minutes = (seconds / 60) % 60;
     int hours = (minutes / 60) % 24;
@@ -982,8 +951,28 @@ void Keysight::log_data(std::uint32_t slot, std::vector<std::uint32_t> cells) {
         }
 
         s += "\n";
-        *logging_files.at(slot) << s;
-        logging_files.at(slot)->flush();
+        *logging_files.at(test) << s;
+        logging_files.at(test)->flush();
+    }
+
+    // check for voltage limits first
+    for (const auto &i : voltages) {
+        if (i < min_red_voltage || i > max_red_voltage) {
+            stop_sequence(test, 0, cells);
+            limit_crossed_callback(1, test);
+
+            return;
+        } else if (i < min_yellow_voltage || i > max_yellow_voltage) {
+            limit_crossed_callback(0, test);
+        }
+    }
+
+    for (const auto &i : currents) {
+        if (i > max_red_current) {
+            stop_sequence(test, 0, cells);
+            limit_crossed_callback(1, test);
+            return;
+        }
     }
 }
 
@@ -1159,6 +1148,7 @@ void Keysight::stop_sequence(std::uint32_t test, std::uint32_t slot, std::vector
         successively_slots[test] = false;
         slot_status_callback(slot_status);
     }
+    LOG_OUT << "slot status updated";
 
 #ifndef SOFTWARE_ONLY
     auto status = viPrintf(session, abort.c_str());
@@ -1171,6 +1161,7 @@ void Keysight::stop_sequence(std::uint32_t test, std::uint32_t slot, std::vector
 #endif
 
     stop_logging(test, cells);
+    LOG_OUT << "logging stopped";
 
     if (cells_being_run_map.find(test) != cells_being_run_map.end()) {
         cells_being_run_map.erase(test);

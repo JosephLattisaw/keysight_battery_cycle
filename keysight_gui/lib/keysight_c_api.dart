@@ -438,13 +438,18 @@ class KeysightCAPI extends ChangeNotifier {
           maxRedCurrent = data.elementAt(4).toDouble();
 
           notifyListeners();
-          limitHit?.call(false);
-          limitHit?.call(false);
-          limitHit?.call(false);
         }
       });
 
     int safetiesNativePort = safetiesPort.sendPort.nativePort;
+
+    ReceivePort limitCrossedPort = ReceivePort()
+      ..listen((data) {
+        print("received limit crossed! $data");
+        limitHit?.call(data.elementAt(0) == 0 ? false : true);
+      });
+
+    int limitCrossedNativePort = limitCrossedPort.sendPort.nativePort;
 
     int keysightConnectionNativePort =
         keysightConnectionPort.sendPort.nativePort;
@@ -471,7 +476,8 @@ class KeysightCAPI extends ChangeNotifier {
         cellTimesNativePort,
         cyclesStatusNativePort,
         cellTotalTimesNativePort,
-        safetiesNativePort);
+        safetiesNativePort,
+        limitCrossedNativePort);
     _runService();
 
     final sequences = getSequences();
@@ -752,7 +758,8 @@ typedef CreateBackendFFI = ffi.Void Function(
     ffi.Int64 cellTimesPort,
     ffi.Int64 cyclesStatusPort,
     ffi.Int64 cellTotalTimesPort,
-    ffi.Int64 safetiesPort);
+    ffi.Int64 safetiesPort,
+    ffi.Int64 limitCrossedPort);
 
 typedef CreateBackendC = void Function(
     int usingDart,
@@ -772,7 +779,8 @@ typedef CreateBackendC = void Function(
     int cellTimesPort,
     int cyclesStatusPort,
     int cellTotalTimesPort,
-    int safetiesPort);
+    int safetiesPort,
+    int limitCrossedPort);
 
 //start save sequence
 typedef StartSaveSequenceFFI = ffi.Void Function(ffi.Pointer<Utf8> name,

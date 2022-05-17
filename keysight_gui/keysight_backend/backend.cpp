@@ -10,7 +10,8 @@
 
 Backend::Backend(boost::asio::io_service &io_service, ActiveCardsCallback ac_cb, ConnectionStatusCallback conn_cb, PortDoubleCallback pd_cb,
                  PortUint16Callback pu16_cb, LoadedProfilesCallback lp_cb, ProfilesStatusCallback ps_cb, ProfilesStatusCallback ss_cb,
-                 TimeStatusCallback ts_cb, ProfilesStatusCallback cyc_cb, TimeStatusCallback tt_cb, LoadSafetiesCallback ls_cb)
+                 TimeStatusCallback ts_cb, ProfilesStatusCallback cyc_cb, TimeStatusCallback tt_cb, LoadSafetiesCallback ls_cb,
+                 LimitCrossedCallback lc_cb)
     : io_service(io_service),
       active_cards_callback{ac_cb},
       connection_status_callback{conn_cb},
@@ -22,7 +23,8 @@ Backend::Backend(boost::asio::io_service &io_service, ActiveCardsCallback ac_cb,
       time_status_callback{ts_cb},
       cycles_status_callback{cyc_cb},
       total_time_callback{tt_cb},
-      load_safeties_callback{ls_cb} {
+      load_safeties_callback{ls_cb},
+      limit_crossed_callback{lc_cb} {
     sequence_parser = std::make_shared<SequenceParser>();
 
     // starting thread to start keysight stuff
@@ -57,7 +59,8 @@ void Backend::worker_thread() {
         [&](profile_status_type statuses) { io_service.post(std::bind(&Backend::slot_statuses_request, this, statuses)); },
         [&](uptime_time_type statuses) { io_service.post(std::bind(&Backend::time_statuses_request, this, statuses)); },
         [&](profile_status_type statuses) { io_service.post(std::bind(&Backend::cycle_statuses_request, this, statuses)); },
-        [&](uptime_time_type statuses) { io_service.post(std::bind(&Backend::total_time_statuses_request, this, statuses)); });
+        [&](uptime_time_type statuses) { io_service.post(std::bind(&Backend::total_time_statuses_request, this, statuses)); },
+        [&](int critical, int test) { io_service.post(std::bind(&Backend::limit_crossed_request, this, critical, test)); });
 
     io_service.post(std::bind(&Backend::keysight_thread_is_up, this));
 
@@ -74,6 +77,8 @@ void Backend::connection_status_request(bool status) { connection_status_callbac
 void Backend::port_double_data_request(PortTypes::port_double_data_type data_type, map_double_data_type data) {
     port_double_callback(data_type, data);
 }
+
+void Backend::limit_crossed_request(int critical, int test) { limit_crossed_callback(critical, test); }
 
 void Backend::port_uint16_data_request(PortTypes::port_uint16_data_type data_type, map_uint16_data_type data) {
     port_uint16_callback(data_type, data);

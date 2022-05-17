@@ -161,7 +161,7 @@ EXPORT void create_backend(bool using_dart = false, std::int64_t load_sequences_
                            std::int64_t cell_status_port = 0, std::int64_t keysight_uint16_port = 0, std::int64_t loaded_profiles_port = 0,
                            std::int64_t profile_statuses_port = 0, std::int64_t slot_statuses_port = 0, std::int64_t time_statuses_port = 0,
                            std::int64_t cycle_statuses_port = 0, std::int64_t total_time_statuses_port = 0,
-                           std::int64_t load_safeties_callback_port = 0) {
+                           std::int64_t load_safeties_callback_port = 0, std::int64_t limit_crossed_port = 0) {
     if (!backend)
         backend = std::make_shared<Backend>(
             io_service,
@@ -248,6 +248,12 @@ EXPORT void create_backend(bool using_dart = false, std::int64_t load_sequences_
                 if (using_dart) {
                     std::vector<double> data(safeties.begin(), safeties.end());
                     post_data_object(load_safeties_callback_port, data);
+                }
+            },
+            [&, using_dart, limit_crossed_port](int critical, int test) {
+                if (using_dart) {
+                    std::vector<std::uint16_t> data = {static_cast<std::uint16_t>(critical), static_cast<std::uint16_t>(test)};
+                    post_data_object(limit_crossed_port, data);
                 }
             });
     else

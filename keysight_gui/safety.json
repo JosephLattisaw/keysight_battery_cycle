@@ -1,8 +1,8 @@
 {
     "api": "1.0",
-    "min_yellow_voltage": "2.700000",
-    "min_red_voltage": "2.300000",
-    "max_yellow_voltage": "4.310000",
-    "max_red_voltage": "4.320000",
-    "max_red_current": "6.100000"
+    "min_yellow_voltage": "0.600000",
+    "min_red_voltage": "0.800000",
+    "max_yellow_voltage": "0.810000",
+    "max_red_voltage": "0.820000",
+    "max_red_current": "0.500000"
 }

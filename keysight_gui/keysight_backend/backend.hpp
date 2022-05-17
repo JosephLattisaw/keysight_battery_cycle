@@ -17,7 +17,8 @@ public:
     Backend(boost::asio::io_service &io_service, ActiveCardsCallback active_cards_callback, ConnectionStatusCallback connection_status_callback,
             PortDoubleCallback port_double_callback, PortUint16Callback port_uint16_callback, LoadedProfilesCallback loaded_profiles_callback,
             ProfilesStatusCallback profiles_status_callback, ProfilesStatusCallback slot_status_callback, TimeStatusCallback time_status_callback,
-            ProfilesStatusCallback cycles_status_callback, TimeStatusCallback total_time_callback, LoadSafetiesCallback load_safeties_callback);
+            ProfilesStatusCallback cycles_status_callback, TimeStatusCallback total_time_callback, LoadSafetiesCallback load_safeties_callback,
+            LimitCrossedCallback limit_crossed_callback);
     ~Backend();
 
     // TODO find out if we can make this private
@@ -31,6 +32,7 @@ public:
     void total_time_statuses_request(uptime_time_type statuses);
     void port_double_data_request(PortTypes::port_double_data_type data_type, map_double_data_type data);
     void port_uint16_data_request(PortTypes::port_uint16_data_type data_type, map_uint16_data_type data);
+    void limit_crossed_request(int critical, int test);
 
     std::shared_ptr<SequenceParser> sequence_parser;
     std::shared_ptr<SafetyLimits> safety_limits;
@@ -65,6 +67,7 @@ private:
     TimeStatusCallback time_status_callback;
     TimeStatusCallback total_time_callback;
     LoadSafetiesCallback load_safeties_callback;
+    LimitCrossedCallback limit_crossed_callback;
 };
 
 #endif

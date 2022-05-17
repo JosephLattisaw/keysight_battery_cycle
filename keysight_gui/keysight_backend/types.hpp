@@ -89,5 +89,6 @@ using ProfilesStatusCallback = std::function<void(profile_status_type)>;
 using TimeStatusCallback = std::function<void(uptime_time_type)>;
 
 using LoadSafetiesCallback = std::function<void(std::array<double, 5>)>;
+using LimitCrossedCallback = std::function<void(unsigned int, unsigned int)>;
 
 #endif
