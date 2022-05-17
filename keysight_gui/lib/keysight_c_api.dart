@@ -480,6 +480,7 @@ class KeysightCAPI extends ChangeNotifier {
         limitCrossedNativePort);
     _runService();
 
+//TODO free this because it's a memeory leak
     final sequences = getSequences();
     for (int i = 0; i < sequences.size; i++) {
       final sequenceInfo = List<dynamic>.empty(growable: true);
@@ -537,14 +538,7 @@ class KeysightCAPI extends ChangeNotifier {
               "test $j:, test type: $test_type, test action: $test_action, value: $value, time type: $time_type, time limit: $time_limit");
 
           stepTests.add(tests);
-          malloc.free(test);
         }
-
-        if (step.ref.tests_size > 0) {
-          malloc.free(step.ref.tests);
-        }
-
-        malloc.free(step);
 
         steps.add(stepTests);
         sequenceSteps.add(steps);
@@ -552,22 +546,9 @@ class KeysightCAPI extends ChangeNotifier {
 
       sequenceInfo.add(sequenceSteps);
 
-      if (sequence.ref.steps_size > 0) {
-        malloc.free(sequence.ref.steps);
-      }
-
       addSavedSequence(sequence.ref.name.toDartString());
 
-      malloc.free(sequence.ref.name);
-      malloc.free(sequence.ref.serial);
-      malloc.free(sequence.ref.comments);
-      malloc.free(sequence);
-
       loadedSequences.add(sequenceInfo);
-    }
-
-    if (sequences.size > 0) {
-      malloc.free(sequences.sequences);
     }
   }
 
