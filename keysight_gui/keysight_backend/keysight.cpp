@@ -959,6 +959,8 @@ void Keysight::log_data(std::uint32_t test, std::vector<std::uint32_t> cells) {
     for (const auto &i : voltages) {
         if (i < min_red_voltage || i > max_red_voltage) {
             LOG_OUT << "voltage safety limit hit: " << i << ", min: " << min_red_voltage << ", max: " << max_red_voltage;
+            *logging_files.at(test) << "voltage safety limit hit: " << i << ", min: " << min_red_voltage << ", max: " << max_red_voltage << "\n";
+            logging_files.at(test)->flush();
             io_service.post(std::bind(&Keysight::stop_sequence, this, test, 0, cells));
             limit_crossed_callback(1, test);
 
@@ -971,6 +973,8 @@ void Keysight::log_data(std::uint32_t test, std::vector<std::uint32_t> cells) {
     for (const auto &i : currents) {
         if (std::abs(i) > max_red_current) {
             LOG_OUT << "current safety limit hit: " << i << ", max: " << max_red_current;
+            *logging_files.at(test) << "current safety limit hit: " << i << ", max: " << max_red_current << "\n";
+            logging_files.at(test)->flush();
             io_service.post(std::bind(&Keysight::stop_sequence, this, test, 0, cells));
             limit_crossed_callback(1, test);
             return;
