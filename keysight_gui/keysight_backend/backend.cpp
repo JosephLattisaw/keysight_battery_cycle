@@ -98,7 +98,8 @@ void Backend::cycle_statuses_request(profile_status_type statuses) { cycles_stat
 
 void Backend::keysight_thread_is_up() {
     safety_limits = std::make_shared<SafetyLimits>([&](std::array<double, 5> safeties) {
-        keysight_service.post(std::bind(&Keysight::set_safety_limits, keysight, 0, 1, 2, 3, 4));
+        keysight_service.post(
+            std::bind(&Keysight::set_safety_limits, keysight, safeties.at(0), safeties.at(1), safeties.at(2), safeties.at(3), safeties.at(4)));
         load_safeties_callback(safeties);
     });
 }

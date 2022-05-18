@@ -679,10 +679,10 @@ bool Keysight::get_cell_verbose(int card_number) {
 
     return true;
 #else
-    std::vector<double> cell_voltage = {12.0, 1.0,  42.0, 33.0, 44.0, 5.0,  6.0,  7.0,  8.0,  9.0,  10.0, 11.0, 12.0, 13.0, 14.0, 15.0,
-                                        16.0, 17.0, 18.0, 19.0, 20.0, 21.0, 22.0, 23.0, 24.0, 25.0, 26.0, 27.0, 28.0, 29.0, 30.0, 31.1};
-    std::vector<double> cell_current = {12.0, 1.0,  42.0, 33.0, 44.0, 5.0,  6.0,  7.0,  8.0,  9.0,  10.0, 11.0, 12.0, 13.0, 14.0, 15.0,
-                                        16.0, 17.0, 18.0, 19.0, 20.0, 21.0, 22.0, 23.0, 24.0, 25.0, 26.0, 27.0, 28.0, 29.0, 30.0, 31.1};
+    std::vector<double> cell_voltage = {4.032331, 4.028462, 42.0, 33.0, 44.0, 5.0,  6.0,  7.0,  8.0,  9.0,  10.0, 11.0, 12.0, 13.0, 14.0, 15.0,
+                                        16.0,     17.0,     18.0, 19.0, 20.0, 21.0, 22.0, 23.0, 24.0, 25.0, 26.0, 27.0, 28.0, 29.0, 30.0, 31.1};
+    std::vector<double> cell_current = {-0.0003, -0.00026, 42.0, 33.0, 44.0, 5.0,  6.0,  7.0,  8.0,  9.0,  10.0, 11.0, 12.0, 13.0, 14.0, 15.0,
+                                        16.0,    17.0,     18.0, 19.0, 20.0, 21.0, 22.0, 23.0, 24.0, 25.0, 26.0, 27.0, 28.0, 29.0, 30.0, 31.1};
     std::vector<std::uint16_t> cell_sequence = {12, 1,  42, 33, 44, 5,  6,  7,  8,  9,  10, 11, 12, 13, 14, 15,
                                                 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31};
     std::vector<std::uint16_t> cell_step = {3,  2,  12, 33, 44, 5,  6,  7,  8,  9,  10, 11, 12, 13, 14, 15,
@@ -958,6 +958,7 @@ void Keysight::log_data(std::uint32_t test, std::vector<std::uint32_t> cells) {
     // check for voltage limits first
     for (const auto &i : voltages) {
         if (i < min_red_voltage || i > max_red_voltage) {
+            LOG_OUT << "voltage safety limit hit: " << i << ", min: " << min_red_voltage << ", max: " << max_red_voltage;
             stop_sequence(test, 0, cells);
             limit_crossed_callback(1, test);
 
@@ -969,6 +970,7 @@ void Keysight::log_data(std::uint32_t test, std::vector<std::uint32_t> cells) {
 
     for (const auto &i : currents) {
         if (std::abs(i) > max_red_current) {
+            LOG_OUT << "current safety limit hit: " << i << ", max: " << max_red_current;
             stop_sequence(test, 0, cells);
             limit_crossed_callback(1, test);
             return;
