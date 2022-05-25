@@ -35,7 +35,7 @@ include_directories(${visa_include_directory})
 
 
 set(sequence_parsing_SRC sequences/sequence_parser.cpp)
-set(keysight_backend_SRC include/dart_api_dl.c keysight_backend.cpp backend.cpp ${sequence_parsing_SRC} logger.cpp common.cpp keysight.cpp)
+set(keysight_backend_SRC include/dart_api_dl.c keysight_backend.cpp backend.cpp ${sequence_parsing_SRC} logger.cpp common.cpp)
 
 add_library(keysight_backend SHARED ${keysight_backend_SRC})
 target_link_libraries(keysight_backend ${VISA_LIBRARY} ${external_libraries} ${Boost_LIBRARIES})
