@@ -1,6 +1,6 @@
 #include "visa_handler.hpp"
 
-#include "logger.hpp"
+#include <logger.hpp>
 
 #define LOG_OUT LogOut("VisaHandler")
 #define LOG_ERR LogOut("VisaHandler")
@@ -8,8 +8,8 @@
 #define BUFFER_SIZE 65535
 
 namespace visa_data {
-ViSession resource_manager = NULL;
-ViSession session = NULL;
+ViSession resource_manager = 0;
+ViSession session = 0;
 }  // namespace visa_data
 
 VisaHandler::VisaHandler(std::string _visa_address, ConnectionStatusCallback _connection_status_callback)
@@ -50,8 +50,8 @@ void VisaHandler::disconnect() {
         viClose(visa_data::session);
         viClose(visa_data::resource_manager);
 
-        visa_data::resource_manager = NULL;
-        visa_data::session = NULL;
+        visa_data::resource_manager = 0;
+        visa_data::session = 0;
 
         update_connection_status(false);
     } else

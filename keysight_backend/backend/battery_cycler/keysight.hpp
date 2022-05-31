@@ -4,10 +4,9 @@
 #include <boost/asio.hpp>
 #include <memory>
 
-#include "../visa_handler.hpp"
+#include "../../visa_handler/visa_handler.hpp"
+#include "../types.hpp"
 #include "module_card.hpp"
-
-//#define SOFTWARE_ONLY 1
 
 class Keysight {
 public:

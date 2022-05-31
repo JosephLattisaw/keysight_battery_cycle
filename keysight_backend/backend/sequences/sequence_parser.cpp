@@ -3,8 +3,7 @@
 #include <boost/property_tree/ini_parser.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
-
-#include "../logger.hpp"
+#include <logger.hpp>
 
 #define LOG_OUT LogOut("sequence_parser")
 #define LOG_ERR LogOut("sequence parser")
@@ -25,7 +24,7 @@ void SequenceParser::save_sequence(std::shared_ptr<Sequence> sequence) {
         }
 
         // putting in an api number in case we ever change up the format after a versions been released
-        property_tree.put(API_PATHNAME, API_VERSION_NUMBER);
+        property_tree.put(API_PATHNAME, std::to_string(API_VERSION_NUMBER));
 
         // delete the node (because we are overwriting it)
         // auto seq_tree
@@ -47,21 +46,21 @@ void SequenceParser::save_sequence(std::shared_ptr<Sequence> sequence) {
             if (step) {
                 auto step_id = step->get_step_id() + 1;
                 auto steps_pretext = SEQUENCES_PATHNAME + "." + sequence_name + "." + STEPS_PATHNAME + "." + std::to_string(step_id) + ".";
-                property_tree.put(steps_pretext + MODE_PATHNAME, step->get_mode());
-                property_tree.put(steps_pretext + DURATION_PATHNAME, step->get_duration());
-                property_tree.put(steps_pretext + CURRENT_LIMIT_PATHNAME, step->get_current_limit());
-                property_tree.put(steps_pretext + VOLTAGE_LIMIT_PATHNAME, step->get_voltage_limit());
+                property_tree.put(steps_pretext + MODE_PATHNAME, std::to_string(static_cast<std::uint8_t>(step->get_mode())));
+                property_tree.put(steps_pretext + DURATION_PATHNAME, std::to_string(step->get_duration()));
+                property_tree.put(steps_pretext + CURRENT_LIMIT_PATHNAME, std::to_string(step->get_current_limit()));
+                property_tree.put(steps_pretext + VOLTAGE_LIMIT_PATHNAME, std::to_string(step->get_voltage_limit()));
 
                 auto tests = step->get_tests();
                 for (const auto &test : tests) {
                     if (test) {
                         auto test_id = test->get_test_id() + 1;
                         auto test_pretext = steps_pretext + TESTS_PATHNAME + "." + std::to_string(test_id) + ".";
-                        property_tree.put(test_pretext + TEST_TYPE_PATHNAME, test->get_test_type());
-                        property_tree.put(test_pretext + TEST_ACTION_PATHNAME, test->get_test_action());
-                        property_tree.put(test_pretext + TEST_VALUE_PATHNAME, test->get_value());
-                        property_tree.put(test_pretext + TEST_TIME_TYPE_PATHNAME, test->get_time_type());
-                        property_tree.put(test_pretext + TEST_TIME_LIMIT_PATHNAME, test->get_time_limit());
+                        property_tree.put(test_pretext + TEST_TYPE_PATHNAME, std::to_string(static_cast<std::uint8_t>(test->get_test_type())));
+                        property_tree.put(test_pretext + TEST_ACTION_PATHNAME, std::to_string(static_cast<std::uint8_t>(test->get_test_action())));
+                        property_tree.put(test_pretext + TEST_VALUE_PATHNAME, std::to_string(test->get_value()));
+                        property_tree.put(test_pretext + TEST_TIME_TYPE_PATHNAME, std::to_string(static_cast<std::uint8_t>(test->get_time_type())));
+                        property_tree.put(test_pretext + TEST_TIME_LIMIT_PATHNAME, std::to_string(test->get_time_limit()));
 
                     } else
                         LOG_ERR << "test pointer did not exist?";
@@ -136,7 +135,8 @@ std::vector<std::shared_ptr<Sequence>> SequenceParser::load_all_sequences() {
                         LOG_OUT << "steps " << steps_it.first;
 
                         std::uint8_t step_id = std::stoi(steps_it.first) - 1;
-                        auto mode = steps_it.second.get<step::mode_type>(MODE_PATHNAME);
+
+                        auto mode = static_cast<step::mode_type>(steps_it.second.get<std::uint8_t>(MODE_PATHNAME));
                         auto duration = steps_it.second.get<std::int32_t>(DURATION_PATHNAME);
                         auto current_limit = steps_it.second.get<std::double_t>(CURRENT_LIMIT_PATHNAME);
                         auto voltage_limit = steps_it.second.get<std::double_t>(VOLTAGE_LIMIT_PATHNAME);
@@ -149,10 +149,10 @@ std::vector<std::shared_ptr<Sequence>> SequenceParser::load_all_sequences() {
                             for (const auto &tests_it : *tests_tree) {
                                 LOG_OUT << "test: " << tests_it.first;
                                 std::uint8_t test_id = std::stoi(tests_it.first) - 1;
-                                auto test_type = tests_it.second.get<test::test_type_t>(TEST_TYPE_PATHNAME);
-                                auto test_action = tests_it.second.get<test::test_action_type>(TEST_ACTION_PATHNAME);
+                                auto test_type = static_cast<test::test_type_t>(tests_it.second.get<std::uint8_t>(TEST_TYPE_PATHNAME));
+                                auto test_action = static_cast<test::test_action_type>(tests_it.second.get<std::uint8_t>(TEST_ACTION_PATHNAME));
                                 auto value = tests_it.second.get<std::double_t>(TEST_VALUE_PATHNAME);
-                                auto time_type = tests_it.second.get<test::time_type_t>(TEST_TIME_TYPE_PATHNAME);
+                                auto time_type = static_cast<test::time_type_t>(tests_it.second.get<std::uint8_t>(TEST_TIME_TYPE_PATHNAME));
                                 auto time_limit = tests_it.second.get<std::uint32_t>(TEST_TIME_LIMIT_PATHNAME);
 
                                 auto test = std::make_shared<SequenceTest>(test_id, test_type, value, time_type, time_limit, test_action);

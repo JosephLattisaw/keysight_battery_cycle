@@ -6,7 +6,7 @@
 namespace sequences {
 namespace step {
 const std::uint8_t MAX_SEQUENCE_ID = 7;
-enum mode_type {
+enum class mode_type : std::uint8_t {
     PRECHARGE = 0,
     CHARGE = 1,
     DISCHARGE = 2,
@@ -15,7 +15,7 @@ enum mode_type {
 }  // namespace step
 
 namespace test {
-enum test_type_t {
+enum class test_type_t : std::uint8_t {
     NONE = 0,
     VOLT_GE = 1,
     VOLT_LE = 2,
@@ -45,14 +45,14 @@ enum test_type_t {
     DIMIN_LE = 26,
 };
 
-enum time_type_t {
+enum class time_type_t : std::uint8_t {
     AT = 0,
     AFTER = 1,
     BEFORE = 2,
     BEFORE_START = 3,
 };
 
-enum test_action_type {
+enum class test_action_type : std::uint8_t {
     FAIL = 0,
     NEXT = 1,
 };

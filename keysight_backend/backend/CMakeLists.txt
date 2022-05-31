@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.0)
-project(keysight_backend VERSION 0.1.0)
+project(backend VERSION 0.1.0)
 
 include(CTest)
 enable_testing()
@@ -32,16 +32,18 @@ endif()
 
 include_directories(${Boost_INCLUDE_DIRS}) 
 include_directories(${visa_include_directory})
+include_directories(../logger)
+include_directories(../visa_handler)
 
-
-set(sequence_parsing_SRC sequences/sequence_parser.cpp)
-set(keysight_backend_SRC include/dart_api_dl.c keysight_backend.cpp backend.cpp ${sequence_parsing_SRC} logger.cpp common.cpp)
+set(sequence_parsing_SRC sequences/sequence_parser.cpp sequences/sequence_step.cpp sequences/sequence_test.cpp sequences/sequence.cpp)
+set(battery_cycling_SRC battery_cycler/battery_cell.cpp battery_cycler/keysight.cpp battery_cycler/module_card.cpp)
+set(keysight_backend_SRC include/dart_api_dl.c keysight_backend.cpp backend.cpp ${sequence_parsing_SRC})
 
 add_library(keysight_backend SHARED ${keysight_backend_SRC})
 target_link_libraries(keysight_backend ${VISA_LIBRARY} ${external_libraries} ${Boost_LIBRARIES})
 
 add_executable(keysight_backend_test ${keysight_backend_SRC})
-target_link_libraries(keysight_backend_test ${VISA_LIBRARY} ${external_libraries} ${Boost_LIBRARIES})
+target_link_libraries(keysight_backend_test ${VISA_LIBRARY} ${external_libraries} ${Boost_LIBRARIES} logger visa_handler)
 
 install(TARGETS keysight_backend LIBRARY DESTINATION "${INSTALL_BUNDLE_LIB_DIR}")
 

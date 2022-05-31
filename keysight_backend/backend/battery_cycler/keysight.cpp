@@ -1,6 +1,6 @@
 #include "keysight.hpp"
 
-#include "../logger.hpp"
+#include "../../logger/logger.hpp"
 
 #define LOG_OUT LogOut("keysight")
 #define LOG_ERR LogOut("keysight")

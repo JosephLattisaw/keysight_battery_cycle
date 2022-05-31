@@ -3,13 +3,12 @@
 
 #include <visa.h>
 
+#include <functional>
 #include <string>
 
-#include "types.hpp"
-
-//#define SOFTWARE_ONLY 1
-
 class VisaHandler {
+    using ConnectionStatusCallback = std::function<void(bool)>;
+
 public:
     VisaHandler(std::string visa_address, ConnectionStatusCallback connection_status_callback);
 
