@@ -37,13 +37,17 @@ include_directories(../visa_handler)
 
 set(sequence_parsing_SRC sequences/sequence_parser.cpp sequences/sequence_step.cpp sequences/sequence_test.cpp sequences/sequence.cpp)
 set(battery_cycling_SRC battery_cycler/battery_cell.cpp battery_cycler/keysight.cpp battery_cycler/module_card.cpp)
-set(keysight_backend_SRC include/dart_api_dl.c keysight_backend.cpp backend.cpp ${sequence_parsing_SRC})
+set(keysight_backend_SRC include/dart_api_dl.c keysight_backend.cpp backend.cpp ${sequence_parsing_SRC} ${battery_cycling_SRC})
 
 add_library(keysight_backend SHARED ${keysight_backend_SRC})
-target_link_libraries(keysight_backend ${VISA_LIBRARY} ${external_libraries} ${Boost_LIBRARIES})
+target_link_libraries(keysight_backend ${VISA_LIBRARY} ${external_libraries} ${Boost_LIBRARIES} logger visa_handler)
 
-add_executable(keysight_backend_test ${keysight_backend_SRC})
-target_link_libraries(keysight_backend_test ${VISA_LIBRARY} ${external_libraries} ${Boost_LIBRARIES} logger visa_handler)
+set_target_properties(keysight_backend PROPERTIES
+        BUILD_WITH_INSTALL_RPATH FALSE
+        LINK_FLAGS "-Wl,-rpath,$ORIGIN/")
+
+#add_executable(keysight_backend_test ${keysight_backend_SRC})
+#target_link_libraries(keysight_backend_test ${VISA_LIBRARY} ${external_libraries} ${Boost_LIBRARIES} logger visa_handler)
 
 install(TARGETS keysight_backend LIBRARY DESTINATION "${INSTALL_BUNDLE_LIB_DIR}")
 

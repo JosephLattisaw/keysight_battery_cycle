@@ -143,6 +143,7 @@ std::array<std::array<std::string, 10>, 32> Keysight::get_cell_verbose(std::uint
 #else
 
 #endif
+    return result;
 }
 
 void Keysight::start_polling_cell_status() {
