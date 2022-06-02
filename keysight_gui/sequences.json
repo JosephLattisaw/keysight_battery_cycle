@@ -1,0 +1,114 @@
+{
+    "api": "1",
+    "sequences": {
+        "Life_4_2_EPCV_HighD_T1": {
+            "serial_number": "",
+            "comments": "4.2V EOCV 5A discharge 2.5A charge",
+            "steps": {
+                "0": {
+                    "mode": "1",
+                    "seconds": "3600",
+                    "current": "2.5",
+                    "voltage": "4.2000000000000002"
+                },
+                "1": {
+                    "mode": "2",
+                    "seconds": "1800",
+                    "current": "5",
+                    "voltage": "2.5"
+                },
+                "2": {
+                    "mode": "1",
+                    "seconds": "3600",
+                    "current": "2.5",
+                    "voltage": "4.2000000000000002"
+                }
+            }
+        },
+        "rest sequence": {
+            "serial_number": "",
+            "comments": "",
+            "steps": {
+                "0": {
+                    "mode": "0",
+                    "seconds": "10",
+                    "current": "0.10000000000000001",
+                    "voltage": "2"
+                }
+            }
+        },
+        "bad_sequence": {
+            "serial_number": "",
+            "comments": ""
+        },
+        "demo_sequence": {
+            "serial_number": "",
+            "comments": "This sequence is for the demo",
+            "steps": {
+                "0": {
+                    "mode": "1",
+                    "seconds": "3600",
+                    "current": "0.10000000000000001",
+                    "voltage": "2"
+                }
+            }
+        },
+        "18650 3 cycle capacity": {
+            "serial_number": "",
+            "comments": "",
+            "steps": {
+                "0": {
+                    "mode": "2",
+                    "seconds": "4500",
+                    "current": "3.2000000000000002",
+                    "voltage": "2.7000000000000002",
+                    "tests": {
+                        "0": {
+                            "test_type": "1",
+                            "test_action": "1",
+                            "value": "2.7999999999999998",
+                            "time_type": "2",
+                            "time_limit": "4500"
+                        }
+                    }
+                },
+                "1": {
+                    "mode": "1",
+                    "seconds": "9000",
+                    "current": "1.6000000000000001",
+                    "voltage": "4.2000000000000002",
+                    "tests": {
+                        "0": {
+                            "test_type": "3",
+                            "test_action": "1",
+                            "value": "0.10000000000000001",
+                            "time_type": "2",
+                            "time_limit": "9000"
+                        }
+                    }
+                }
+            }
+        },
+        "18650 1 cycle capacity": {
+            "serial_number": "",
+            "comments": "",
+            "steps": {
+                "0": {
+                    "mode": "2",
+                    "seconds": "4500",
+                    "current": "3.2000000000000002",
+                    "voltage": "2.7000000000000002",
+                    "tests": {
+                        "0": {
+                            "test_type": "2",
+                            "test_action": "0",
+                            "value": "3.1000000000000001",
+                            "time_type": "1",
+                            "time_limit": "4502"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

@@ -26,9 +26,9 @@ private:
 
     // steps path names
     const std::string MODE_PATHNAME = "mode";
-    const std::string DURATION_PATHNAME = "duration";
-    const std::string CURRENT_LIMIT_PATHNAME = "current_limit";
-    const std::string VOLTAGE_LIMIT_PATHNAME = "voltage_limit";
+    const std::string DURATION_PATHNAME = "seconds";
+    const std::string CURRENT_LIMIT_PATHNAME = "current";
+    const std::string VOLTAGE_LIMIT_PATHNAME = "voltage";
 
     // tests path names
     const std::string TEST_TYPE_PATHNAME = "test_type";

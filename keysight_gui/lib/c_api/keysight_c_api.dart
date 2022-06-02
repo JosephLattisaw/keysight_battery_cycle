@@ -55,14 +55,14 @@ class KeysightCAPI extends ChangeNotifier {
         .lookup<ffi.NativeFunction<SequencesFFI>>("get_sequences")
         .asFunction();
 
-    _freePointer = lib
-        .lookup<ffi.NativeFunction<FreePointerFFI>>("free_pointer")
-        .asFunction();
-
     _createBackend(); //creating our backend
     _runService(); //running the asyncronous service
+
+    final sequences = getSequences(); //TODO do we need?
+    print("printing this total sequences: ${sequences.sequences.length}");
   }
 
+//TODO figure out how to free pointers
   s_api.Sequences getSequences() {
     final sequences = _getSequences();
 
@@ -80,7 +80,7 @@ class KeysightCAPI extends ChangeNotifier {
 
         final testsDart = List<s_api.Test>.empty(growable: true);
 
-        for (int j = 0; k < step.ref.testsSize; j++) {
+        for (int j = 0; j < step.ref.testsSize; j++) {
           final test =
               step.ref.tests.elementAt(j).cast<ffi.Pointer<Test>>().value;
 
@@ -92,8 +92,6 @@ class KeysightCAPI extends ChangeNotifier {
               value: test.ref.value);
 
           testsDart.add(testDart);
-
-          _freePointer(test.cast<ffi.Pointer<ffi.Void>>().value);
         }
 
         final stepDart = s_api.Step(
@@ -104,8 +102,6 @@ class KeysightCAPI extends ChangeNotifier {
             tests: testsDart);
 
         stepsDart.add(stepDart);
-
-        _freePointer(step.cast<ffi.Pointer<ffi.Void>>().value);
       }
 
       final sequenceDart = s_api.Sequence(
@@ -114,15 +110,12 @@ class KeysightCAPI extends ChangeNotifier {
           steps: stepsDart);
 
       sequencesDart.add(sequenceDart);
-
-      _freePointer(sequence.cast<ffi.Pointer<ffi.Void>>().value);
     }
 
     return s_api.Sequences(sequences: sequencesDart);
   }
 
   late VoidFunctionC _createBackend;
-  late FreePointerC _freePointer; //
   late VoidFunctionC _runService;
   late SequencesC _getSequences;
 }
@@ -136,7 +129,3 @@ typedef VoidFunctionC = void Function();
 //get sequences function
 typedef SequencesFFI = Sequences Function();
 typedef SequencesC = Sequences Function();
-
-//free pointer
-typedef FreePointerFFI = ffi.Void Function(ffi.Pointer<ffi.Void>);
-typedef FreePointerC = void Function(ffi.Pointer<ffi.Void>);

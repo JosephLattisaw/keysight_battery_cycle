@@ -134,7 +134,7 @@ std::vector<std::shared_ptr<Sequence>> SequenceParser::load_all_sequences() {
                     for (const auto &steps_it : *steps_tree) {
                         LOG_OUT << "steps " << steps_it.first;
 
-                        std::uint8_t step_id = std::stoi(steps_it.first) - 1;
+                        std::uint8_t step_id = std::stoi(steps_it.first);
 
                         auto mode = static_cast<step::mode_type>(steps_it.second.get<std::uint8_t>(MODE_PATHNAME));
                         auto duration = steps_it.second.get<std::int32_t>(DURATION_PATHNAME);
@@ -148,7 +148,7 @@ std::vector<std::shared_ptr<Sequence>> SequenceParser::load_all_sequences() {
 
                             for (const auto &tests_it : *tests_tree) {
                                 LOG_OUT << "test: " << tests_it.first;
-                                std::uint8_t test_id = std::stoi(tests_it.first) - 1;
+                                std::uint8_t test_id = std::stoi(tests_it.first);
                                 auto test_type = static_cast<test::test_type_t>(tests_it.second.get<std::uint8_t>(TEST_TYPE_PATHNAME));
                                 auto test_action = static_cast<test::test_action_type>(tests_it.second.get<std::uint8_t>(TEST_ACTION_PATHNAME));
                                 auto value = tests_it.second.get<std::double_t>(TEST_VALUE_PATHNAME);
