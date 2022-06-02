@@ -46,9 +46,6 @@ set_target_properties(keysight_backend PROPERTIES
         BUILD_WITH_INSTALL_RPATH FALSE
         LINK_FLAGS "-Wl,-rpath,$ORIGIN/")
 
-#add_executable(keysight_backend_test ${keysight_backend_SRC})
-#target_link_libraries(keysight_backend_test ${VISA_LIBRARY} ${external_libraries} ${Boost_LIBRARIES} logger visa_handler)
-
 install(TARGETS keysight_backend LIBRARY DESTINATION "${INSTALL_BUNDLE_LIB_DIR}")
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
