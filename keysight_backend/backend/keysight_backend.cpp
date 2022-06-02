@@ -150,6 +150,8 @@ EXPORT struct Sequences get_sequences() {
 
     return sequences;
 }
+
+EXPORT void free_pointer(void *pointer) { free(pointer); }
 }
 
 int main(int argc, char **argv) { return 0; }
