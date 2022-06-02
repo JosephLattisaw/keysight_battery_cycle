@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:keysight_gui/home_page.dart';
 import 'package:provider/provider.dart';
-import 'package:keysight_gui/keysight_c_api.dart' as c_api;
+import 'package:keysight_gui/c_api/keysight_c_api.dart' as c_api;
 
 void main() {
   runApp(const MyApp());
