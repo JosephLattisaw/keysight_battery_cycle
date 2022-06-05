@@ -3,6 +3,8 @@
 
 #include "sequence_step.hpp"
 
+#include <string>
+
 namespace sequences {
 class Sequence {
 public:
