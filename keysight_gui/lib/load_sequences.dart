@@ -4,6 +4,25 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:keysight_gui/keysight_c_api.dart';
 import 'package:provider/provider.dart';
 
+class LoadSequencesKeepAlive extends StatefulWidget {
+  const LoadSequencesKeepAlive({Key? key}) : super(key: key);
+
+  @override
+  State<LoadSequencesKeepAlive> createState() => _LoadSequencesKeepAliveState();
+}
+
+class _LoadSequencesKeepAliveState extends State<LoadSequencesKeepAlive>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return LoadSequences();
+  }
+
+  @override
+  bool get wantKeepAlive => true;
+}
+
 class LoadSequences extends HookWidget {
   String getProfileStatusText(int value) {
     switch (value) {

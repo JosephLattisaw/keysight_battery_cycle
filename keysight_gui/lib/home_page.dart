@@ -170,7 +170,7 @@ class HomePage extends HookWidget {
                       const InstrumentWidget(),
                       SystemSafety(),
                       const ProfileSequenceWidget(),
-                      LoadSequences(),
+                      LoadSequencesKeepAlive(),
                       const TestWidget(),
                       SystemPage(),
                     ],
