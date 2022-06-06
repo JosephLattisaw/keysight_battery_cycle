@@ -1,3 +1,4 @@
+import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:provider/provider.dart';
@@ -102,156 +103,153 @@ class MeasurementTableWidget extends HookWidget {
       }
     }
 
-    return SingleChildScrollView(
-      primary: false,
-      child: DataTable(
-        headingRowColor:
-            MaterialStateColor.resolveWith((states) => Colors.blue.shade900),
-        columns: const [
-          DataColumn(
-            label: Text(
-              'Cell Number',
-              style: TextStyle(color: Colors.white),
-            ),
+    return DataTable2(
+      headingRowColor:
+          MaterialStateColor.resolveWith((states) => Colors.blue.shade900),
+      columns: const [
+        DataColumn(
+          label: Text(
+            'Cell Number',
+            style: TextStyle(color: Colors.white),
           ),
-          DataColumn(
-            label: Text(
-              'Voltage (V)',
-              style: TextStyle(color: Colors.white),
-            ),
+        ),
+        DataColumn(
+          label: Text(
+            'Voltage (V)',
+            style: TextStyle(color: Colors.white),
           ),
-          DataColumn(
-            label: Text(
-              'Current (A)',
-              style: TextStyle(color: Colors.white),
-            ),
+        ),
+        DataColumn(
+          label: Text(
+            'Current (A)',
+            style: TextStyle(color: Colors.white),
           ),
-          DataColumn(
-            label: Text(
-              'Capacity (aH)',
-              style: TextStyle(color: Colors.white),
-            ),
+        ),
+        DataColumn(
+          label: Text(
+            'Capacity (aH)',
+            style: TextStyle(color: Colors.white),
           ),
-          DataColumn(
-            label: Text(
-              'Capacity (Wh)',
-              style: TextStyle(color: Colors.white),
-            ),
+        ),
+        DataColumn(
+          label: Text(
+            'Capacity (Wh)',
+            style: TextStyle(color: Colors.white),
           ),
-          DataColumn(
-            label: Text(
-              'State',
-              style: TextStyle(color: Colors.white),
-            ),
+        ),
+        DataColumn(
+          label: Text(
+            'State',
+            style: TextStyle(color: Colors.white),
           ),
-          DataColumn(
-            label: Text(
-              'Status',
-              style: TextStyle(color: Colors.white),
-            ),
+        ),
+        DataColumn(
+          label: Text(
+            'Status',
+            style: TextStyle(color: Colors.white),
           ),
-          DataColumn(
-            label: Text(
-              'Seq',
-              style: TextStyle(color: Colors.white),
-            ),
+        ),
+        DataColumn(
+          label: Text(
+            'Seq',
+            style: TextStyle(color: Colors.white),
           ),
-          DataColumn(
-            label: Text(
-              'Step',
-              style: TextStyle(color: Colors.white),
-            ),
+        ),
+        DataColumn(
+          label: Text(
+            'Step',
+            style: TextStyle(color: Colors.white),
           ),
-        ],
-        rows: List<DataRow>.generate(
-          tableSize.value,
-          (index) => DataRow(
-            color: MaterialStateProperty.resolveWith<Color>((states) {
-              if (index % 2 == 0) return Colors.grey.shade700;
-              return Colors.grey.shade800;
-            }),
-            cells: <DataCell>[
-              DataCell(
-                Text(
+        ),
+      ],
+      rows: List<DataRow>.generate(
+        tableSize.value,
+        (index) => DataRow(
+          color: MaterialStateProperty.resolveWith<Color>((states) {
+            if (index % 2 == 0) return Colors.grey.shade700;
+            return Colors.grey.shade800;
+          }),
+          cells: <DataCell>[
+            DataCell(
+              Text(
 //                  'Data',
-                  cellNames
-                      .elementAt(getModuleIndex(index))
-                      .elementAt(getCellIndex(index)),
-                  style: const TextStyle(color: Colors.white),
-                ),
+                cellNames
+                    .elementAt(getModuleIndex(index))
+                    .elementAt(getCellIndex(index)),
+                style: const TextStyle(color: Colors.white),
               ),
-              DataCell(
-                Text(
-                  voltageValues
-                      .elementAt(getModuleIndex(index))
-                      .elementAt(getCellIndex(index)),
-                  style: const TextStyle(color: Colors.white),
-                ),
+            ),
+            DataCell(
+              Text(
+                voltageValues
+                    .elementAt(getModuleIndex(index))
+                    .elementAt(getCellIndex(index)),
+                style: const TextStyle(color: Colors.white),
               ),
-              DataCell(
-                Text(
-                  currentValues
-                      .elementAt(getModuleIndex(index))
-                      .elementAt(getCellIndex(index)),
-                  style: const TextStyle(color: Colors.white),
-                ),
+            ),
+            DataCell(
+              Text(
+                currentValues
+                    .elementAt(getModuleIndex(index))
+                    .elementAt(getCellIndex(index)),
+                style: const TextStyle(color: Colors.white),
               ),
-              DataCell(
-                Text(
-                  capacityAmpHrs
-                      .elementAt(getModuleIndex(index))
-                      .elementAt(getCellIndex(index)),
-                  style: const TextStyle(color: Colors.white),
-                ),
+            ),
+            DataCell(
+              Text(
+                capacityAmpHrs
+                    .elementAt(getModuleIndex(index))
+                    .elementAt(getCellIndex(index)),
+                style: const TextStyle(color: Colors.white),
               ),
-              DataCell(
-                Text(
-                  capacityWattHrs
-                      .elementAt(getModuleIndex(index))
-                      .elementAt(getCellIndex(index)),
-                  style: const TextStyle(color: Colors.white),
-                ),
+            ),
+            DataCell(
+              Text(
+                capacityWattHrs
+                    .elementAt(getModuleIndex(index))
+                    .elementAt(getCellIndex(index)),
+                style: const TextStyle(color: Colors.white),
               ),
-              DataCell(
-                Text(
-                  getStateText(stateIds
-                      .elementAt(getModuleIndex(index))
-                      .elementAt(getCellIndex(index))),
-                  style: TextStyle(
-                      color: getStateColor(stateIds
-                          .elementAt(getModuleIndex(index))
-                          .elementAt(getCellIndex(index)))),
-                ),
+            ),
+            DataCell(
+              Text(
+                getStateText(stateIds
+                    .elementAt(getModuleIndex(index))
+                    .elementAt(getCellIndex(index))),
+                style: TextStyle(
+                    color: getStateColor(stateIds
+                        .elementAt(getModuleIndex(index))
+                        .elementAt(getCellIndex(index)))),
               ),
-              DataCell(
-                Text(
-                  getStatusText(statusIds
-                      .elementAt(getModuleIndex(index))
-                      .elementAt(getCellIndex(index))),
-                  style: TextStyle(
-                      color: getStatusColor(statusIds
-                          .elementAt(getModuleIndex(index))
-                          .elementAt(getCellIndex(index)))),
-                ),
+            ),
+            DataCell(
+              Text(
+                getStatusText(statusIds
+                    .elementAt(getModuleIndex(index))
+                    .elementAt(getCellIndex(index))),
+                style: TextStyle(
+                    color: getStatusColor(statusIds
+                        .elementAt(getModuleIndex(index))
+                        .elementAt(getCellIndex(index)))),
               ),
-              DataCell(
-                Text(
-                  sequenceIds
-                      .elementAt(getModuleIndex(index))
-                      .elementAt(getCellIndex(index)),
-                  style: const TextStyle(color: Colors.white),
-                ),
+            ),
+            DataCell(
+              Text(
+                sequenceIds
+                    .elementAt(getModuleIndex(index))
+                    .elementAt(getCellIndex(index)),
+                style: const TextStyle(color: Colors.white),
               ),
-              DataCell(
-                Text(
-                  stepIds
-                      .elementAt(getModuleIndex(index))
-                      .elementAt(getCellIndex(index)),
-                  style: const TextStyle(color: Colors.white),
-                ),
+            ),
+            DataCell(
+              Text(
+                stepIds
+                    .elementAt(getModuleIndex(index))
+                    .elementAt(getCellIndex(index)),
+                style: const TextStyle(color: Colors.white),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
