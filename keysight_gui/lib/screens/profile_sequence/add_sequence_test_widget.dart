@@ -315,39 +315,48 @@ class AddSequenceTestWidget extends HookWidget {
                                       ),
                                       const SizedBox(height: 8),
                                       IntrinsicWidth(
-                                        child: SpinBox(
-                                          value: value.value,
-                                          min: 0.0,
-                                          max: 4.5,
-                                          decimals: 2,
-                                          step: 0.1,
-                                          onChanged: (v) {
-                                            value.value = v;
-                                          },
-                                          incrementIcon: const Icon(
-                                            Icons.add,
-                                            color: Colors.black,
-                                          ),
-                                          decrementIcon: const Icon(
-                                            Icons.remove,
-                                            color: Colors.black,
-                                          ),
-                                          decoration: const InputDecoration(
-                                            enabledBorder: OutlineInputBorder(
-                                              borderSide: BorderSide(
-                                                  color: Colors.black,
-                                                  width: 1.4),
+                                        child: Theme(
+                                          data: ThemeData(
+                                            textSelectionTheme:
+                                                const TextSelectionThemeData(
+                                              selectionColor: Colors.grey,
                                             ),
-                                            border: OutlineInputBorder(),
-                                            hintStyle: TextStyle(
+                                          ),
+                                          child: SpinBox(
+                                            value: value.value,
+                                            min: 0.0,
+                                            max: 4.5,
+                                            decimals: 2,
+                                            step: 0.1,
+                                            onChanged: (v) {
+                                              value.value = v;
+                                            },
+                                            cursorColor: Colors.black,
+                                            incrementIcon: const Icon(
+                                              Icons.add,
                                               color: Colors.black,
-                                              fontStyle: FontStyle.italic,
                                             ),
-                                            hintText: "Centered Text",
-                                            filled: true,
-                                            fillColor: Colors.blue,
+                                            decrementIcon: const Icon(
+                                              Icons.remove,
+                                              color: Colors.black,
+                                            ),
+                                            decoration: const InputDecoration(
+                                              enabledBorder: OutlineInputBorder(
+                                                borderSide: BorderSide(
+                                                    color: Colors.black,
+                                                    width: 1.4),
+                                              ),
+                                              border: OutlineInputBorder(),
+                                              hintStyle: TextStyle(
+                                                color: Colors.black,
+                                                fontStyle: FontStyle.italic,
+                                              ),
+                                              hintText: "Centered Text",
+                                              filled: true,
+                                              fillColor: Colors.blue,
+                                            ),
+                                            textAlign: TextAlign.center,
                                           ),
-                                          textAlign: TextAlign.center,
                                         ),
                                       ),
                                       const SizedBox(height: 8),
@@ -503,39 +512,48 @@ class AddSequenceTestWidget extends HookWidget {
                                         height: 8,
                                       ),
                                       IntrinsicWidth(
-                                        child: SpinBox(
-                                          value: timeLimit.value.toDouble(),
-                                          min: 20,
-                                          max: 2147483647,
-                                          decimals: 0,
-                                          step: 1,
-                                          onChanged: (value) {
-                                            timeLimit.value = value.toInt();
-                                          },
-                                          incrementIcon: const Icon(
-                                            Icons.add,
-                                            color: Colors.black,
-                                          ),
-                                          decrementIcon: const Icon(
-                                            Icons.remove,
-                                            color: Colors.black,
-                                          ),
-                                          decoration: const InputDecoration(
-                                            enabledBorder: OutlineInputBorder(
-                                              borderSide: BorderSide(
-                                                  color: Colors.black,
-                                                  width: 1.4),
+                                        child: Theme(
+                                          data: ThemeData(
+                                            textSelectionTheme:
+                                                const TextSelectionThemeData(
+                                              selectionColor: Colors.grey,
                                             ),
-                                            border: OutlineInputBorder(),
-                                            hintStyle: TextStyle(
+                                          ),
+                                          child: SpinBox(
+                                            value: timeLimit.value.toDouble(),
+                                            min: 20,
+                                            max: 2147483647,
+                                            decimals: 0,
+                                            step: 1,
+                                            onChanged: (value) {
+                                              timeLimit.value = value.toInt();
+                                            },
+                                            cursorColor: Colors.black,
+                                            incrementIcon: const Icon(
+                                              Icons.add,
                                               color: Colors.black,
-                                              fontStyle: FontStyle.italic,
                                             ),
-                                            hintText: "Centered Text",
-                                            filled: true,
-                                            fillColor: Colors.blue,
+                                            decrementIcon: const Icon(
+                                              Icons.remove,
+                                              color: Colors.black,
+                                            ),
+                                            decoration: const InputDecoration(
+                                              enabledBorder: OutlineInputBorder(
+                                                borderSide: BorderSide(
+                                                    color: Colors.black,
+                                                    width: 1.4),
+                                              ),
+                                              border: OutlineInputBorder(),
+                                              hintStyle: TextStyle(
+                                                color: Colors.black,
+                                                fontStyle: FontStyle.italic,
+                                              ),
+                                              hintText: "Centered Text",
+                                              filled: true,
+                                              fillColor: Colors.blue,
+                                            ),
+                                            textAlign: TextAlign.center,
                                           ),
-                                          textAlign: TextAlign.center,
                                         ),
                                       ),
                                       const SizedBox(height: 8),
