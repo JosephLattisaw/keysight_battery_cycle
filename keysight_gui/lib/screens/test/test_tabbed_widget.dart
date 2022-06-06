@@ -13,12 +13,15 @@ class TestTabbedWidget extends HookWidget {
 
   final int sequenceNumber;
 
-  String getDropDownText(int index, int value) {
+  String getDropDownText(int index, int value, String sequence) {
     String s = "Sequence ${index + 1}";
 
     if (value != 2) {
       s = s + ": INVALID";
+    } else {
+      s = s + ": " + sequence;
     }
+
     return s;
   }
 
@@ -30,6 +33,7 @@ class TestTabbedWidget extends HookWidget {
     final cApi = Provider.of<KeysightCAPI>(context, listen: false);
     final profileStatuses =
         context.select((KeysightCAPI k) => k.profilesStatuses);
+    final loadedProfiles = context.select((KeysightCAPI k) => k.loadedProfiles);
 
     final checkCount = useState(
         List<List<bool>>.generate(8, (index) => List<bool>.filled(32, false)));
@@ -103,7 +107,9 @@ class TestTabbedWidget extends HookWidget {
                           (index) => DropdownMenuItem(
                               child: Text(
                                   getDropDownText(
-                                      index, profileStatuses.elementAt(index)),
+                                      index,
+                                      profileStatuses.elementAt(index),
+                                      loadedProfiles.elementAt(index)),
                                   style: TextStyle(
                                       color:
                                           profileStatuses.elementAt(index) != 2
