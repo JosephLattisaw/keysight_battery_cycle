@@ -41,18 +41,6 @@
             "serial_number": "",
             "comments": ""
         },
-        "demo_sequence": {
-            "serial_number": "",
-            "comments": "This sequence is for the demo",
-            "steps": {
-                "0": {
-                    "mode": "1",
-                    "seconds": "3600",
-                    "current": "0.10000000000000001",
-                    "voltage": "2"
-                }
-            }
-        },
         "18650 3 cycle capacity": {
             "serial_number": "",
             "comments": "",

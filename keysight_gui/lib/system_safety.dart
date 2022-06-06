@@ -22,28 +22,6 @@ class SystemSafety extends HookWidget {
 
     return Column(
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: Container(
-                color: Colors.blue,
-                child: Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Text(
-                    'Edit System Safety Limits',
-                    textAlign: TextAlign.left,
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontStyle: FontStyle.italic,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
         Container(
           color: Colors.black,
           child: Column(

@@ -8,9 +8,10 @@
 
 #include "types.hpp"
 
-//#define SOFTWARE_ONLY 1
+#define SOFTWARE_ONLY 1
 
-class Keysight {
+class Keysight
+{
 public:
     Keysight(boost::asio::io_service &io_service, ActiveCardsCallback active_cards_callback, ConnectionStatusCallback connection_status_callback,
              PortDoubleCallback port_double_callback, PortUint16Callback port_uint16_callback, LoadedProfilesCallback loaded_profiles_callback,
@@ -39,8 +40,8 @@ private:
     // commands
     // NOTE: all cell names are defined 1:1
     // i.e: cell 1001 equals channel 101
-    bool define_cells_for_all_cards();  // defining all cell names
-    bool detect_cards_at_boot();        // getting all the active cards in the hardware
+    bool define_cells_for_all_cards(); // defining all cell names
+    bool detect_cards_at_boot();       // getting all the active cards in the hardware
 
     // status updates
     bool get_cell_status();
@@ -117,7 +118,7 @@ private:
     double max_red_voltage = 4.22;
     double max_red_current = 6;
 
-    const std::string VISA_ADDRESS_BT2203A = "USB0::0x008D::0x3502::MY58000516::0::INSTR";  // usb address of battery cycler
+    const std::string VISA_ADDRESS_BT2203A = "USB0::0x008D::0x3502::MY58000516::0::INSTR"; // usb address of battery cycler
 
     bool connected = false;
 };
