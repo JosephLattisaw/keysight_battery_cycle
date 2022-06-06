@@ -24,43 +24,58 @@ Backend::Backend(boost::asio::io_service &io_service, ActiveCardsCallback ac_cb,
       cycles_status_callback{cyc_cb},
       total_time_callback{tt_cb},
       load_safeties_callback{ls_cb},
-      limit_crossed_callback{lc_cb} {
+      limit_crossed_callback{lc_cb}
+{
     sequence_parser = std::make_shared<SequenceParser>();
 
     // starting thread to start keysight stuff
     keysight_thread = std::thread(std::bind(&Backend::worker_thread, this));
 }
 
-Backend::~Backend() {
-    if (keysight_thread.joinable()) keysight_thread.join();
+Backend::~Backend()
+{
+    if (keysight_thread.joinable())
+        keysight_thread.join();
 }
 
-void Backend::worker_thread() {
+void Backend::worker_thread()
+{
     // TODO should just double bind these if possible
     keysight = std::make_shared<Keysight>(
         keysight_service,
-        [&](active_cards_type active_cards) {
+        [&](active_cards_type active_cards)
+        {
             // active cells callback
             io_service.post(std::bind(&Backend::active_cards_request, this, active_cards));
         },
-        [&](bool status) {
+        [&](bool status)
+        {
             // connection status
             io_service.post(std::bind(&Backend::connection_status_request, this, status));
         },
-        [&](PortTypes::port_double_data_type data_type, map_double_data_type data) {
+        [&](PortTypes::port_double_data_type data_type, map_double_data_type data)
+        {
             // double data type
             io_service.post(std::bind(&Backend::port_double_data_request, this, data_type, data));
         },
-        [&](PortTypes::port_uint16_data_type data_type, map_uint16_data_type data) {
+        [&](PortTypes::port_uint16_data_type data_type, map_uint16_data_type data)
+        {
             io_service.post(std::bind(&Backend::port_uint16_data_request, this, data_type, data));
         },
-        [&](loaded_profile_type loaded_profiles) { io_service.post(std::bind(&Backend::loaded_profiles_request, this, loaded_profiles)); },
-        [&](profile_status_type statuses) { io_service.post(std::bind(&Backend::profile_statuses_request, this, statuses)); },
-        [&](profile_status_type statuses) { io_service.post(std::bind(&Backend::slot_statuses_request, this, statuses)); },
-        [&](uptime_time_type statuses) { io_service.post(std::bind(&Backend::time_statuses_request, this, statuses)); },
-        [&](profile_status_type statuses) { io_service.post(std::bind(&Backend::cycle_statuses_request, this, statuses)); },
-        [&](uptime_time_type statuses) { io_service.post(std::bind(&Backend::total_time_statuses_request, this, statuses)); },
-        [&](int critical, int test) { io_service.post(std::bind(&Backend::limit_crossed_request, this, critical, test)); });
+        [&](loaded_profile_type loaded_profiles)
+        { io_service.post(std::bind(&Backend::loaded_profiles_request, this, loaded_profiles)); },
+        [&](profile_status_type statuses)
+        { io_service.post(std::bind(&Backend::profile_statuses_request, this, statuses)); },
+        [&](profile_status_type statuses)
+        { io_service.post(std::bind(&Backend::slot_statuses_request, this, statuses)); },
+        [&](uptime_time_type statuses)
+        { io_service.post(std::bind(&Backend::time_statuses_request, this, statuses)); },
+        [&](profile_status_type statuses)
+        { io_service.post(std::bind(&Backend::cycle_statuses_request, this, statuses)); },
+        [&](uptime_time_type statuses)
+        { io_service.post(std::bind(&Backend::total_time_statuses_request, this, statuses)); },
+        [&](int critical, int test)
+        { io_service.post(std::bind(&Backend::limit_crossed_request, this, critical, test)); });
 
     io_service.post(std::bind(&Backend::keysight_thread_is_up, this));
 
@@ -74,13 +89,15 @@ void Backend::active_cards_request(active_cards_type active_cards) { active_card
 
 void Backend::connection_status_request(bool status) { connection_status_callback(status); }
 
-void Backend::port_double_data_request(PortTypes::port_double_data_type data_type, map_double_data_type data) {
+void Backend::port_double_data_request(PortTypes::port_double_data_type data_type, map_double_data_type data)
+{
     port_double_callback(data_type, data);
 }
 
 void Backend::limit_crossed_request(int critical, int test) { limit_crossed_callback(critical, test); }
 
-void Backend::port_uint16_data_request(PortTypes::port_uint16_data_type data_type, map_uint16_data_type data) {
+void Backend::port_uint16_data_request(PortTypes::port_uint16_data_type data_type, map_uint16_data_type data)
+{
     port_uint16_callback(data_type, data);
 }
 
@@ -96,28 +113,42 @@ void Backend::slot_statuses_request(profile_status_type statuses) { slot_status_
 
 void Backend::cycle_statuses_request(profile_status_type statuses) { cycles_status_callback(statuses); };
 
-void Backend::keysight_thread_is_up() {
-    safety_limits = std::make_shared<SafetyLimits>([&](std::array<double, 5> safeties) {
+void Backend::keysight_thread_is_up()
+{
+    safety_limits = std::make_shared<SafetyLimits>([&](std::array<double, 5> safeties)
+                                                   {
         keysight_service.post(
             std::bind(&Keysight::set_safety_limits, keysight, safeties.at(0), safeties.at(1), safeties.at(2), safeties.at(3), safeties.at(4)));
-        load_safeties_callback(safeties);
-    });
+        load_safeties_callback(safeties); });
 }
 
 void Backend::connect_keysight() { keysight_service.post(std::bind(&Keysight::connect, keysight)); }
 void Backend::disconnect_keysight() { keysight_service.post(std::bind(&Keysight::disconnect, keysight)); }
 
-void Backend::load_profile(std::string name, int slot, sequence_step_vector steps, sequence_test_map tests) {
+void Backend::load_profile(std::string name, int slot, sequence_step_vector steps, sequence_test_map tests)
+{
     LOG_OUT << "load profile called";
     keysight_service.post(std::bind(&Keysight::load_sequence, keysight, name, slot, steps, tests));
 }
 
-void Backend::start_sequence(std::uint32_t test, std::uint32_t slot, std::vector<std::uint32_t> cells, bool successively) {
+void Backend::start_sequence(std::uint32_t test, std::uint32_t slot, std::vector<std::uint32_t> cells, bool successively)
+{
     LOG_OUT << "start sequence called";
     keysight_service.post(std::bind(&Keysight::start_sequence, keysight, test, slot, cells, successively));
 }
 
-void Backend::stop_sequence(std::uint32_t test, std::uint32_t slot, std::vector<std::uint32_t> cells) {
+void Backend::stop_sequence(std::uint32_t test, std::uint32_t slot, std::vector<std::uint32_t> cells)
+{
     LOG_OUT << "stop sequence called";
     keysight_service.post(std::bind(&Keysight::stop_sequence, keysight, test, slot, cells));
+}
+
+void Backend::clear_hard_limit(std::uint32_t test)
+{
+    keysight_service.post(std::bind(&Keysight::clear_hard_limit, keysight, test));
+}
+
+void Backend::clear_soft_limit(std::uint32_t test)
+{
+    keysight_service.post(std::bind(&Keysight::clear_soft_limit, keysight, test));
 }

@@ -179,6 +179,14 @@ class KeysightCAPI extends ChangeNotifier {
         .lookup<ffi.NativeFunction<SetSafetyLimitsFFI>>("set_safety_limits")
         .asFunction();
 
+    clearSoftLimit = lib
+        .lookup<ffi.NativeFunction<ClearLimitFFI>>("clear_soft_limit")
+        .asFunction();
+
+    clearHardLimit = lib
+        .lookup<ffi.NativeFunction<ClearLimitFFI>>("clear_hard_limit")
+        .asFunction();
+
     ReceivePort loadSequencesPort = ReceivePort()
       ..listen((data) {
         print("seq received $data");
@@ -702,6 +710,8 @@ class KeysightCAPI extends ChangeNotifier {
   late SelectCellC selectCell;
   late VoidFunctionC clearCells;
   late SetSafetyLimitsC setSafetyLimits;
+  late ClearLimitC clearSoftLimit;
+  late ClearLimitC clearHardLimit;
 
   double minYellowVoltage = 0.0;
   double minRedVoltage = 0.0;
@@ -816,6 +826,9 @@ typedef StopSequenceC = void Function(int test, int slot);
 
 typedef SelectCellFFI = ffi.Void Function(ffi.Uint32 cell);
 typedef SelectCellC = void Function(int cell);
+
+typedef ClearLimitFFI = ffi.Void Function(ffi.Uint32 test);
+typedef ClearLimitC = void Function(int test);
 
 final List<bool> cardsActiveDefault = List<bool>.filled(8, false);
 final List<List<String>> cellsDefaultNan =

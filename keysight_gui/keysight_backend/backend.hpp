@@ -12,7 +12,8 @@
 #include "sequence_parser.hpp"
 #include "types.hpp"
 
-class Backend {
+class Backend
+{
 public:
     Backend(boost::asio::io_service &io_service, ActiveCardsCallback active_cards_callback, ConnectionStatusCallback connection_status_callback,
             PortDoubleCallback port_double_callback, PortUint16Callback port_uint16_callback, LoadedProfilesCallback loaded_profiles_callback,
@@ -23,6 +24,8 @@ public:
 
     // TODO find out if we can make this private
     void active_cards_request(active_cards_type active_cards);
+    void clear_hard_limit(std::uint32_t test);
+    void clear_soft_limit(std::uint32_t test);
     void connection_status_request(bool status);
     void loaded_profiles_request(loaded_profile_type profiles);
     void profile_statuses_request(profile_status_type statuses);
@@ -46,7 +49,7 @@ public:
 
 private:
     // thread management
-    void keysight_thread_is_up();  // TODO this will get removed
+    void keysight_thread_is_up(); // TODO this will get removed
     void worker_thread();
 
     boost::asio::io_service &io_service;

@@ -61,6 +61,12 @@ class SystemPage extends StatelessWidget {
         return "FAILED";
       case 2:
         return "RUNNING";
+      case 3:
+        return "ABORTED, HARD LIMIT";
+      case 4:
+        return "RUNNING, SOFT LIMIT";
+      case 5:
+        return "COMPLETED";
       default:
         return "NOT RUNNING";
     }
@@ -72,6 +78,12 @@ class SystemPage extends StatelessWidget {
         return Colors.red;
       case 2:
         return Colors.green;
+      case 3:
+        return Colors.red;
+      case 4:
+        return Colors.amber;
+      case 5:
+        return Colors.blue;
       default:
         return Colors.white;
     }

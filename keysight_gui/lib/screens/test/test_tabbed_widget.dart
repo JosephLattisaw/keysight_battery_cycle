@@ -25,6 +25,28 @@ class TestTabbedWidget extends HookWidget {
     return s;
   }
 
+  String getActionButtonText(bool started, int slotStatus) {
+    switch (slotStatus) {
+      case 3:
+        return "Clear Hard Limit";
+      case 4:
+        return "Clear Soft Limit";
+      default:
+        return started ? "Stop Sequence" : "Start Sequence";
+    }
+  }
+
+  Color getActionButtonColor(bool started, int slotStatus) {
+    switch (slotStatus) {
+      case 3:
+        return Colors.red;
+      case 4:
+        return Colors.amber;
+      default:
+        return started ? Colors.red : Colors.green;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final canStartSequence = useState(false);
@@ -34,6 +56,7 @@ class TestTabbedWidget extends HookWidget {
     final profileStatuses =
         context.select((KeysightCAPI k) => k.profilesStatuses);
     final loadedProfiles = context.select((KeysightCAPI k) => k.loadedProfiles);
+    final slotStatuses = context.select((KeysightCAPI k) => k.slotStatuses);
 
     final checkCount = useState(
         List<List<bool>>.generate(8, (index) => List<bool>.filled(32, false)));
@@ -52,7 +75,7 @@ class TestTabbedWidget extends HookWidget {
           Visibility(
             child: CheckboxListTile(
               title: Text(
-                "Run Sequence Successively",
+                "Run Sequence Repeatedly",
                 style: TextStyle(color: Colors.white),
               ),
               value: successivelyCheckbox.value,
@@ -209,10 +232,11 @@ class TestTabbedWidget extends HookWidget {
                           });
                         }
                       : null,
-                  child: Text(
-                      sequenceStarted ? "Stop Sequence" : "Start Sequence"),
+                  child: Text(getActionButtonText(
+                      sequenceStarted, slotStatuses.elementAt(sequenceNumber))),
                   style: ElevatedButton.styleFrom(
-                    primary: sequenceStarted ? Colors.red : Colors.green,
+                    primary: getActionButtonColor(sequenceStarted,
+                        slotStatuses.elementAt(sequenceNumber)),
                   ),
                 ),
               ],

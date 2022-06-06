@@ -22,8 +22,11 @@ public:
     void connect();
     void disconnect();
 
+    void clear_hard_limit(std::uint32_t test);
+    void clear_soft_limit(std::uint32_t test);
     void load_sequence(std::string name, int slot, sequence_step_vector steps, sequence_test_map tests);
     void start_sequence(std::uint32_t test, std::uint32_t slot, std::vector<std::uint32_t> cells, bool successfully);
+    void stop_sequence2(std::uint32_t test, std::uint32_t slot, std::vector<std::uint32_t> cells, std::uint8_t slot_status);
     void stop_sequence(std::uint32_t test, std::uint32_t slot, std::vector<std::uint32_t> cells);
 
     void set_safety_limits(double min_yellow_voltage, double min_red_voltage, double max_yellow_voltage, double max_red_voltage,
