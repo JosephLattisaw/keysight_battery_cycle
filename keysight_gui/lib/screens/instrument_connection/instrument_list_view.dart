@@ -44,28 +44,6 @@ class InstrumentListView extends StatelessWidget {
             ),
           ),
         ),
-        Container(
-          color: Colors.white.withOpacity(0.2),
-          child: ListTile(
-            title: const Text(
-              "Keysight DAQ970A Data Acquisition System",
-              style: TextStyle(color: Colors.white),
-            ),
-            leading: Image.asset(
-              'assets/DAQ970A.png',
-              fit: BoxFit.contain,
-              width: 70,
-            ),
-            trailing: ElevatedButton(
-              child: const Padding(
-                padding: EdgeInsets.all(8.0),
-                child: Text("Connect"),
-              ),
-              onPressed: () {},
-              style: ElevatedButton.styleFrom(primary: Colors.green),
-            ),
-          ),
-        ),
       ],
     );
   }
