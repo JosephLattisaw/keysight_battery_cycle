@@ -65,12 +65,6 @@ class LoadSequences extends HookWidget {
             ),
             DataColumn(
               label: Text(
-                'In Use?',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-            DataColumn(
-              label: Text(
                 'Select Profile to Load',
                 style: TextStyle(color: Colors.white),
               ),
@@ -108,12 +102,6 @@ class LoadSequences extends HookWidget {
                     style: TextStyle(
                         color: getProfileStatusColor(
                             profileStatuses.elementAt(index))),
-                  ),
-                ),
-                DataCell(
-                  Text(
-                    "No",
-                    style: const TextStyle(color: Colors.white),
                   ),
                 ),
                 DataCell(IntrinsicWidth(
