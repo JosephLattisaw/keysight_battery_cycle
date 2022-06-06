@@ -1035,6 +1035,7 @@ std::string Keysight::get_timestamp()
     auto timestamp = std::string(std::ctime(&time));
     timestamp.erase(std::remove(timestamp.begin(), timestamp.end(), '\r'), timestamp.end());
     timestamp.erase(std::remove(timestamp.begin(), timestamp.end(), '\n'), timestamp.end());
+    std::replace(timestamp.begin(), timestamp.end(), ':', '_');
 
     return timestamp;
 }
