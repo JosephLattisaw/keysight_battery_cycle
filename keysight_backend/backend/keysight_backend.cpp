@@ -95,11 +95,17 @@ EXPORT void run_service() {
 }
 
 EXPORT void connect_keysight() {
-    // TODO
+    if (backend)
+        backend->connect_keysight();
+    else
+        print_backend_doesnt_exist_error();
 }
 
 EXPORT void disconnect_keysight() {
-    // TODO
+    if (backend)
+        backend->disconnect_keysight();
+    else
+        print_backend_doesnt_exist_error();
 }
 
 EXPORT struct Sequences get_sequences() {

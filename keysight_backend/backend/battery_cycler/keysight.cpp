@@ -5,6 +5,8 @@
 #define LOG_OUT LogOut("keysight")
 #define LOG_ERR LogOut("keysight")
 
+#define SOFTWARE_ONLY 1
+
 Keysight::Keysight(boost::asio::io_service &io_service, ConnectionStatusCallback _connection_status_callback)
     : io_service(io_service), cell_status_timer(io_service), connection_status_callback{_connection_status_callback} {
     cards.fill(std::make_shared<ModuleCard>());

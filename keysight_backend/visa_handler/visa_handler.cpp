@@ -7,45 +7,65 @@
 
 #define BUFFER_SIZE 65535
 
-namespace visa_data {
-ViSession resource_manager = 0;
-ViSession session = 0;
-}  // namespace visa_data
+#define SOFTWARE_ONLY 1
+
+namespace visa_data
+{
+    ViSession resource_manager = 0;
+    ViSession session = 0;
+} // namespace visa_data
 
 VisaHandler::VisaHandler(std::string _visa_address, ConnectionStatusCallback _connection_status_callback)
     : visa_address(_visa_address), connection_status_callback{_connection_status_callback} {}
 
-void VisaHandler::connect() {
-    if (!connected) {
-        if (open_resource_manager()) {
-            if (open_instrument()) {
-                if (enable_read_termination_character()) {
-                    if (identification_query()) {
+void VisaHandler::connect()
+{
+    if (!connected)
+    {
+        if (open_resource_manager())
+        {
+            if (open_instrument())
+            {
+                if (enable_read_termination_character())
+                {
+                    if (identification_query())
+                    {
                         LOG_OUT << "identified " << visa_address;
                         update_connection_status(true);
-                    } else {
+                    }
+                    else
+                    {
                         LOG_ERR << "failed to identify " << visa_address;
                         disconnect();
                     }
-                } else {
+                }
+                else
+                {
                     LOG_ERR << "failed to enabled read termination character";
                     disconnect();
                 }
-            } else {
+            }
+            else
+            {
                 LOG_ERR << "failed to open instrument";
                 disconnect();
             }
-        } else {
+        }
+        else
+        {
             LOG_ERR << "failed to open resource manager";
             disconnect();
         }
-    } else
+    }
+    else
         LOG_ERR << "not attempting connection, already connected";
 }
 
-void VisaHandler::disconnect() {
+void VisaHandler::disconnect()
+{
     LOG_OUT << "disconnect called";
-    if (connected) {
+    if (connected)
+    {
         viUnlock(visa_data::session);
         viClose(visa_data::session);
         viClose(visa_data::resource_manager);
@@ -54,40 +74,49 @@ void VisaHandler::disconnect() {
         visa_data::session = 0;
 
         update_connection_status(false);
-    } else
+    }
+    else
         LOG_ERR << "can't disconnect because already disconnected";
 }
 
-void VisaHandler::update_connection_status(bool flag) {
+void VisaHandler::update_connection_status(bool flag)
+{
     connected = flag;
     connection_status_callback(connected);
 }
 
-bool VisaHandler::identification_query() {
+bool VisaHandler::identification_query()
+{
     LOG_OUT << "sending the identification query command";
 
 #ifndef SOFTWARE_ONLY
     bool res;
 
-    auto status = viPrintf(visa_data::session, "*IDN?\n");  // sending identification query command
+    auto status = viPrintf(visa_data::session, "*IDN?\n"); // sending identification query command
     res = verify_vi_status(visa_data::session, status, "sent id query command", "There was a problem sending the id queury, error code: ");
 
-    if (res) {
+    if (res)
+    {
         // getting the response from the identification query
         ViChar idn_response[BUFFER_SIZE];
         status = viScanf(visa_data::session, "%t", idn_response);
         res = verify_vi_status(visa_data::session, status, "read id query response",
                                "There was a problem reading the id queury response, error code: ");
 
-        if (res) {
+        if (res)
+        {
             LOG_OUT << "identification query response: " << idn_response;
 
             return res;
-        } else {
+        }
+        else
+        {
             LOG_ERR << "unable to retrieve identification query response";
             return false;
         }
-    } else {
+    }
+    else
+    {
         LOG_ERR << "unabled to send identification query command " << status;
         return false;
     }
@@ -96,7 +125,8 @@ bool VisaHandler::identification_query() {
 #endif
 }
 
-bool VisaHandler::enable_read_termination_character() {
+bool VisaHandler::enable_read_termination_character()
+{
 #ifndef SOFTWARE_ONLY
     // For Serial and TCP/IP socket connections enable the read Termination character, or read's will timeout
     ViChar full_address[BUFFER_SIZE];
@@ -107,8 +137,10 @@ bool VisaHandler::enable_read_termination_character() {
     res = verify_vi_status(visa_data::session, status, "enabled read termination character",
                            "There was a problem getting the attributes resource name, error code: ");
 
-    if (res) {
-        if (std::string("ASRL").compare(full_address) == 0 || std::string("SOCKET").compare(full_address) == 0) {
+    if (res)
+    {
+        if (std::string("ASRL").compare(full_address) == 0 || std::string("SOCKET").compare(full_address) == 0)
+        {
             LOG_OUT << "controller: detected Serial or TCP/IP connection, enabling read termination character";
             status = viSetAttribute(visa_data::session, VI_ATTR_TERMCHAR_EN, VI_TRUE);
             res = verify_vi_status(visa_data::session, status, "enabled read termination character",
@@ -117,16 +149,19 @@ bool VisaHandler::enable_read_termination_character() {
             status = viSetAttribute(visa_data::session, VI_ATTR_TMO_VALUE, 2000);
             res = verify_vi_status(visa_data::session, status, "timeout", "There was a problem setting the attributes timeout, error code: ");
             return res;
-        } else
-            return true;  // success
-    } else
-        return false;  // we failed
+        }
+        else
+            return true; // success
+    }
+    else
+        return false; // we failed
 #else
     return true;
 #endif
 }
 
-bool VisaHandler::open_resource_manager() {
+bool VisaHandler::open_resource_manager()
+{
     LOG_OUT << "attempting to open resource manager";
 
 #ifndef SOFTWARE_ONLY
@@ -140,7 +175,8 @@ bool VisaHandler::open_resource_manager() {
     return res;
 }
 
-bool VisaHandler::open_instrument() {
+bool VisaHandler::open_instrument()
+{
     LOG_OUT << "attempting to open instrument";
 
 #ifndef SOFTWARE_ONLY
@@ -149,12 +185,14 @@ bool VisaHandler::open_instrument() {
     auto res = verify_vi_status(visa_data::session, status, "opened instrument",
                                 "There was a problem opening the connection to the instrument, error code: ");
 
-    if (res) {
+    if (res)
+    {
         ViChar full_address[BUFFER_SIZE];
         // TODO check that this lock crap works
         status = viLock(visa_data::session, VI_SHARED_LOCK, VI_TMO_IMMEDIATE, "IBEOS", full_address);
         res = verify_vi_status(visa_data::session, status, "locked instrument", "There was a problem locking the instrument, error code: ");
-        if (res) {
+        if (res)
+        {
             return true;
         }
     }
@@ -166,31 +204,38 @@ bool VisaHandler::open_instrument() {
 }
 
 bool VisaHandler::verify_vi_status(const ViSession &session, const ViStatus &status, const std::string &message_success,
-                                   const std::string &message_failure) {
-    if (status < VI_SUCCESS) {
+                                   const std::string &message_failure)
+{
+    if (status < VI_SUCCESS)
+    {
         LOG_ERR << message_failure << status;
         ViChar response[BUFFER_SIZE];
         viStatusDesc(session, status, response);
         LOG_ERR << "status description: " << response;
         return false;
-    } else {
+    }
+    else
+    {
         // LOG_OUT << message_success;
         return true;
     }
 }
 
-bool VisaHandler::send_command(std::string command) {
+bool VisaHandler::send_command(std::string command)
+{
     LOG_OUT << "sending command: " << command << "\n";
 
     bool res = false;
 
-    if (connected) {
+    if (connected)
+    {
         auto cmd = command + "\n";
         auto status = viPrintf(visa_data::session, cmd.c_str());
 
         res = verify_vi_status(visa_data::session, status, "error sending command", "There was a problem sending " + command + ", error code: ");
 
-        if (!res) {
+        if (!res)
+        {
             LOG_ERR << "failed reading response";
             disconnect();
         }
@@ -199,20 +244,25 @@ bool VisaHandler::send_command(std::string command) {
     return res;
 }
 
-bool VisaHandler::get_response(std::string &response) {
+bool VisaHandler::get_response(std::string &response)
+{
     LOG_OUT << "reading response";
 
     bool res = false;
 
-    if (connected) {
+    if (connected)
+    {
         ViChar buffer[BUFFER_SIZE];
         auto status = viScanf(visa_data::session, "%t", buffer);
         auto res = verify_vi_status(visa_data::session, status, "getting response", "There was a problem getting the response, error code: ");
 
-        if (!res) {
+        if (!res)
+        {
             LOG_ERR << "failed reading response";
             disconnect();
-        } else {
+        }
+        else
+        {
             response = buffer;
         }
     }

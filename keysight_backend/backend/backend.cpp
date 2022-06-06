@@ -26,4 +26,8 @@ void Backend::worker_thread() {
 
 void Backend::set_keysight_thread_is_up() { keysight_thread_is_up = true; }
 
-void Backend::connection_status_request(bool status) {}
+void Backend::connection_status_request(bool status) { connection_status_callback(status); }
+
+void Backend::connect_keysight() { keysight_service.post(std::bind(&Keysight::connect, keysight)); }
+
+void Backend::disconnect_keysight() { keysight_service.post(std::bind(&Keysight::disconnect, keysight)); }

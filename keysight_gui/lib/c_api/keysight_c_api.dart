@@ -69,6 +69,8 @@ class KeysightCAPI extends ChangeNotifier {
       ..listen((message) {
         print("received keysight connection status $message");
         keysightConnectionStatus = message;
+
+        notifyListeners();
       });
 
     int keysightConnectionNativePort =
