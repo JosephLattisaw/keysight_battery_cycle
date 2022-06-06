@@ -39,6 +39,7 @@ private:
     bool enable_read_termination_character();
     bool identification_query();
     bool reset();
+    std::string get_timestamp();
 
     // commands
     // NOTE: all cell names are defined 1:1

@@ -962,8 +962,9 @@ void Keysight::start_logging(std::uint32_t test, std::vector<std::uint32_t> cell
     {
         std::ofstream csv_file;
         auto c = new std::ofstream;
+        auto timestamp = get_timestamp();
         logging_files.at(test) = c;
-        logging_files.at(test)->open("test" + std::to_string(test) + ".csv", std::ios::out | std::ios::app);
+        logging_files.at(test)->open("test" + std::to_string(test) + "_" + timestamp + ".csv", std::ios::out | std::ios::app);
 
         std::string s_commas;
         for (const auto &i : cells)
@@ -1019,12 +1020,19 @@ void Keysight::stop_logging(std::uint32_t test, std::vector<std::uint32_t> cells
     }
 }
 
-void Keysight::log_data(std::uint32_t test, std::vector<std::uint32_t> cells)
+std::string Keysight::get_timestamp()
 {
     std::time_t time = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
     auto timestamp = std::string(std::ctime(&time));
     timestamp.erase(std::remove(timestamp.begin(), timestamp.end(), '\r'), timestamp.end());
     timestamp.erase(std::remove(timestamp.begin(), timestamp.end(), '\n'), timestamp.end());
+
+    return timestamp;
+}
+
+void Keysight::log_data(std::uint32_t test, std::vector<std::uint32_t> cells)
+{
+    auto timestamp = get_timestamp();
 
     auto elapsed_time = total_seq_uptime.at(test);
     int seconds = static_cast<std::uint64_t>(elapsed_time) % 60;

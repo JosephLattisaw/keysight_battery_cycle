@@ -95,7 +95,7 @@ class TestTabbedWidget extends HookWidget {
                 tabs: const [
                   Text("Channels / Cells"),
                   Text("Live Measurements"),
-                  Text("Chart"),
+                  //Text("Chart"),
                 ],
                 tabWidgets: [
                   TestSequenceCellsTab(
@@ -110,7 +110,7 @@ class TestTabbedWidget extends HookWidget {
                   TestSequenceMeasurementsTab(
                     sequenceNumber: sequenceNumber,
                   ),
-                  TestSequenceChartTab(),
+                  //TestSequenceChartTab(),
                 ],
               ),
             ),

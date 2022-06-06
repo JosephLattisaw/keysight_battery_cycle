@@ -109,7 +109,7 @@ class SystemPage extends StatelessWidget {
         tabs: const [
           Text("Test Status"),
           Text("Live Measurements"),
-          Text("Chart"),
+          //Text("Chart"),
         ],
         tabWidgets: [
           SingleChildScrollView(
@@ -242,7 +242,7 @@ class SystemPage extends StatelessWidget {
           MeasurementWidget(
             key: UniqueKey(),
           ),
-          TestSequenceChartTab(),
+          //TestSequenceChartTab(),
         ],
       ),
     );
