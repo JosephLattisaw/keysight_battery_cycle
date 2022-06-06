@@ -440,20 +440,29 @@ void Keysight::start_polling_cell_status()
     cell_status_timer.expires_after(std::chrono::seconds(1));
     cell_status_timer.async_wait([&](const boost::system::error_code &error)
                                  {
-        if (error == boost::asio::error::operation_aborted) {
-            LOG_OUT << "cell status timer was cancelled";  // this isn't necessarily an error
-        } else if (error) {
-            LOG_ERR << "timer encountered error: " << error.message();
-            disconnect();
-        } else {
-            // LOG_OUT << "getting cell status";
-            if (get_cell_status()) {
-                start_polling_cell_status();
-            } else {
-                LOG_ERR << "error getting the cell status";
-                disconnect();
-            }
-        } });
+                                     if (error == boost::asio::error::operation_aborted)
+                                     {
+                                         LOG_OUT << "cell status timer was cancelled"; // this isn't necessarily an error
+                                     }
+                                     else if (error)
+                                     {
+                                         LOG_ERR << "timer encountered error: " << error.message();
+                                         disconnect();
+                                     }
+                                     else
+                                     {
+                                         // LOG_OUT << "getting cell status";
+                                         if (get_cell_status())
+                                         {
+                                             start_polling_cell_status();
+                                         }
+                                         else
+                                         {
+                                             LOG_ERR << "error getting the cell status";
+                                             disconnect();
+                                         }
+                                     }
+                                 });
 }
 
 bool Keysight::get_cell_status()
@@ -1255,10 +1264,10 @@ bool Keysight::check_cells_sequence_rollover_and_failures()
                     {
                         if (i.first < slot_status.size())
                         {
-                            if (slot_status[i.first] == 2)
+                            if (slot_status[i.first] == 2 || slot_status[i.first] == 4)
                             {
-                                slot_status[i.first] = 5;
-                                slot_status_callback(slot_status);
+                                auto c = cells_being_run_map.at(i.first);
+                                io_service.post(std::bind(&Keysight::stop_sequence2, this, i.first, 0, c, 5));
                             }
                         }
                     }

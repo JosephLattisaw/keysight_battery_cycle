@@ -224,11 +224,19 @@ class TestTabbedWidget extends HookWidget {
                           (sequenceStarted)
                       ? () {
                           Future.delayed(Duration.zero, () async {
-                            cApi.setSequenceStarted(
-                                sequenceNumber,
-                                dropdownStatus.value,
-                                !sequenceStarted,
-                                successivelyCheckbox.value);
+                            int slotStatus =
+                                slotStatuses.elementAt(sequenceNumber);
+                            if (slotStatus == 4) {
+                              print("clearing soft limit");
+                              cApi.clearSoftLimit(sequenceNumber);
+                            } else {
+                              print("starting/stopping test");
+                              cApi.setSequenceStarted(
+                                  sequenceNumber,
+                                  dropdownStatus.value,
+                                  !sequenceStarted,
+                                  successivelyCheckbox.value);
+                            }
                           });
                         }
                       : null,
