@@ -138,7 +138,9 @@ class HomePage extends HookWidget {
                     ),
                     Spacer(),
                     ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        backend.disconnectKeysight();
+                      },
                       child: const Padding(
                         padding: EdgeInsets.all(8.0),
                         child: Text("Emergency Shutoff"),
