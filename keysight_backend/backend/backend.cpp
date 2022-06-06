@@ -1,6 +1,7 @@
 #include "backend.hpp"
 
-Backend::Backend(boost::asio::io_service &io_service) : io_service(io_service) {
+Backend::Backend(boost::asio::io_service &io_service, ConnectionStatusCallback _connection_status_callback)
+    : io_service(io_service), connection_status_callback{_connection_status_callback} {
     sequence_parser = std::make_shared<sequences::SequenceParser>();
     keysight_thread = std::thread(std::bind(&Backend::worker_thread, this));
 }
@@ -10,9 +11,8 @@ Backend::~Backend() {
 }
 
 void Backend::worker_thread() {
-    keysight = std::make_shared<Keysight>(keysight_service, [&](bool status) {
-
-    });
+    keysight = std::make_shared<Keysight>(keysight_service,
+                                          [&](bool status) { io_service.post(std::bind(&Backend::connection_status_request, this, status)); });
 
     // letting the main thread know we've finsihed creating our keysight object and we
     // are ready to go.
@@ -25,3 +25,5 @@ void Backend::worker_thread() {
 }
 
 void Backend::set_keysight_thread_is_up() { keysight_thread_is_up = true; }
+
+void Backend::connection_status_request(bool status) {}

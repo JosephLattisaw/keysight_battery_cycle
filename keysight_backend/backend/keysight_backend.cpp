@@ -29,6 +29,13 @@ std::shared_ptr<Backend> backend;
 
 void print_backend_doesnt_exist_error() { LOG_ERR << "backend object doesn't exist"; }
 
+static void post_data_bool(std::int64_t port, bool value) {
+    Dart_CObject dart_object;
+    dart_object.type = Dart_CObject_kBool;
+    dart_object.value.as_bool = value;
+    Dart_PostCObject_DL(port, &dart_object);
+}
+
 // Test for Seqeunce
 struct Test {
     std::uint8_t test_type;
@@ -71,9 +78,10 @@ char *copy_string_get_ptr(std::string name) {
 extern "C" {
 EXPORT std::intptr_t InitializeDartApi(void *data) { return Dart_InitializeApiDL(data); }
 
-EXPORT void create_backend() {
+EXPORT void create_backend(std::int64_t connection_status_port) {
     if (!backend) {
-        backend = std::make_shared<Backend>(io_service);
+        backend = std::make_shared<Backend>(
+            io_service, [&, connection_status_port](bool connection_status) { post_data_bool(connection_status_port, connection_status); });
     } else
         print_backend_doesnt_exist_error();
 }
@@ -84,6 +92,14 @@ EXPORT void run_service() {
         io_service.run();
     });
     t.detach();
+}
+
+EXPORT void connect_keysight() {
+    // TODO
+}
+
+EXPORT void disconnect_keysight() {
+    // TODO
 }
 
 EXPORT struct Sequences get_sequences() {

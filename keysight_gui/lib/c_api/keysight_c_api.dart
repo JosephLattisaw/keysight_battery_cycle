@@ -1,5 +1,7 @@
 library c_api;
 
+import 'dart:isolate';
+
 import 'package:ffi/ffi.dart';
 import 'package:flutter/foundation.dart';
 import 'dart:io' show File, Platform;
@@ -44,7 +46,7 @@ class KeysightCAPI extends ChangeNotifier {
     }
 
     _createBackend = lib
-        .lookup<ffi.NativeFunction<VoidFunctionFFI>>("create_backend")
+        .lookup<ffi.NativeFunction<CreateBackendFFI>>("create_backend")
         .asFunction();
 
     _runService = lib
@@ -55,7 +57,24 @@ class KeysightCAPI extends ChangeNotifier {
         .lookup<ffi.NativeFunction<SequencesFFI>>("get_sequences")
         .asFunction();
 
-    _createBackend(); //creating our backend
+    connectKeysight = lib
+        .lookup<ffi.NativeFunction<VoidFunctionFFI>>("connect_keysight")
+        .asFunction();
+
+    disconnectKeysight = lib
+        .lookup<ffi.NativeFunction<VoidFunctionFFI>>("disconnect_keysight")
+        .asFunction();
+
+    ReceivePort keysightConnectionPort = ReceivePort()
+      ..listen((message) {
+        print("received keysight connection status $message");
+        keysightConnectionStatus = message;
+      });
+
+    int keysightConnectionNativePort =
+        keysightConnectionPort.sendPort.nativePort;
+
+    _createBackend(keysightConnectionNativePort); //creating our backend
     _runService(); //running the asyncronous service
 
     final sequences = getSequences(); //TODO do we need?
@@ -115,9 +134,13 @@ class KeysightCAPI extends ChangeNotifier {
     return s_api.Sequences(sequences: sequencesDart);
   }
 
-  late VoidFunctionC _createBackend;
+  late VoidFunctionC connectKeysight;
+  late VoidFunctionC disconnectKeysight;
+  late CreateBackendC _createBackend;
   late VoidFunctionC _runService;
   late SequencesC _getSequences;
+
+  bool keysightConnectionStatus = false;
 }
 
 KeysightCAPI? keysightCAPI;
@@ -129,3 +152,7 @@ typedef VoidFunctionC = void Function();
 //get sequences function
 typedef SequencesFFI = Sequences Function();
 typedef SequencesC = Sequences Function();
+
+//create backend function
+typedef CreateBackendFFI = ffi.Void Function(ffi.Int64 connectionStatusPort);
+typedef CreateBackendC = void Function(int connectionStatusPort);

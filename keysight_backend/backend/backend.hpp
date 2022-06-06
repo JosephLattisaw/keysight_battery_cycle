@@ -8,10 +8,12 @@
 
 class Backend {
 public:
-    Backend(boost::asio::io_service &io_service);
+    Backend(boost::asio::io_service &io_service, ConnectionStatusCallback connection_status_callback);
     ~Backend();
 
     std::shared_ptr<sequences::SequenceParser> get_sequence_parser() { return sequence_parser; }
+
+    void connection_status_request(bool status);
 
 private:
     void set_keysight_thread_is_up();
@@ -27,6 +29,9 @@ private:
     std::shared_ptr<Keysight> keysight;
 
     std::shared_ptr<sequences::SequenceParser> sequence_parser;
+
+    // callbacks
+    ConnectionStatusCallback connection_status_callback;
 };
 
 #endif
