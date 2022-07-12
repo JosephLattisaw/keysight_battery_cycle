@@ -157,7 +157,11 @@ class SequenceStepTable extends HookWidget {
       }
     } else {
       dynamic element = table.elementAt(mapping.elementAt(0)).elementAt(3);
-      return element.toString() + "V";
+      if (table.elementAt(mapping.elementAt(0)).elementAt(0) != 0) {
+        return element.toString() + "V";
+      } else {
+        return "";
+      }
     }
   }
 
@@ -180,7 +184,11 @@ class SequenceStepTable extends HookWidget {
       }
     } else {
       dynamic element = table.elementAt(mapping.elementAt(0)).elementAt(2);
-      return element.toString() + "A";
+      if (table.elementAt(mapping.elementAt(0)).elementAt(0) != 0) {
+        return element.toString() + "A";
+      } else {
+        return "";
+      }
     }
   }
 
