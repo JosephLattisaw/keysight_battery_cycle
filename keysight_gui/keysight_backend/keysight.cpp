@@ -965,7 +965,7 @@ std::string Keysight::get_test_type(int value)
     }
 }
 
-void Keysight::start_logging(std::uint32_t test, std::vector<std::uint32_t> cells)
+void Keysight::start_logging(std::uint32_t test, std::vector<std::uint32_t> cells, std::vector<std::string> serial_numbers)
 {
     if (logging_files.at(test) == nullptr)
     {
@@ -980,12 +980,11 @@ void Keysight::start_logging(std::uint32_t test, std::vector<std::uint32_t> cell
         {
             s_commas += ",";
         }
-        
-        *logging_files.at(test) << "Serial Number," << serial_numbers[test] << "\n";
+
         *logging_files.at(test) << ",,,Voltage(V)" << s_commas << ",Current (A)" << s_commas << ",Capacity (Ah)" << s_commas << ",Capacity (Wh)\n";
 
         //*logging_files.at(test) << "Cell Number, Voltage (V), Current (A), Capacity (aH), Capacity (Wh), Timestamp\n";
-        *logging_files.at(test) << "Timestamp,Elapsed Time,Step";
+        *logging_files.at(test) << "Timestamp,Elapsed Time,Step,";
 
         for (const auto &i : cells)
         {
@@ -1011,6 +1010,38 @@ void Keysight::start_logging(std::uint32_t test, std::vector<std::uint32_t> cell
         for (const auto &i : cells)
         {
             *logging_files.at(test) << "cell " << i << ",";
+        }
+
+        *logging_files.at(test) << "\n";
+
+        //////////////////////////////
+        // extra line for logging serial numbers only
+        *logging_files.at(test) << ",,,";
+
+        for (const auto &i : serial_numbers)
+        {
+            *logging_files.at(test) << "Serial Number: " << i << ",";
+        }
+
+        *logging_files.at(test) << ",";
+
+        for (const auto &i : serial_numbers)
+        {
+            *logging_files.at(test) << "Serial Number: " << i << ",";
+        }
+
+        *logging_files.at(test) << ",";
+
+        for (const auto &i : serial_numbers)
+        {
+            *logging_files.at(test) << "Serial Number: " << i << ",";
+        }
+
+        *logging_files.at(test) << ",";
+
+        for (const auto &i : serial_numbers)
+        {
+            *logging_files.at(test) << "Serial Number: " << i << ",";
         }
 
         *logging_files.at(test) << "\n";
@@ -1103,10 +1134,12 @@ void Keysight::log_data(std::uint32_t test, std::vector<std::uint32_t> cells)
                 cell_cap_whrs.push_back(cell_cap_vector.at(cell_number));
             }
         }
-        
-        if(cell_step_id_data.find(card_number) != cell_step_id_data.end()) {
+
+        if (cell_step_id_data.find(card_number) != cell_step_id_data.end())
+        {
             auto cell_id_vector = cell_step_id_data.at(card_number);
-            if(cell_number < cell_id_vector.size()) {
+            if (cell_number < cell_id_vector.size())
+            {
                 step_numbers.push_back(cell_id_vector.at(cell_number));
             }
         }
@@ -1361,7 +1394,7 @@ bool Keysight::get_cells_running_uptime()
     return true;
 }
 
-void Keysight::start_sequence(std::uint32_t test, std::uint32_t slot, std::vector<std::uint32_t> cells, bool successively, std::string serialNumber)
+void Keysight::start_sequence(std::uint32_t test, std::uint32_t slot, std::vector<std::uint32_t> cells, bool successively, std::vector<std::string> serial_numbers)
 {
     std::string s1 = "(@";
 
@@ -1382,7 +1415,6 @@ void Keysight::start_sequence(std::uint32_t test, std::uint32_t slot, std::vecto
     {
         slot_status[test] = 2;
         successively_slots[test] = successively;
-        serial_numbers[test] = serialNumber;
         slot_status_callback(slot_status);
     }
 
@@ -1407,8 +1439,9 @@ void Keysight::start_sequence(std::uint32_t test, std::uint32_t slot, std::vecto
 #endif
 
     cells_being_run_map[test] = cells;
+    cells_serials_being_run_map[test] = serial_numbers;
     cells_slots_being_run_map[test] = slot;
-    start_logging(test, cells);
+    start_logging(test, cells, serial_numbers);
 }
 
 void Keysight::stop_sequence(std::uint32_t test, std::uint32_t slot, std::vector<std::uint32_t> cells)
@@ -1434,7 +1467,6 @@ void Keysight::stop_sequence2(std::uint32_t test, std::uint32_t slot, std::vecto
     {
         slot_status[test] = _slot_status;
         successively_slots[test] = false;
-        serial_numbers[test] = "";
         slot_status_callback(slot_status);
     }
     LOG_OUT << "slot status updated";
@@ -1461,6 +1493,11 @@ void Keysight::stop_sequence2(std::uint32_t test, std::uint32_t slot, std::vecto
     if (cells_slots_being_run_map.find(test) != cells_slots_being_run_map.end())
     {
         cells_slots_being_run_map.erase(test);
+    }
+
+    if (cells_serials_being_run_map.find(test) != cells_serials_being_run_map.end())
+    {
+        cells_serials_being_run_map.erase(test);
     }
 }
 

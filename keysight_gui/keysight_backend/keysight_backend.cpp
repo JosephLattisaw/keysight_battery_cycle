@@ -30,6 +30,7 @@ namespace
     boost::asio::io_service io_service;
     std::shared_ptr<Backend> backend;
     std::vector<std::uint32_t> selected_cells;
+    std::vector<std::string> selected_cells_serial_numbers;
 
     void print_backend_doesnt_exist_error() { LOG_ERR << "backend: backend object doesn't exist "; }
 
@@ -373,11 +374,11 @@ extern "C"
         }
     }
 
-    EXPORT void start_sequence(std::uint32_t test, std::uint32_t slot, bool successively, const char* serial_number)
+    EXPORT void start_sequence(std::uint32_t test, std::uint32_t slot, bool successively)
     {
         LOG_OUT << "load sequence called on: " << test << ", " << slot;
         if (backend)
-            backend->start_sequence(test, slot, selected_cells, successively, serial_number);
+            backend->start_sequence(test, slot, selected_cells, successively, selected_cells_serial_numbers);
     }
 
     EXPORT void stop_sequence(std::uint32_t test, std::uint32_t slot)
@@ -391,8 +392,9 @@ extern "C"
     {
         std::thread t([&]
                       {
-        work_guard_type work_guard(io_service.get_executor());
-        io_service.run(); });
+                          work_guard_type work_guard(io_service.get_executor());
+                          io_service.run();
+                      });
         t.detach();
     }
 
@@ -416,12 +418,14 @@ extern "C"
     {
         LOG_OUT << "clear cells called";
         selected_cells.clear();
+        selected_cells_serial_numbers.clear();
     }
 
-    EXPORT void select_cell(std::uint32_t cell)
+    EXPORT void select_cell(std::uint32_t cell, const char *serial_number)
     {
         LOG_OUT << "select cell called: " << cell;
         selected_cells.push_back(cell);
+        selected_cells_serial_numbers.push_back(serial_number);
     }
 
     struct Test

@@ -117,9 +117,10 @@ void Backend::keysight_thread_is_up()
 {
     safety_limits = std::make_shared<SafetyLimits>([&](std::array<double, 5> safeties)
                                                    {
-        keysight_service.post(
-            std::bind(&Keysight::set_safety_limits, keysight, safeties.at(0), safeties.at(1), safeties.at(2), safeties.at(3), safeties.at(4)));
-        load_safeties_callback(safeties); });
+                                                       keysight_service.post(
+                                                           std::bind(&Keysight::set_safety_limits, keysight, safeties.at(0), safeties.at(1), safeties.at(2), safeties.at(3), safeties.at(4)));
+                                                       load_safeties_callback(safeties);
+                                                   });
 }
 
 void Backend::connect_keysight() { keysight_service.post(std::bind(&Keysight::connect, keysight)); }
@@ -131,10 +132,10 @@ void Backend::load_profile(std::string name, int slot, sequence_step_vector step
     keysight_service.post(std::bind(&Keysight::load_sequence, keysight, name, slot, steps, tests));
 }
 
-void Backend::start_sequence(std::uint32_t test, std::uint32_t slot, std::vector<std::uint32_t> cells, bool successively, std::string serialNumber)
+void Backend::start_sequence(std::uint32_t test, std::uint32_t slot, std::vector<std::uint32_t> cells, bool successively, std::vector<std::string> serial_numbers)
 {
     LOG_OUT << "start sequence called";
-    keysight_service.post(std::bind(&Keysight::start_sequence, keysight, test, slot, cells, successively, serialNumber));
+    keysight_service.post(std::bind(&Keysight::start_sequence, keysight, test, slot, cells, successively, serial_numbers));
 }
 
 void Backend::stop_sequence(std::uint32_t test, std::uint32_t slot, std::vector<std::uint32_t> cells)

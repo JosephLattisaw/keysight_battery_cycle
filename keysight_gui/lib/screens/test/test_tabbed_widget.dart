@@ -64,9 +64,6 @@ class TestTabbedWidget extends HookWidget {
 
     final successivelyCheckbox = useState(false);
 
-    final serialNumberController = useTextEditingController(
-        text: cApi.serialNumbers.elementAt(sequenceNumber));
-
     print(
         "seq started $sequenceStarted, canstart ${canStartSequence.value}, (${profileStatuses.elementAt(dropdownStatus.value)}");
 
@@ -88,27 +85,6 @@ class TestTabbedWidget extends HookWidget {
                   ListTileControlAffinity.leading, //  <-- leading Checkbox
             ),
             visible: !sequenceStarted,
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: TextField(
-              controller: serialNumberController,
-              onChanged: (String? text) {
-                cApi.serialNumbers[sequenceNumber] = text ?? "";
-              },
-              decoration: InputDecoration(
-                enabledBorder: const OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.white),
-                ),
-                border: const OutlineInputBorder(),
-                hintText: "Enter Serial Number",
-                hintStyle: TextStyle(
-                    color: Colors.grey.shade500, fontStyle: FontStyle.italic),
-                filled: true,
-                fillColor: Colors.grey.shade800,
-              ),
-              style: const TextStyle(color: Colors.white),
-            ),
           ),
           Expanded(
             child: Padding(
@@ -258,8 +234,7 @@ class TestTabbedWidget extends HookWidget {
                                   sequenceNumber,
                                   dropdownStatus.value,
                                   !sequenceStarted,
-                                  successivelyCheckbox.value,
-                                  serialNumberController.text);
+                                  successivelyCheckbox.value);
                             }
                           });
                         }

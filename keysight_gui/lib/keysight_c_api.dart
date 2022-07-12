@@ -571,7 +571,8 @@ class KeysightCAPI extends ChangeNotifier {
   List<double> timeTotalStatuses = List<double>.generate(8, (index) => 0.0);
   List<int> cycleStatuses = List<int>.generate(8, (index) => 0);
 
-  List<String> serialNumbers = List<String>.generate(8, (index) => "");
+  List<List<String>> serialNumbersMap =
+      List.generate(8, (i) => List.generate(32, (k) => ""));
 
   final List<bool> sequencesStarted = List.generate(8, (index) => false);
   final List<int> sequencesStartedSlots = List.generate(8, (index) => -1);
@@ -629,8 +630,7 @@ class KeysightCAPI extends ChangeNotifier {
 
   bool keysightConnectionStatus = false;
 
-  void setSequenceStarted(
-      int index, int slot, bool value, bool successive, String serialNumber) {
+  void setSequenceStarted(int index, int slot, bool value, bool successive) {
     if (index < sequencesStarted.length) {
       sequencesStarted[index] = value;
 
@@ -645,7 +645,10 @@ class KeysightCAPI extends ChangeNotifier {
             //we have a winner
             int mod = (i + 1) * 1000;
             int card = k + 1;
-            selectCell(mod + card);
+            final sNumber =
+                serialNumbersMap.elementAt(i).elementAt(k).toNativeUtf8();
+            selectCell(mod + card, sNumber);
+            malloc.free(sNumber);
           }
         }
       }
@@ -657,9 +660,7 @@ class KeysightCAPI extends ChangeNotifier {
       }
 
       if (value) {
-        final sNumber = serialNumber.toNativeUtf8();
-        startSequence(index, slot, successive, sNumber);
-        malloc.free(sNumber);
+        startSequence(index, slot, successive);
       } else
         stopSequence(index, slot);
 
@@ -822,16 +823,16 @@ typedef LoadProfileFFI = ffi.Void Function(
     ffi.Pointer<Utf8> name, ffi.Uint32 slot);
 typedef LoadProfileC = void Function(ffi.Pointer<Utf8> name, int slot);
 
-typedef StartSequenceFFI = ffi.Void Function(ffi.Uint32 test, ffi.Uint32 slot,
-    ffi.Bool successively, ffi.Pointer<Utf8> serialNumber);
-typedef StartSequenceC = void Function(
-    int test, int slot, bool successively, ffi.Pointer<Utf8> serialNumber);
+typedef StartSequenceFFI = ffi.Void Function(
+    ffi.Uint32 test, ffi.Uint32 slot, ffi.Bool successively);
+typedef StartSequenceC = void Function(int test, int slot, bool successively);
 
 typedef StopSequenceFFI = ffi.Void Function(ffi.Uint32 test, ffi.Uint32 slot);
 typedef StopSequenceC = void Function(int test, int slot);
 
-typedef SelectCellFFI = ffi.Void Function(ffi.Uint32 cell);
-typedef SelectCellC = void Function(int cell);
+typedef SelectCellFFI = ffi.Void Function(
+    ffi.Uint32 cell, ffi.Pointer<Utf8> serialNumber);
+typedef SelectCellC = void Function(int cell, ffi.Pointer<Utf8> serialNumber);
 
 typedef ClearLimitFFI = ffi.Void Function(ffi.Uint32 test);
 typedef ClearLimitC = void Function(int test);

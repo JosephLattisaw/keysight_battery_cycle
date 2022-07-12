@@ -8,7 +8,7 @@
 
 #include "types.hpp"
 
-//#define SOFTWARE_ONLY 1
+#define SOFTWARE_ONLY 1
 
 class Keysight
 {
@@ -25,7 +25,7 @@ public:
     void clear_hard_limit(std::uint32_t test);
     void clear_soft_limit(std::uint32_t test);
     void load_sequence(std::string name, int slot, sequence_step_vector steps, sequence_test_map tests);
-    void start_sequence(std::uint32_t test, std::uint32_t slot, std::vector<std::uint32_t> cells, bool successfully, std::string serialNumber);
+    void start_sequence(std::uint32_t test, std::uint32_t slot, std::vector<std::uint32_t> cells, bool successfully, std::vector<std::string> serial_numbers);
     void stop_sequence2(std::uint32_t test, std::uint32_t slot, std::vector<std::uint32_t> cells, std::uint8_t slot_status);
     void stop_sequence(std::uint32_t test, std::uint32_t slot, std::vector<std::uint32_t> cells);
 
@@ -65,7 +65,7 @@ private:
     // polling
     void start_polling_cell_status();
 
-    void start_logging(std::uint32_t test, std::vector<std::uint32_t> cells);
+    void start_logging(std::uint32_t test, std::vector<std::uint32_t> cells, std::vector<std::string> serial_numbers);
     void stop_logging(std::uint32_t test, std::vector<std::uint32_t> cells);
     void log_data(std::uint32_t test, std::vector<std::uint32_t> cells);
 
@@ -87,6 +87,7 @@ private:
     map_uint16_data_type cell_run_state_data;
     map_uint16_data_type cell_run_status_data;
     std::map<std::uint32_t, std::vector<std::uint32_t>> cells_being_run_map;
+    std::map<std::uint32_t, std::vector<std::string>> cells_serials_being_run_map;
     std::map<std::uint32_t, std::uint32_t> cells_slots_being_run_map;
 
     boost::asio::io_service &io_service;
@@ -108,7 +109,6 @@ private:
     std::vector<std::vector<std::string>> last_valid_verbose_response;
 
     loaded_profile_type currently_loaded_profiles;
-    loaded_profile_type serial_numbers;
     profile_status_type current_profile_statuses;
     profile_status_type successively_slots;
     profile_status_type slot_status;

@@ -200,27 +200,66 @@ class TestCellsCheckboxWidget extends HookWidget {
       }
     }
 
+    bool isSerialNumberEditable() {
+      return getModeCheckable() && checked.value;
+    }
+
+    final serialNumberController = useTextEditingController(
+        text: cApi.serialNumbersMap
+            .elementAt(moduleNumber)
+            .elementAt(cellNumber));
+
     return Container(
       decoration: BoxDecoration(
         color: getBoxDecorationColor(),
       ),
-      child: CheckboxListTile(
-        title: Text("Cell ${getCellString(moduleNumber, cellNumber)}",
-            style: TextStyle(
-              color: getTextColor(),
-            )),
-        value: checked.value,
-        onChanged: !getModeCheckable()
-            ? null
-            : (newValue) {
-                cApi.setCellSequenceStarted(moduleNumber, cellNumber,
-                    sequenceNumber, newValue ?? false);
-                onChanged(newValue ?? false);
-                checked.value = newValue ?? false;
-                oldChecked.value = checked.value;
+      child: Column(
+        children: [
+          CheckboxListTile(
+            title: Text("Cell ${getCellString(moduleNumber, cellNumber)}",
+                style: TextStyle(
+                  color: getTextColor(),
+                )),
+            value: checked.value,
+            onChanged: !getModeCheckable()
+                ? null
+                : (newValue) {
+                    cApi.setCellSequenceStarted(moduleNumber, cellNumber,
+                        sequenceNumber, newValue ?? false);
+                    onChanged(newValue ?? false);
+                    checked.value = newValue ?? false;
+                    oldChecked.value = checked.value;
+                  },
+            controlAffinity:
+                ListTileControlAffinity.leading, //  <-- leading Checkbox
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              enabled: isSerialNumberEditable(),
+              controller: serialNumberController,
+              onChanged: (String? text) {
+                cApi.serialNumbersMap[moduleNumber][cellNumber] = text ?? "";
               },
-        controlAffinity:
-            ListTileControlAffinity.leading, //  <-- leading Checkbox
+              decoration: InputDecoration(
+                enabledBorder: const OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.white),
+                ),
+                border: const OutlineInputBorder(),
+                hintStyle: TextStyle(
+                    color: Colors.grey.shade500, fontStyle: FontStyle.italic),
+                filled: true,
+                fillColor: Colors.grey.shade800,
+                labelText: "Serial Number",
+                labelStyle: isSerialNumberEditable() ||
+                        serialNumberController.text.isNotEmpty
+                    ? TextStyle(color: Colors.blueGrey.shade300)
+                    : null,
+              ),
+              style: const TextStyle(color: Colors.white, fontSize: 12),
+            ),
+          )
+        ],
       ),
     );
   }
