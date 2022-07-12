@@ -556,9 +556,6 @@ class _SequenceBuilderKeepAliveClientState
                       filled: true,
                       fillColor: Colors.grey.shade800,
                     ),
-                    inputFormatters: [
-                      FilteringTextInputFormatter.allow(RegExp("[0-9a-zA-Z_ ]"))
-                    ],
                     style: const TextStyle(color: Colors.white),
                   ),
                 ),
