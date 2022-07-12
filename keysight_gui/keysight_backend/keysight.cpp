@@ -1301,9 +1301,10 @@ bool Keysight::check_cells_sequence_rollover_and_failures()
                             cells_slots_being_run_map.find(i.first) != cells_slots_being_run_map.end())
                         {
                             auto c = cells_being_run_map.at(i.first);
+                            auto s = cells_serials_being_run_map.at(i.first);
                             auto slot = cells_slots_being_run_map.at(i.first);
                             total_seq_uptime_offset[i.first] += current_seq_uptime[i.first];
-                            start_sequence(i.first, slot, c, true, serial_numbers[i.first]);
+                            start_sequence(i.first, slot, c, true, s);
                             cycles_count[i.first]++;
                         }
                     }
