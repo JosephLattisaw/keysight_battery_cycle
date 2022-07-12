@@ -571,6 +571,8 @@ class KeysightCAPI extends ChangeNotifier {
   List<double> timeTotalStatuses = List<double>.generate(8, (index) => 0.0);
   List<int> cycleStatuses = List<int>.generate(8, (index) => 0);
 
+  List<String> serialNumbers = List<String>.generate(8, (index) => "");
+
   final List<bool> sequencesStarted = List.generate(8, (index) => false);
   final List<int> sequencesStartedSlots = List.generate(8, (index) => -1);
 
@@ -627,7 +629,8 @@ class KeysightCAPI extends ChangeNotifier {
 
   bool keysightConnectionStatus = false;
 
-  void setSequenceStarted(int index, int slot, bool value, bool successive) {
+  void setSequenceStarted(
+      int index, int slot, bool value, bool successive, String serialNumber) {
     if (index < sequencesStarted.length) {
       sequencesStarted[index] = value;
 
@@ -654,7 +657,9 @@ class KeysightCAPI extends ChangeNotifier {
       }
 
       if (value) {
-        startSequence(index, slot, successive);
+        final sNumber = serialNumber.toNativeUtf8();
+        startSequence(index, slot, successive, sNumber);
+        malloc.free(sNumber);
       } else
         stopSequence(index, slot);
 
@@ -817,9 +822,10 @@ typedef LoadProfileFFI = ffi.Void Function(
     ffi.Pointer<Utf8> name, ffi.Uint32 slot);
 typedef LoadProfileC = void Function(ffi.Pointer<Utf8> name, int slot);
 
-typedef StartSequenceFFI = ffi.Void Function(
-    ffi.Uint32 test, ffi.Uint32 slot, ffi.Bool successively);
-typedef StartSequenceC = void Function(int test, int slot, bool successively);
+typedef StartSequenceFFI = ffi.Void Function(ffi.Uint32 test, ffi.Uint32 slot,
+    ffi.Bool successively, ffi.Pointer<Utf8> serialNumber);
+typedef StartSequenceC = void Function(
+    int test, int slot, bool successively, ffi.Pointer<Utf8> serialNumber);
 
 typedef StopSequenceFFI = ffi.Void Function(ffi.Uint32 test, ffi.Uint32 slot);
 typedef StopSequenceC = void Function(int test, int slot);

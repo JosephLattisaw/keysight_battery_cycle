@@ -131,10 +131,10 @@ void Backend::load_profile(std::string name, int slot, sequence_step_vector step
     keysight_service.post(std::bind(&Keysight::load_sequence, keysight, name, slot, steps, tests));
 }
 
-void Backend::start_sequence(std::uint32_t test, std::uint32_t slot, std::vector<std::uint32_t> cells, bool successively)
+void Backend::start_sequence(std::uint32_t test, std::uint32_t slot, std::vector<std::uint32_t> cells, bool successively, std::string serialNumber)
 {
     LOG_OUT << "start sequence called";
-    keysight_service.post(std::bind(&Keysight::start_sequence, keysight, test, slot, cells, successively));
+    keysight_service.post(std::bind(&Keysight::start_sequence, keysight, test, slot, cells, successively, serialNumber));
 }
 
 void Backend::stop_sequence(std::uint32_t test, std::uint32_t slot, std::vector<std::uint32_t> cells)
