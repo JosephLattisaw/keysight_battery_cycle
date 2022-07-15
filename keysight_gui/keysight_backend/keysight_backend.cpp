@@ -376,7 +376,7 @@ extern "C"
 
     EXPORT void start_sequence(std::uint32_t test, std::uint32_t slot, bool successively, bool acceptance)
     {
-        LOG_OUT << "load sequence called on: " << test << ", " << slot;
+        LOG_OUT << "load sequence called on: " << test << ", " << slot << ", " << acceptance;
         if (backend)
             backend->start_sequence(test, slot, selected_cells, successively, selected_cells_serial_numbers, acceptance);
     }

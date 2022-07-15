@@ -112,6 +112,36 @@
                     }
                 }
             }
+        },
+        "rest_seq": {
+            "serial_number": "",
+            "comments": "",
+            "steps": {
+                "0": {
+                    "mode": "0",
+                    "seconds": "10",
+                    "current": "0.10000000000000001",
+                    "voltage": "2"
+                },
+                "1": {
+                    "mode": "0",
+                    "seconds": "10",
+                    "current": "0.10000000000000001",
+                    "voltage": "2"
+                },
+                "2": {
+                    "mode": "0",
+                    "seconds": "10",
+                    "current": "0.10000000000000001",
+                    "voltage": "2"
+                },
+                "3": {
+                    "mode": "0",
+                    "seconds": "10",
+                    "current": "0.10000000000000001",
+                    "voltage": "2"
+                }
+            }
         }
     }
 }

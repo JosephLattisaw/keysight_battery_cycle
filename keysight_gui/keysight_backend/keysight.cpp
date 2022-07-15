@@ -1151,7 +1151,9 @@ void Keysight::log_data(std::uint32_t test, std::vector<std::uint32_t> cells)
                 step_numbers.push_back(cell_id_vector.at(cell_number));
                 if (step_numbers.front() != last_steps_run[test])
                 {
+                    LOG_OUT << "step changed? " << step_numbers.front() << ", " << last_steps_run[test];
                     step_changed = true;
+                    last_steps_run[test] = step_numbers.front();
                 }
             }
         }
@@ -1190,12 +1192,15 @@ void Keysight::log_data(std::uint32_t test, std::vector<std::uint32_t> cells)
         s += "\n";
         if (test_types.at(test))
         {
+            LOG_OUT << "logging data (acceptance test)";
             log_data(test, s);
         }
         else
         {
+            LOG_OUT << "storing data (life test)";
             if (step_changed)
             {
+                LOG_OUT << "step changed!";
                 auto s = last_log_message[test];
                 if (!s.empty())
                 {
@@ -1321,6 +1326,12 @@ bool Keysight::check_cells_sequence_rollover_and_failures()
                     }
 
                     LOG_OUT << "cell rep finished: " << cell_rep_finished;
+
+                    //log the last step if finished
+                    if (cell_rep_finished && !test_types[i.first])
+                    {
+                        log_data(i.first, last_log_message[i.first]);
+                    }
 
                     if (cell_rep_finished && (successively_slots.at(i.first) == true))
                     {
@@ -1473,6 +1484,7 @@ void Keysight::start_sequence(std::uint32_t test, std::uint32_t slot, std::vecto
     cells_being_run_map[test] = cells;
     cells_serials_being_run_map[test] = serial_numbers;
     cells_slots_being_run_map[test] = slot;
+    last_steps_run[test] = 1; //always start on step 1 (because we want the end, not the beginning)
     test_types[test] = acceptance;
     start_logging(test, cells, serial_numbers);
 }
