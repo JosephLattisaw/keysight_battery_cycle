@@ -1020,28 +1020,28 @@ void Keysight::start_logging(std::uint32_t test, std::vector<std::uint32_t> cell
 
         for (const auto &i : serial_numbers)
         {
-            *logging_files.at(test) << "Serial Number: " << i << ",";
+            *logging_files.at(test) << "SN: " << i << ",";
         }
 
         *logging_files.at(test) << ",";
 
         for (const auto &i : serial_numbers)
         {
-            *logging_files.at(test) << "Serial Number: " << i << ",";
+            *logging_files.at(test) << "SN: " << i << ",";
         }
 
         *logging_files.at(test) << ",";
 
         for (const auto &i : serial_numbers)
         {
-            *logging_files.at(test) << "Serial Number: " << i << ",";
+            *logging_files.at(test) << "SN: " << i << ",";
         }
 
         *logging_files.at(test) << ",";
 
         for (const auto &i : serial_numbers)
         {
-            *logging_files.at(test) << "Serial Number: " << i << ",";
+            *logging_files.at(test) << "SN: " << i << ",";
         }
 
         *logging_files.at(test) << "\n";
