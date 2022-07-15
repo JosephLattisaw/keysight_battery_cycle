@@ -63,6 +63,7 @@ class TestTabbedWidget extends HookWidget {
     final dropdownStatus = useState(0);
 
     final successivelyCheckbox = useState(false);
+    final typeOfTest = useState(0);
 
     print(
         "seq started $sequenceStarted, canstart ${canStartSequence.value}, (${profileStatuses.elementAt(dropdownStatus.value)}");
@@ -171,14 +172,16 @@ class TestTabbedWidget extends HookWidget {
                   visible: !sequenceStarted,
                   child: IntrinsicWidth(
                     child: DropdownButtonFormField(
-                      value: 0,
+                      value: typeOfTest.value,
                       items: [
                         DropdownMenuItem(
                             child: Text("Acceptance Test"), value: 0),
                         DropdownMenuItem(
                             child: Text("Lifecycle Test"), value: 1)
                       ],
-                      onChanged: (int? value) {},
+                      onChanged: (int? value) {
+                        typeOfTest.value = value ?? 0;
+                      },
                       style: const TextStyle(color: Colors.white),
                       dropdownColor: Colors.blueAccent,
                       iconEnabledColor: Colors.white,
@@ -234,7 +237,8 @@ class TestTabbedWidget extends HookWidget {
                                   sequenceNumber,
                                   dropdownStatus.value,
                                   !sequenceStarted,
-                                  successivelyCheckbox.value);
+                                  successivelyCheckbox.value,
+                                  typeOfTest.value == 0);
                             }
                           });
                         }

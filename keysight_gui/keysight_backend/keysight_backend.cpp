@@ -374,11 +374,11 @@ extern "C"
         }
     }
 
-    EXPORT void start_sequence(std::uint32_t test, std::uint32_t slot, bool successively)
+    EXPORT void start_sequence(std::uint32_t test, std::uint32_t slot, bool successively, bool acceptance)
     {
         LOG_OUT << "load sequence called on: " << test << ", " << slot;
         if (backend)
-            backend->start_sequence(test, slot, selected_cells, successively, selected_cells_serial_numbers);
+            backend->start_sequence(test, slot, selected_cells, successively, selected_cells_serial_numbers, acceptance);
     }
 
     EXPORT void stop_sequence(std::uint32_t test, std::uint32_t slot)

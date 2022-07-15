@@ -25,7 +25,7 @@ public:
     void clear_hard_limit(std::uint32_t test);
     void clear_soft_limit(std::uint32_t test);
     void load_sequence(std::string name, int slot, sequence_step_vector steps, sequence_test_map tests);
-    void start_sequence(std::uint32_t test, std::uint32_t slot, std::vector<std::uint32_t> cells, bool successfully, std::vector<std::string> serial_numbers);
+    void start_sequence(std::uint32_t test, std::uint32_t slot, std::vector<std::uint32_t> cells, bool successfully, std::vector<std::string> serial_numbers, bool acceptance);
     void stop_sequence2(std::uint32_t test, std::uint32_t slot, std::vector<std::uint32_t> cells, std::uint8_t slot_status);
     void stop_sequence(std::uint32_t test, std::uint32_t slot, std::vector<std::uint32_t> cells);
 
@@ -68,6 +68,7 @@ private:
     void start_logging(std::uint32_t test, std::vector<std::uint32_t> cells, std::vector<std::string> serial_numbers);
     void stop_logging(std::uint32_t test, std::vector<std::uint32_t> cells);
     void log_data(std::uint32_t test, std::vector<std::uint32_t> cells);
+    void log_data(std::uint32_t test, std::string data);
 
     std::array<std::ofstream *, 8> logging_files;
 
@@ -116,6 +117,9 @@ private:
     uptime_time_type current_seq_uptime;
     uptime_time_type total_seq_uptime;
     uptime_time_type total_seq_uptime_offset;
+    test_type_type test_types;
+    profile_status_type last_steps_run;
+    loaded_profile_type last_log_message;
 
     double min_yellow_voltage = 2.6;
     double max_yellow_voltage = 4.21;

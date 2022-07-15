@@ -630,7 +630,8 @@ class KeysightCAPI extends ChangeNotifier {
 
   bool keysightConnectionStatus = false;
 
-  void setSequenceStarted(int index, int slot, bool value, bool successive) {
+  void setSequenceStarted(
+      int index, int slot, bool value, bool successive, bool acceptance) {
     if (index < sequencesStarted.length) {
       sequencesStarted[index] = value;
 
@@ -660,7 +661,7 @@ class KeysightCAPI extends ChangeNotifier {
       }
 
       if (value) {
-        startSequence(index, slot, successive);
+        startSequence(index, slot, successive, acceptance);
       } else
         stopSequence(index, slot);
 
@@ -823,9 +824,10 @@ typedef LoadProfileFFI = ffi.Void Function(
     ffi.Pointer<Utf8> name, ffi.Uint32 slot);
 typedef LoadProfileC = void Function(ffi.Pointer<Utf8> name, int slot);
 
-typedef StartSequenceFFI = ffi.Void Function(
-    ffi.Uint32 test, ffi.Uint32 slot, ffi.Bool successively);
-typedef StartSequenceC = void Function(int test, int slot, bool successively);
+typedef StartSequenceFFI = ffi.Void Function(ffi.Uint32 test, ffi.Uint32 slot,
+    ffi.Bool successively, ffi.Bool acceptance);
+typedef StartSequenceC = void Function(
+    int test, int slot, bool successively, bool acceptance);
 
 typedef StopSequenceFFI = ffi.Void Function(ffi.Uint32 test, ffi.Uint32 slot);
 typedef StopSequenceC = void Function(int test, int slot);
